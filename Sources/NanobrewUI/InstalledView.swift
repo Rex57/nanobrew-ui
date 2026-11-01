@@ -157,6 +157,8 @@ extension TableRow where Status == Text {
 struct PackageDetailView: View {
     @Environment(AppModel.self) private var model
     let package: PackageRef
+    /// Discover's install options and button, after the info.
+    var footer: AnyView?
     @State private var detail: PackageDetail?
 
     private var formula: Formula? { package.cask ? nil : model.snapshot?.formulae.first { $0.name == package.name } }
@@ -293,6 +295,7 @@ struct PackageDetailView: View {
                 } else {
                     ProgressView().frame(maxWidth: .infinity)
                 }
+                footer
             }
             .buttonStyle(TextButtonStyle())
             .foregroundStyle(Theme.text)

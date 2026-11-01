@@ -58,6 +58,7 @@ extension Section {
         switch self {
         case .installed: "Search installed packages"
         case .updates: "Search updates"
+        case .discover: "Search formulae and casks"
         default: nil
         }
     }
@@ -151,9 +152,10 @@ struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 13, weight: .medium))
-            .foregroundStyle(Theme.onPrimary)
+            .foregroundStyle(enabled ? Theme.onPrimary : Theme.muted)
             .padding(.horizontal, 14).frame(height: 32)
-            .background(Theme.primary.opacity(enabled ? (configuration.isPressed ? 0.8 : 1) : 0.4),
+            // Disabled: the mockup's grey (Discover's "Installing jq…").
+            .background(enabled ? Theme.primary.opacity(configuration.isPressed ? 0.8 : 1) : Theme.active,
                         in: RoundedRectangle(cornerRadius: 6))
     }
 }

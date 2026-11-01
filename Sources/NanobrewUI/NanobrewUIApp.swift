@@ -123,7 +123,7 @@ struct ContentView: View {
                 }
                 // The sheet (DD11): inset 8px from the right and bottom edges, 16px corners, a 1px edge, no shadow.
                 VStack(spacing: 0) {
-                    VSplitView {
+                    VStack(spacing: 0) {
                         VStack(spacing: 0) {
                             if model.restartOffered {
                                 HStack {
@@ -144,7 +144,10 @@ struct ContentView: View {
                             }
                         }
                         .frame(minHeight: 200, maxHeight: .infinity)
-                        if model.consoleShown { ConsoleView().frame(minHeight: 120, idealHeight: 180) }
+                        // The mockup's console: 212px under a 1px edge.
+                        if model.consoleShown {
+                            ConsoleView().frame(height: 212).overlay(alignment: .top) { Theme.border.frame(height: 1) }
+                        }
                     }
                     StatusLine()
                 }
@@ -212,7 +215,7 @@ struct ContentView: View {
         switch section {
         case .installed, nil: InstalledView(filter: query, section: $section)
         case .updates: UpdatesView(filter: query, reinstalling: $reinstalling)
-        case .discover: DiscoverView()
+        case .discover: DiscoverView(query: query)
         case .services: ServicesView()
         case .maintenance: MaintenanceView()
         case .bundle: BundleView()
