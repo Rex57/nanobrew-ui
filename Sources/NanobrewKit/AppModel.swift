@@ -223,6 +223,8 @@ public final class AppModel {
     }
 
     private func execute(_ command: NBCommand) async {
+        // A run that cannot start must not leave an earlier success standing (the Reinstall guard reads it).
+        succeeded.remove(command)
         console.append("$ \(command.title)")
         guard let path = command.program ?? nbPath else { console.append("Failed: nb is not installed"); return }
         let process: NBProcess

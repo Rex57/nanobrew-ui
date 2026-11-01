@@ -99,3 +99,16 @@ let firefoxReason = "this download format does not support staged upgrades yet"
         #expect(model.status?.kind == .failure)
     }
 }
+
+@MainActor @Suite struct LastRunResetTests {
+    @Test func aRunThatCannotStartForgetsTheEarlierSuccess() async throws {
+        let nb = try FakeNB()
+        let model = nb.model()
+        let remove = NBCommand.removeCask("firefox")
+        await model.run(remove).value
+        #expect(model.lastRunSucceeded(remove))
+        try FileManager.default.removeItem(atPath: nb.path)
+        await model.run(remove).value
+        #expect(!model.lastRunSucceeded(remove))
+    }
+}
