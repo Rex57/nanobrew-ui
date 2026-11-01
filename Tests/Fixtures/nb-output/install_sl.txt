@@ -1,0 +1,9 @@
+==> Resolving dependencies...
+    [92ms]
+==> Installing 1 package(s) (1 already up to date):
+    sl 5.02
+==> Downloading + installing 1 packages...
+nb: sl: post-install probe warning: declared binaries or linked executables missing
+    ✓ sl
+    [2007ms]
+==> Done in 2106.6ms

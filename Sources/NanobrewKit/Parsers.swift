@@ -46,3 +46,32 @@ public struct PackageInfo: Equatable, Sendable {
         return info
     }
 }
+
+/// One row of `nb search` (nanobrew main.zig runSearch): `name version[ [installed]][ (cask)] - desc`.
+public struct SearchResult: Equatable, Hashable, Sendable {
+    public var name: String
+    public var version: String
+    public var description: String
+    public var isCask: Bool
+    public var installed: Bool
+
+    public init(name: String, version: String, description: String, isCask: Bool, installed: Bool) {
+        self.name = name
+        self.version = version
+        self.description = description
+        self.isCask = isCask
+        self.installed = installed
+    }
+
+    public static func parse(_ lines: [String]) -> [SearchResult] {
+        lines.compactMap { line in
+            guard !line.hasPrefix("==>"), let dash = line.range(of: " - ") ?? (line.hasSuffix(" -") ? line.range(of: " -", options: .backwards) : nil)
+            else { return nil }
+            let words = line[..<dash.lowerBound].split(separator: " ").map(String.init)
+            guard words.count >= 2 else { return nil }
+            return SearchResult(name: words[0], version: words[1],
+                                description: String(line[dash.upperBound...]).trimmingCharacters(in: .whitespaces),
+                                isCask: words.contains("(cask)"), installed: words.contains("[installed]"))
+        }
+    }
+}

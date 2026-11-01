@@ -1,0 +1,4 @@
+==> Searching for "puremac"...
+puremac 3.2.0 [installed] (cask) - Open-source application manager and system cleaner
+
+==> 1 result(s)

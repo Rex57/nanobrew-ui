@@ -1,0 +1,5 @@
+==> Searching for "ripgr"...
+ripgrep 15.2.0 - Search tool like grep and The Silver Searcher
+ripgrep-all 0.10.10 - Wrapper around ripgrep that adds multiple rich file types
+
+==> 2 result(s)

@@ -94,6 +94,10 @@ public final class AppModel {
         return (lines, process.exitCode)
     }
 
+    public func search(_ query: String) async -> [SearchResult] {
+        SearchResult.parse(await capture(.search(query)).lines)
+    }
+
     /// The detail pane of a package: parsed info (or nb's error text) and, for a formula, the dependency tree.
     public func detail(name: String, cask: Bool) async -> PackageDetail {
         let (lines, code) = await capture(cask ? .caskInfo(name) : .info(name))

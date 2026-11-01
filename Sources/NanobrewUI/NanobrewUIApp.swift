@@ -56,6 +56,7 @@ struct NanobrewUIApp: App {
 
 enum Section: String, CaseIterable, Identifiable {
     case installed = "Installed"
+    case discover = "Discover"
     case maintenance = "Maintenance"
     var id: String { rawValue }
 }
@@ -75,6 +76,7 @@ struct ContentView: View {
                     }
                     switch section {
                     case .installed, nil: InstalledView()
+                    case .discover: DiscoverView()
                     case .maintenance: MaintenanceView()
                     }
                 }

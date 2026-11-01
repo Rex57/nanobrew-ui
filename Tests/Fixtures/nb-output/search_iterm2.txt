@@ -1,0 +1,11 @@
+==> Searching for "iterm2"...
+gptline 1.0.8_25 - ChatGPT client with native iTerm2 support
+iterm2 3.7.6 (cask) - Terminal emulator as alternative to Apple's Terminal app
+iterm2@beta 3.7.7beta2 (cask) - Terminal emulator as alternative to Apple's Terminal app
+iterm2@nightly 3_7_20261031 (cask) - Terminal emulator as alternative to Apple's Terminal app
+itermai 1.1 (cask) - Enable generative AI features in iTerm2
+itermbrowserplugin 1.0 (cask) - Enables an integrated web browser in iTerm2
+itermcompanion 1.0 (cask) - Pairs iTerm2 with the iTerm2 Companion iPhone app
+therm 0.6.4 (cask) - Fork of iTerm2 that aims to have good defaults and minimal features
+
+==> 8 result(s)

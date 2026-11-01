@@ -33,5 +33,12 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public static func switchVersion(_ name: String, to version: String) -> NBCommand {
         NBCommand(args: ["switch", "\(name)@\(version)"], changes: true)
     }
+    public static func search(_ query: String) -> NBCommand { NBCommand(args: ["search", query], changes: false) }
+    /// `name` may be a tap path `user/tap/name`.
+    public static func install(_ name: String, cask: Bool = false, shims: Bool = false, trustedOnly: Bool = false,
+                               trusted: Bool = false) -> NBCommand {
+        NBCommand(args: ["install"] + (cask ? ["--cask"] : []) + (shims ? ["--shims"] : [])
+            + (trustedOnly ? ["--trusted-only"] : []) + [trusted ? name + "@trusted" : name], changes: true)
+    }
     public static func depsTree(_ name: String) -> NBCommand { NBCommand(args: ["deps", "--tree", name], changes: false) }
 }
