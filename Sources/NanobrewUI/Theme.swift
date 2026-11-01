@@ -24,6 +24,8 @@ enum Theme {
     static let onPrimary = pair(0xffffff, 0x000000)
     static let pillBg = pair(0xebedee, 0x262626)
     static let pillInk = pair(0x353736, 0xd4d4d4)
+    /// The positive pale pair of a running service's pill (app-screens.md §7.6).
+    static let positiveBg = pair(0xe6f4ec, 0x12261b)
     /// Behind a dialog: #131416 at 28% on light, black at 50% on dark.
     static let scrim = pair(0x131416, 0x000000, alpha: (0.28, 0.5))
 
@@ -221,5 +223,47 @@ struct OutlinedButtonStyle: ButtonStyle {
             .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(border))
             .opacity(enabled ? (configuration.isPressed ? 0.7 : 1) : 0.4)
             .contentShape(Rectangle())
+    }
+}
+
+/// app-screens.md §8.2: a title and a grey description on the left, the controls on the right, a rule under it.
+struct SettingsRow<Controls: View>: View {
+    let title: String
+    let description: String
+    @ViewBuilder let controls: Controls
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 24) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.system(size: 14, weight: .medium)).foregroundStyle(Theme.text)
+                Text(description).font(.system(size: 13)).foregroundStyle(Theme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: 8) { controls }
+                .fixedSize()
+                .buttonStyle(OutlinedButtonStyle())
+                .toggleStyle(.switch).controlSize(.small).tint(Theme.primary)
+        }
+        .padding(.vertical, 14)
+        .overlay(alignment: .bottom) { Theme.rule.frame(height: 1) }
+    }
+}
+
+/// Plain words first, the flag after them in grey (DD6).
+func flagLabel(_ words: String, _ flag: String) -> some View {
+    HStack(spacing: 6) {
+        Text(words).font(.system(size: 13)).foregroundStyle(Theme.text)
+        Text(flag).font(.system(size: 12, design: .monospaced)).foregroundStyle(Theme.muted)
+    }
+}
+
+extension View {
+    /// A text field in the theme: 28px, 1px control edge, 6px corners.
+    func themedField(width: CGFloat? = nil) -> some View {
+        textFieldStyle(.plain).font(.system(size: 13)).foregroundStyle(Theme.text)
+            .padding(.horizontal, 10).frame(width: width, height: 28)
+            .background(Theme.sheet, in: RoundedRectangle(cornerRadius: 6))
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Theme.control))
     }
 }

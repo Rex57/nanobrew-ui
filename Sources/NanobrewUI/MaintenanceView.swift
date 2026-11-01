@@ -1,6 +1,7 @@
 import NanobrewKit
 import SwiftUI
 
+/// Maintenance as settings rows (app-screens.md §8.2): a title and a grey description, the controls on the right.
 struct MaintenanceView: View {
     @Environment(AppModel.self) private var model
     @State private var probePackage = ""
@@ -13,17 +14,20 @@ struct MaintenanceView: View {
     @State private var leavesTree = false
 
     var body: some View {
-        Form {
-            SwiftUI.Section("Health") {
-                HStack {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                ScreenTitle(title: "Maintenance") { Text(subline) }.padding(.bottom, 12)
+                SettingsRow(title: "Doctor", description: "Checks the nanobrew installation and reports problems.") {
                     Button("Doctor") { model.request(.doctor) }.disabled(model.inProgress.contains(.doctor))
-                    Button("Doctor Probe") { model.request(.doctorProbe(probePackage.isEmpty ? nil : probePackage)) }
-                    TextField("Package (optional)", text: $probePackage)
                 }
-            }
-            SwiftUI.Section("Cleanup") {
-                HStack {
-                    Toggle("Remove phantom keg entries (--prune-kegs)", isOn: $pruneKegs)
+                SettingsRow(title: "Probe",
+                            description: "Runs the packages' health probes and records the result. Leave the name empty for all.") {
+                    TextField("Package (optional)", text: $probePackage).themedField(width: 180)
+                    Button("Probe") { model.request(.doctorProbe(probePackage.isEmpty ? nil : probePackage)) }
+                }
+                SettingsRow(title: "Cleanup", description: "Removes old downloads and unused files. "
+                            + (dryRunFor == pruneKegs ? "Check the dry run in the console first." : "Run a dry run first.")) {
+                    Toggle(isOn: $pruneKegs) { flagLabel("Remove phantom keg entries", "--prune-kegs") }
                     Button("Dry Run") {
                         Task {
                             let prune = pruneKegs // the setting this dry run shows, even if the switch moves meanwhile
@@ -37,42 +41,45 @@ struct MaintenanceView: View {
                         model.request(.cleanup(pruneKegs: pruneKegs))
                     }
                     .disabled(dryRunFor != pruneKegs)
-                    Text(dryRunFor == pruneKegs ? "Check the dry run in the console first." : "Run a dry run first.")
-                        .foregroundStyle(.secondary)
                 }
-            }
-            SwiftUI.Section("Update") {
-                HStack {
+                SettingsRow(title: "Update nb", description: "Updates nanobrew itself to its newest release.") {
                     Button("Update nanobrew") { model.request(.update) }
+                }
+                SettingsRow(title: "Update registry", description: "Downloads the newest package index.") {
                     Button("Update Registry") { model.request(.updateRegistry) }
                 }
-            }
-            SwiftUI.Section("Auto-update") {
-                Text(autoupdate.map { "Installed: \($0.installed ? "yes" : "no"), enabled: \($0.enabled ? "yes" : "no")" }
-                     ?? "Status unknown")
-                HStack {
-                    Toggle("Also upgrade packages (--upgrade)", isOn: $alsoUpgrade)
+                SettingsRow(title: "Auto-update", description: autoupdateText) {
+                    Toggle(isOn: $alsoUpgrade) { flagLabel("Also upgrade packages", "--upgrade") }
                     Button("Status") { model.request(.autoupdateStatus) }
                     Button("Enable") { model.request(.autoupdate(.enable, upgrade: alsoUpgrade)) }
                     Button("Disable") { model.request(.autoupdate(.disable, upgrade: false)) }
                     Button("Run Now") { model.request(.autoupdate(.run, upgrade: alsoUpgrade)) }
                 }
-            }
-            SwiftUI.Section("Find") {
-                HStack {
-                    TextField("Pattern", text: $pattern)
+                SettingsRow(title: "Where", description: "Finds the package that owns a file or a command.") {
+                    TextField("Pattern", text: $pattern).themedField(width: 180)
                     Button("Where") { model.request(.where(pattern)) }.disabled(pattern.isEmpty)
                 }
-                HStack {
-                    Toggle("Tree", isOn: $leavesTree)
+                SettingsRow(title: "Leaves", description: "Lists the packages that nothing else depends on.") {
+                    Toggle(isOn: $leavesTree) { Text("Tree").font(.system(size: 13)) }
                     Button("Leaves") { model.request(.leaves(tree: leavesTree)) }
                 }
             }
+            .padding(24)
         }
-        .formStyle(.grouped)
         .task { autoupdate = await model.autoupdateStatus() }
         .onChange(of: model.running) { _, running in
             if running == nil { Task { autoupdate = await model.autoupdateStatus() } }
         }
+    }
+
+    private var subline: String {
+        "\(model.snapshot.map { "\($0.formulae.count + $0.casks.count)" } ?? "No") packages in /opt/nanobrew · auto-update "
+            + (autoupdate.map { $0.enabled ? "on" : "off" } ?? "status unknown")
+    }
+
+    private var autoupdateText: String {
+        guard let autoupdate else { return "Runs nb update and, if you choose, upgrades on a schedule. Status unknown." }
+        return "Runs nb update and, if you choose, upgrades on a schedule. Now: "
+            + (autoupdate.installed ? "installed" : "not installed") + ", " + (autoupdate.enabled ? "enabled." : "not enabled.")
     }
 }
