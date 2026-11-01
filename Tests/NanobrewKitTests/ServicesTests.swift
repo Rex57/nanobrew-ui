@@ -24,7 +24,23 @@ import Testing
 
     @MainActor @Test func modelListsServicesThroughNb() async throws {
         let nb = try FakeNB()
-        #expect(await nb.model().services().map(\.name) == ["postgresql@17", "redis"])
+        #expect(try await nb.model().services().map(\.name) == ["postgresql@17", "redis"])
         #expect(nb.argvs == [["services", "list"]])
+    }
+}
+
+@MainActor @Suite struct FailedListTests {
+    @Test func failedServicesListThrowsNbErrorText() async throws {
+        let nb = try FakeNB()
+        try nb.exit("services", code: 1)
+        try nb.stderr("services", text: "nb: failed to discover services\n")
+        await #expect(throws: AppModel.CommandFailed(text: "nb: failed to discover services")) { try await nb.model().services() }
+    }
+
+    @Test func failedSearchThrowsNbErrorText() async throws {
+        let nb = try FakeNB()
+        try nb.exit("search", code: 1)
+        try nb.stderr("search", text: "nb: search failed: ConnectionRefused\n")
+        await #expect(throws: AppModel.CommandFailed(text: "nb: search failed: ConnectionRefused")) { try await nb.model().search("sl") }
     }
 }

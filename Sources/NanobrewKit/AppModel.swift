@@ -14,6 +14,8 @@ public final class AppModel {
     public private(set) var notSetUp = false
     public private(set) var stateError: String?
     /// The console: one line per output line, with a header and an end line per command.
+    // shortcut: every line of the session is kept (a few MB at the expected load); cap it if sessions
+    // reach tens of MB of output (for example a long-running command left open for days).
     public private(set) var console: [String] = []
     /// The changing command that runs now, and the changing commands that wait for their turn.
     public private(set) var running: NBCommand?
@@ -23,6 +25,10 @@ public final class AppModel {
     /// A command that waits for the user's yes before it runs.
     public private(set) var pendingConfirmation: NBCommand?
     private var processes: [NBProcess] = []
+    private var succeeded: Set<NBCommand> = []
+
+    /// True when the last run of this command (through `run`) exited 0; false after a failure or a cancel.
+    public func lastRunSucceeded(_ command: NBCommand) -> Bool { succeeded.contains(command) }
     private var lastChange: Task<Void, Never>?
 
     public var notInstalled: Bool { nbPath == nil }
@@ -112,23 +118,42 @@ public final class AppModel {
         return (lines, process.exitCode)
     }
 
-    public func search(_ query: String) async -> [SearchResult] {
-        SearchResult.parse(await capture(.search(query)).lines)
+    /// stdout of a read-only command, stderr apart. A non-zero exit throws nb's error text (never an empty list).
+    private func captureStdout(_ command: NBCommand) async throws -> [String] {
+        guard let nbPath else { throw CommandFailed(text: "nb is not installed") }
+        let process = try NBProcess(path: nbPath, args: command.args, separateStderr: true)
+        var lines: [String] = []
+        for await batch in process.lines { lines += batch }
+        guard process.exitCode == 0 else {
+            let joined = { (lines: [String]) in lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines) }
+            let text = joined(process.stderrLines).isEmpty ? joined(lines) : joined(process.stderrLines)
+            throw CommandFailed(text: text.isEmpty ? "\(command.title) failed (exit code \(process.exitCode.map(String.init) ?? "none"))" : text)
+        }
+        return lines
+    }
+
+    public func search(_ query: String) async throws -> [SearchResult] {
+        SearchResult.parse(try await captureStdout(.search(query)))
+    }
+
+    /// The text of `nb completions <shell>`, with nb's final newline; nil when nb fails.
+    public func completions(_ shell: String) async -> String? {
+        guard let lines = try? await captureStdout(.completions(shell)) else { return nil }
+        return lines.joined(separator: "\n") + "\n"
     }
 
     public func autoupdateStatus() async -> AutoupdateStatus? { AutoupdateStatus.parse(await capture(.autoupdateStatus).lines) }
 
     public func telemetryEnabled() async -> Bool? { parseTelemetry(await capture(.telemetryStatus).lines) }
 
-    public struct CommandFailed: Error, LocalizedError {
+    public struct CommandFailed: Error, LocalizedError, Equatable {
         public let text: String
         public var errorDescription: String? { text }
     }
 
-    /// Writes the output of `nb bundle dump` to `url`; nothing is written when nb fails.
+    /// Writes nb's stdout of `nb bundle dump` to `url`; nothing is written when nb fails (its stderr is thrown).
     public func bundleDump(to url: URL) async throws {
-        let (lines, code) = await capture(.bundleDump)
-        guard code == 0 else { throw CommandFailed(text: lines.joined(separator: "\n")) }
+        let lines = try await captureStdout(.bundleDump)
         try (lines.joined(separator: "\n") + "\n").write(to: url, atomically: true, encoding: .utf8)
     }
 
@@ -140,13 +165,13 @@ public final class AppModel {
 
     public func nbVersion() async -> String? { parseNBVersion(await capture(.version).lines) }
 
-    public func services() async -> [Service] { Service.parse(await capture(.servicesList).lines) }
+    public func services() async throws -> [Service] { Service.parse(try await captureStdout(.servicesList)) }
 
     /// Formulae from `nb outdated`, casks from `nb outdated --cask`.
-    public func outdated() async -> [OutdatedPackage] {
-        async let formulae = capture(.outdated)
-        async let casks = capture(.outdatedCasks)
-        return await OutdatedPackage.parse(formulae.lines).filter { !$0.isCask } + OutdatedPackage.parse(casks.lines)
+    public func outdated() async throws -> [OutdatedPackage] {
+        async let formulae = captureStdout(.outdated)
+        async let casks = captureStdout(.outdatedCasks)
+        return try await OutdatedPackage.parse(formulae).filter { !$0.isCask } + OutdatedPackage.parse(casks)
     }
 
     /// The detail pane of a package: parsed info (or nb's error text) and, for a formula, the dependency tree.
@@ -177,6 +202,7 @@ public final class AppModel {
         for await batch in process.lines { console.append(contentsOf: batch) }
         processes.removeAll { $0 === process }
         inProgress.remove(at: inProgress.firstIndex(of: command)!)
+        if !process.wasCancelled, process.exitCode == 0 { succeeded.insert(command) } else { succeeded.remove(command) }
         if process.wasCancelled {
             console.append("Cancelled: \(command.title)")
         } else if let code = process.exitCode, code == 0 {

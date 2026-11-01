@@ -3,11 +3,15 @@ import SwiftUI
 
 struct ServicesView: View {
     @Environment(AppModel.self) private var model
+    @State private var error: String?
     @State private var rows: [Service]?
 
     var body: some View {
         Group {
-            if let rows {
+            if let error {
+                Text(error).foregroundStyle(.red).textSelection(.enabled)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).padding()
+            } else if let rows {
                 if rows.isEmpty {
                     ContentUnavailableView("No services found", systemImage: "gearshape.2")
                 } else {
@@ -31,5 +35,13 @@ struct ServicesView: View {
         .onChange(of: model.running) { _, running in if running == nil { Task { await load() } } }
     }
 
-    private func load() async { rows = await model.services() }
+    private func load() async {
+        do {
+            rows = try await model.services()
+            error = nil
+        } catch {
+            rows = nil
+            self.error = error.localizedDescription
+        }
+    }
 }

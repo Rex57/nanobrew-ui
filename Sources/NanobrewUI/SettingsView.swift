@@ -108,7 +108,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .task { telemetry = await model.telemetryEnabled() }
-        .task(id: shell) { completions = await model.capture(.completions(shell)).lines.joined(separator: "\n") }
+        .task(id: shell) { completions = await model.completions(shell) ?? "" }
         .onChange(of: model.running) { _, running in
             if running == nil { Task { telemetry = await model.telemetryEnabled() } }
         }

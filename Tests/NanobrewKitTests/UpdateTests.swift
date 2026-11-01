@@ -30,7 +30,7 @@ import Testing
 @MainActor @Suite struct UpdatesModelTests {
     @Test func outdatedListsFormulaeFromOutdatedAndCasksFromOutdatedCask() async throws {
         let nb = try FakeNB()
-        let rows = await nb.model().outdated()
+        let rows = try await nb.model().outdated()
         #expect(rows.map(\.name) == ["node", "libffi", "puremac", "nanobrew-ui"])
         #expect(Set(nb.argvs) == [["outdated"], ["outdated", "--cask"]])
     }
@@ -76,8 +76,17 @@ import Testing
 
     @Test func noRestartOfferWhenTheVersionDidNotChange() async throws {
         let nb = try FakeNB()
-        let model = AppModel(statePath: fixture("state.json"), nbPath: nb.path, appVersion: "1.0.0")
+        // state.json still holds nanobrew-ui 1.0.0, the version of the running app.
+        let model = AppModel(statePath: fixture("state-self-current.json"), nbPath: nb.path, appVersion: "1.0.0")
+        model.reload()
         await model.run(.upgradeCask("nanobrew-ui")).value
         #expect(!model.restartOffered)
+    }
+
+    @Test func failedOutdatedThrowsNbErrorText() async throws {
+        let nb = try FakeNB()
+        try nb.exit("outdated", code: 1)
+        try nb.stderr("outdated", text: "nb: could not open database\n")
+        await #expect(throws: AppModel.CommandFailed(text: "nb: could not open database")) { try await nb.model().outdated() }
     }
 }

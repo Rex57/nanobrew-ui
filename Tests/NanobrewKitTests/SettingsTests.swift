@@ -34,7 +34,9 @@ import Testing
         let model = AppModel(statePath: fixture("state.json"), nbPath: nil)
         model.saveNBPath(nb.path, defaults: defaults)
         #expect(defaults.string(forKey: NBLocator.savedPathKey) == nb.path)
-        #expect(NBLocator.locate(defaults: defaults) == nb.path)
+        // Two executable files: the saved one and one in a default place. The saved one wins (D24).
+        let other = try FakeNB()
+        #expect(NBLocator.locate(argument: nil, saved: defaults.string(forKey: NBLocator.savedPathKey), places: [other.path]) == nb.path)
         #expect(model.nbPath == nb.path)
         model.saveNBPath("", defaults: defaults)
         #expect(defaults.string(forKey: NBLocator.savedPathKey) == nil)
@@ -46,6 +48,28 @@ import Testing
         try await nb.model().bundleDump(to: file)
         #expect(try String(contentsOf: file, encoding: .utf8) == String(contentsOfFile: fixture("nb-output/bundle_dump.txt"), encoding: .utf8))
         #expect(nb.argvs == [["bundle", "dump"]])
+    }
+
+    @MainActor @Test func bundleDumpFileHasStdoutOnly() async throws {
+        let nb = try FakeNB()
+        try nb.stderr("bundle", text: "nb: warning: registry is 3 days old\n")
+        let file = nb.dir.appendingPathComponent("Nanobrew")
+        try await nb.model().bundleDump(to: file)
+        #expect(try String(contentsOf: file, encoding: .utf8) == String(contentsOfFile: fixture("nb-output/bundle_dump.txt"), encoding: .utf8))
+    }
+
+    @MainActor @Test func failedBundleDumpShowsNbStderr() async throws {
+        let nb = try FakeNB()
+        try nb.exit("bundle", code: 1)
+        try nb.stderr("bundle", text: "nb: could not open database\n")
+        let file = nb.dir.appendingPathComponent("Nanobrew")
+        await #expect(throws: AppModel.CommandFailed(text: "nb: could not open database")) { try await nb.model().bundleDump(to: file) }
+        #expect(!FileManager.default.fileExists(atPath: file.path))
+    }
+
+    @MainActor @Test func completionsKeepTheFinalNewline() async throws {
+        let nb = try FakeNB()
+        #expect(try await nb.model().completions("bash") == String(contentsOfFile: fixture("nb-output/completions_bash.txt"), encoding: .utf8))
     }
 
     @MainActor @Test func failedBundleDumpThrowsAndWritesNothing() async throws {

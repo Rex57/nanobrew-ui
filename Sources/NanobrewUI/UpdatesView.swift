@@ -3,6 +3,7 @@ import SwiftUI
 
 struct UpdatesView: View {
     @Environment(AppModel.self) private var model
+    @State private var error: String?
     @State private var rows: [OutdatedPackage]?
 
     var body: some View {
@@ -15,7 +16,10 @@ struct UpdatesView: View {
             }
             .padding(8)
             Divider()
-            if let rows {
+            if let error {
+                Text(error).foregroundStyle(.red).textSelection(.enabled)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).padding()
+            } else if let rows {
                 if rows.isEmpty {
                     ContentUnavailableView("All packages are up to date", systemImage: "checkmark.circle")
                 } else {
@@ -38,5 +42,13 @@ struct UpdatesView: View {
         .onChange(of: model.running) { _, running in if running == nil { Task { await load() } } }
     }
 
-    private func load() async { rows = await model.outdated() }
+    private func load() async {
+        do {
+            rows = try await model.outdated()
+            error = nil
+        } catch {
+            rows = nil
+            self.error = error.localizedDescription
+        }
+    }
 }

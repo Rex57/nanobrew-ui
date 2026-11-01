@@ -3,21 +3,24 @@ import Foundation
 /// One nb run: started at an absolute path with an argv list (never a shell), in its own process group.
 public final class NBProcess: @unchecked Sendable {
     public let pid: pid_t
-    /// stdout and stderr lines, ANSI codes removed, one batch per read. The stream ends after the process exits.
+    /// stdout and stderr lines (only stdout with `separateStderr`), ANSI codes removed, one batch per read.
+    /// The stream ends after the process exits.
     public let lines: AsyncStream<[String]>
     private let lock = NSLock()
     private var waitStatus: Int32 = 0
     private var cancelled = false
+    private var stderrData = Data()
 
-    public init(path: String, args: [String]) throws {
+    public init(path: String, args: [String], separateStderr: Bool = false) throws {
         var fds: [Int32] = [0, 0]
-        guard pipe(&fds) == 0 else { throw POSIXError(.EMFILE) }
+        var errFDs: [Int32] = [-1, -1]
+        guard pipe(&fds) == 0, !separateStderr || pipe(&errFDs) == 0 else { throw POSIXError(.EMFILE) }
         var actions: posix_spawn_file_actions_t?
         posix_spawn_file_actions_init(&actions)
         defer { posix_spawn_file_actions_destroy(&actions) }
         posix_spawn_file_actions_addopen(&actions, 0, "/dev/null", O_RDONLY, 0)
         posix_spawn_file_actions_adddup2(&actions, fds[1], 1)
-        posix_spawn_file_actions_adddup2(&actions, fds[1], 2)
+        posix_spawn_file_actions_adddup2(&actions, separateStderr ? errFDs[1] : fds[1], 2)
         var attr: posix_spawnattr_t?
         posix_spawnattr_init(&attr)
         defer { posix_spawnattr_destroy(&attr) }
@@ -30,8 +33,10 @@ public final class NBProcess: @unchecked Sendable {
         var pid: pid_t = 0
         let err = posix_spawn(&pid, path, &actions, &attr, argv, environ)
         close(fds[1])
+        if separateStderr { close(errFDs[1]) }
         guard err == 0 else {
             close(fds[0])
+            if separateStderr { close(errFDs[0]) }
             throw POSIXError(POSIXErrorCode(rawValue: err) ?? .ENOENT)
         }
         self.pid = pid
@@ -39,6 +44,22 @@ public final class NBProcess: @unchecked Sendable {
         let (stream, continuation) = AsyncStream<[String]>.makeStream()
         lines = stream
         let readFD = fds[0]
+        let stderrDone = DispatchSemaphore(value: 0)
+        if separateStderr {
+            let errFD = errFDs[0]
+            Thread.detachNewThread { [self] in
+                var buffer = [UInt8](repeating: 0, count: 65536)
+                while true {
+                    let n = read(errFD, &buffer, buffer.count)
+                    if n <= 0 { break }
+                    lock.withLock { stderrData.append(contentsOf: buffer[0..<n]) }
+                }
+                close(errFD)
+                stderrDone.signal()
+            }
+        } else {
+            stderrDone.signal()
+        }
         Thread.detachNewThread { [self] in
             var pending = Data()
             var buffer = [UInt8](repeating: 0, count: 65536)
@@ -53,6 +74,7 @@ public final class NBProcess: @unchecked Sendable {
             }
             if !pending.isEmpty { continuation.yield([Self.clean(pending)]) }
             close(readFD)
+            stderrDone.wait()
             var status: Int32 = 0
             while waitpid(self.pid, &status, 0) == -1 && errno == EINTR {}
             lock.withLock { waitStatus = status }
@@ -68,6 +90,12 @@ public final class NBProcess: @unchecked Sendable {
     }
 
     public var wasCancelled: Bool { lock.withLock { cancelled } }
+
+    /// stderr lines with `separateStderr`, ANSI codes removed. Valid once `lines` has ended.
+    public var stderrLines: [String] {
+        let data = lock.withLock { stderrData }
+        return data.isEmpty ? [] : data.split(separator: 10).map(Self.clean)
+    }
 
     /// The exit code, or nil when a signal ended the process. Valid once `lines` has ended.
     public var exitCode: Int32? {

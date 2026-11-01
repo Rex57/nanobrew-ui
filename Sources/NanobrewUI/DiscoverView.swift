@@ -5,6 +5,8 @@ struct DiscoverView: View {
     @Environment(AppModel.self) private var model
     @State private var query = ""
     @State private var results: [SearchResult]?
+    @State private var error: String?
+    @State private var latestQuery = ""
     @State private var selection: SearchResult?
     @State private var tapName = ""
     @State private var tapCask = false
@@ -33,7 +35,10 @@ struct DiscoverView: View {
             Divider()
             HSplitView {
                 Group {
-                    if let results, results.isEmpty {
+                    if let error {
+                        Text(error).foregroundStyle(.red).textSelection(.enabled)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).padding()
+                    } else if let results, results.isEmpty {
                         ContentUnavailableView("No results", systemImage: "magnifyingglass")
                     } else {
                         List(results ?? [], id: \.self, selection: $selection) { r in
@@ -65,7 +70,16 @@ struct DiscoverView: View {
     private func search() {
         guard !query.isEmpty else { return }
         let q = query
-        Task { results = await model.search(q) }
+        latestQuery = q
+        Task {
+            let outcome: Result<[SearchResult], Error>
+            do { outcome = .success(try await model.search(q)) } catch { outcome = .failure(error) }
+            guard q == latestQuery else { return } // a newer search was started: drop this older result
+            switch outcome {
+            case .success(let rows): results = rows; error = nil
+            case .failure(let failure): results = nil; error = failure.localizedDescription
+            }
+        }
     }
 
     private func install(_ name: String, cask: Bool) {
