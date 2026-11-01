@@ -17,7 +17,7 @@ let firefoxReason = "this download format does not support staged upgrades yet"
 @Suite struct UnsupportedSkipTests {
     @Test func parsesTheUnsupportedLineOfRecordedUpgradeOutput() throws {
         #expect(UnsupportedSkip.parse(try recorded("upgrade_--cask_firefox_puremac")) == [
-            UnsupportedSkip(token: "firefox", latest: "145.0.1", reason: firefoxReason),
+            UnsupportedSkip(token: "firefox", installed: "144.0", reason: firefoxReason),
         ])
     }
 
@@ -33,7 +33,7 @@ let firefoxReason = "this download format does not support staged upgrades yet"
 @MainActor @Suite(.serialized) struct VerdictTests {
     let firefox = OutdatedPackage(name: "firefox", installed: "144.0", latest: "145.0.1", isCask: true, pinned: false)
 
-    @Test func anUpgradeThatSkipsACaskGivesAVerdictForThatVersion() async throws {
+    @Test func anUpgradeThatSkipsACaskGivesAVerdictForItsInstalledVersion() async throws {
         let nb = try FakeNB()
         let scratch = ScratchDefaults()
         let defaults = scratch.defaults
@@ -44,10 +44,15 @@ let firefoxReason = "this download format does not support staged upgrades yet"
         // After a restart: a new model on the same preferences.
         let again = AppModel(statePath: fixture("state.json"), nbPath: nb.path, defaults: defaults)
         #expect(again.verdict(for: firefox) == firefoxReason)
-        // A new version of the same cask has no verdict; reading it with stale rows does not delete the verdict.
-        var newer = firefox
-        newer.latest = "146.0"
-        #expect(again.verdict(for: newer) == nil)
+        // DD24: the skip line's new version may differ from outdated's (nb's trust fallback); the installed
+        // version decides.
+        var otherCandidate = firefox
+        otherCandidate.latest = "145.0.2"
+        #expect(again.verdict(for: otherCandidate) == firefoxReason)
+        // After the installed version changed (an upgrade or a reinstall) the row has no verdict; that read deletes
+        // nothing.
+        let upgraded = OutdatedPackage(name: "firefox", installed: "145.0.1", latest: "146.0", isCask: true, pinned: false)
+        #expect(again.verdict(for: upgraded) == nil)
         #expect(again.verdict(for: firefox) == firefoxReason)
     }
 

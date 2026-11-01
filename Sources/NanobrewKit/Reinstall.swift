@@ -4,14 +4,15 @@ import Foundation
 /// `    <token> (<old> -> <new>) [unsupported, skipping: <reason>]`.
 public struct UnsupportedSkip: Equatable, Sendable {
     public var token: String
-    public var latest: String
+    /// The installed (old) version: the verdict's key with the token (DD24).
+    public var installed: String
     public var reason: String
 
     public static func parse(_ lines: [String]) -> [UnsupportedSkip] {
         lines.compactMap { line in
             guard let m = line.trimmingCharacters(in: .whitespaces)
-                .wholeMatch(of: /(\S+) \(.+ -> (.+?)\) \[unsupported, skipping: (.+)\]/) else { return nil }
-            return UnsupportedSkip(token: String(m.1), latest: String(m.2), reason: String(m.3))
+                .wholeMatch(of: /(\S+) \((.+) -> .+?\) \[unsupported, skipping: (.+)\]/) else { return nil }
+            return UnsupportedSkip(token: String(m.1), installed: String(m.2), reason: String(m.3))
         }
     }
 
@@ -31,18 +32,19 @@ public struct UnsupportedSkip: Equatable, Sendable {
 extension AppModel {
     private static func verdictKey(_ token: String) -> String { "ReinstallVerdict.\(token)" }
 
-    /// DD15: remembers nb's verdict per cask and new version in the app's own preferences.
+    /// DD15, DD24: remembers nb's verdict per cask and installed version in the app's own preferences. The skip
+    /// line's new version can differ from outdated's (nb's trust fallback); the installed version is the same in both.
     func record(_ skips: [UnsupportedSkip]) {
         for skip in skips {
-            defaults.set(["version": skip.latest, "reason": skip.reason], forKey: Self.verdictKey(skip.token))
+            defaults.set(["installed": skip.installed, "reason": skip.reason], forKey: Self.verdictKey(skip.token))
         }
     }
 
-    /// nb's reason when it skipped this cask version as unsupported; none for another version. A read never
-    /// deletes: the next skip of the token overwrites its verdict.
+    /// nb's reason when it skipped this cask, at this installed version, as unsupported; none once the installed
+    /// version changed (an upgrade or a reinstall). A read never deletes: the next skip of the token overwrites it.
     public func verdict(for row: OutdatedPackage) -> String? {
         guard row.isCask, let saved = defaults.dictionary(forKey: Self.verdictKey(row.name)) as? [String: String],
-              saved["version"] == row.latest else { return nil }
+              saved["installed"] == row.installed else { return nil }
         return saved["reason"]
     }
 
