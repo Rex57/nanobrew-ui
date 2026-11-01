@@ -105,17 +105,6 @@ struct ContentView: View {
     }
 }
 
-struct MaintenanceView: View {
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        Form {
-            Button("Doctor") { model.run(.doctor) }.disabled(model.inProgress.contains(.doctor))
-        }
-        .formStyle(.grouped)
-    }
-}
-
 /// Opens the app bundle again as a new copy (the upgraded one nb put in place) and quits this one.
 @MainActor func relaunch() {
     let open = Process()

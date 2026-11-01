@@ -1,0 +1,26 @@
+[1m==> installed matching "jq":[0m
+  (none)
+[1m==> /opt/nanobrew/prefix/bin/ matching "jq":[0m
+  (none)
+[1m==> /opt/nanobrew/prefix/lib/ matching "jq":[0m
+  (none)
+[1m==> /opt/nanobrew/prefix/opt/ matching "jq":[0m
+  (none)
+[1m==> formula index matches for "jq":[0m
+  gojq 0.12.19 - Pure Go implementation of jq
+  hq 1.2.2 - Jq, but for HTML
+  ijq 1.4.2 - Interactive jq
+  jaq 3.1.2 - JQ clone focussed on correctness, speed, and simplicity
+  jnv 0.7.1 - Interactive JSON filter using jq
+  jq 1.8.2 - Lightweight and flexible command-line JSON processor
+  jq-lsp 0.1.19 - Jq language server
+  jqfmt 0.1.0 - Opinionated formatter for jq
+  jql 9.0.3 - JSON query language CLI tool
+  jqp 0.8.0 - TUI playground to experiment and play with jq
+  mdq 0.10.0 - Like jq but for Markdown
+  mq 0.10.0 - Jq-like command-line tool for markdown processing
+  oq 1.3.5_2 - Performant, and portable jq wrapper to support formats other than JSON
+  python-yq 4.4.5 - Command-line YAML and XML processor that wraps jq
+  sq 0.55.0 - Data wrangler with jq-like query language
+  yh 0.4.0 - YAML syntax highlighter to bring colours where only jq could
+  jquake 1.8.5 (cask) - Real-time earthquake monitoring software for Japan

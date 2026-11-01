@@ -104,6 +104,8 @@ public final class AppModel {
         SearchResult.parse(await capture(.search(query)).lines)
     }
 
+    public func autoupdateStatus() async -> AutoupdateStatus? { AutoupdateStatus.parse(await capture(.autoupdateStatus).lines) }
+
     public func services() async -> [Service] { Service.parse(await capture(.servicesList).lines) }
 
     /// Formulae from `nb outdated`, casks from `nb outdated --cask`.

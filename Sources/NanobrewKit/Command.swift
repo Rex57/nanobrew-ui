@@ -51,5 +51,20 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public static func services(_ action: ServiceAction, _ name: String) -> NBCommand {
         NBCommand(args: ["services", action.rawValue, name], changes: true)
     }
+    /// Probes write their results to state.json, so they are changing.
+    public static func doctorProbe(_ package: String?) -> NBCommand {
+        NBCommand(args: ["doctor", "--probe"] + (package.map { [$0] } ?? []), changes: true)
+    }
+    public static let cleanupDryRun = NBCommand(args: ["cleanup", "--dry-run"], changes: false)
+    public static let cleanup = NBCommand(args: ["cleanup"], changes: true, confirmation: .ask)
+    public static let update = NBCommand(args: ["update"], changes: true)
+    public static let updateRegistry = NBCommand(args: ["update-registry"], changes: true)
+    public enum AutoupdateAction: String, Sendable { case enable, disable, run }
+    public static let autoupdateStatus = NBCommand(args: ["autoupdate", "status"], changes: false)
+    public static func autoupdate(_ action: AutoupdateAction, upgrade: Bool) -> NBCommand {
+        NBCommand(args: ["autoupdate", action.rawValue] + (upgrade ? ["--upgrade"] : []), changes: true)
+    }
+    public static func `where`(_ pattern: String) -> NBCommand { NBCommand(args: ["where", pattern], changes: false) }
+    public static func leaves(tree: Bool) -> NBCommand { NBCommand(args: ["leaves"] + (tree ? ["--tree"] : []), changes: false) }
     public static func depsTree(_ name: String) -> NBCommand { NBCommand(args: ["deps", "--tree", name], changes: false) }
 }

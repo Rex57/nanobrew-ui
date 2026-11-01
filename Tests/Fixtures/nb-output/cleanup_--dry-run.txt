@@ -1,0 +1,49 @@
+==> Cleaning up...
+  Checking API cache...
+  Would remove: upstream-formula-8b19206b932fc9db-ncurses.json
+  Would remove: _cask_list.json.idx.v5
+  Would remove: sl.json
+  Would remove: upstream-formula-8b19206b932fc9db-libnghttp2.json
+  Would remove: upstream-formula-8b19206b932fc9db-simdutf.json
+  Would remove: _formula_list.json
+  Would remove: upstream-formula-8b19206b932fc9db-merve.json
+  Would remove: _formula_list.json.idx.v5.lock
+  Would remove: upstream-formula-8b19206b932fc9db-hdrhistogram_c.json
+  Would remove: upstream-formula-8b19206b932fc9db-brotli.json
+  Would remove: upstream-formula-8b19206b932fc9db-ada-url.json
+  Would remove: upstream-formula-8b19206b932fc9db-node.json
+  Would remove: upstream-formula-8b19206b932fc9db-mpdecimal.json
+  Would remove: upstream-formula-8b19206b932fc9db-oniguruma.json
+  Would remove: _cask_list.json.idx.v5.lock
+  Would remove: upstream-formula-8b19206b932fc9db-tree.json
+  Would remove: upstream-formula-8b19206b932fc9db-abseil.json
+  Would remove: _cask_list.json
+  Would remove: upstream-formula-8b19206b932fc9db-jq.json
+  Would remove: upstream-formula-8b19206b932fc9db-uvwasi.json
+  Would remove: upstream-formula-8b19206b932fc9db-llhttp.json
+  Would remove: upstream-formula-8b19206b932fc9db-simdjson.json
+  Would remove: upstream-formula-8b19206b932fc9db-ca-certificates.json
+  Would remove: upstream-formula-8b19206b932fc9db-readline.json
+  Would remove: upstream-formula-8b19206b932fc9db-zstd.json
+  Would remove: upstream-registry.json
+  Would remove: upstream-formula-8b19206b932fc9db-libuv.json
+  Would remove: upstream-formula-8b19206b932fc9db-sqlite.json
+  Would remove: upstream-formula-8b19206b932fc9db-c-ares.json
+  Would remove: upstream-registry.json.idx.v1
+  Would remove: upstream-formula-8b19206b932fc9db-fmt.json
+  Would remove: upstream-formula-8b19206b932fc9db-xz.json
+  Would remove: _formula_list.json.idx.v5
+  Would remove: upstream-formula-8b19206b932fc9db-nbytes.json
+  Would remove: upstream-formula-8b19206b932fc9db-lz4.json
+  Would remove: upstream-formula-8b19206b932fc9db-expat.json
+  Checking token cache...
+  Would remove: homebrew_core_sl
+  Checking tmp files...
+  Checking orphaned entries...
+  Would remove orphaned blob: 2e48bc5d316d859aa74429f471501726e7dccb4ffcb4e3ab1e36d6fa7defe254
+  Would remove orphaned blob: dd5a747d4ca4d1800968d3e1c7d4d44039a1366b49e890fbb6644d9d9ff3ebb1
+  Would remove orphaned blob: 99c2620dc9fe4058ba790fd445adf4160f5201ef2ad2abae5b9d90b707684f26
+  Would remove orphaned store entry: 99c2620dc9fe4058ba790fd445adf4160f5201ef2ad2abae5b9d90b707684f26
+
+==> Would reclaim 41.4 MB
+    (run with --prune-kegs to also remove phantom DB entries flagged by `nb doctor`)

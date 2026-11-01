@@ -1,0 +1,2 @@
+==> Auto-update is not installed, not enabled
+    Schedule: /Users/rex/Library/LaunchAgents/ai.trilok.nanobrew.autoupdate.plist

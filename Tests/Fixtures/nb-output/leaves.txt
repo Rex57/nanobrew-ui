@@ -1,0 +1,10 @@
+xcodegen 2.46.0
+smartmontools 7.5
+wireshark 4.6.9
+zig 0.17.0
+rtk 1.1.0
+python@3.15 3.15.2
+ffmpeg-full 9.0.2_1
+uv 0.13.6
+node 26.13.0_2
+python@3.14 3.14.10

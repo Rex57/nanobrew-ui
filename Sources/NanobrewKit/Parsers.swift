@@ -120,3 +120,23 @@ public struct Service: Equatable, Hashable, Sendable {
         }
     }
 }
+
+/// `nb autoupdate status` (nanobrew main.zig:3698-3700): `==> Auto-update is [not ]installed, [not ]enabled`.
+public struct AutoupdateStatus: Equatable, Sendable {
+    public var installed: Bool
+    public var enabled: Bool
+
+    public init(installed: Bool, enabled: Bool) {
+        self.installed = installed
+        self.enabled = enabled
+    }
+
+    public static func parse(_ lines: [String]) -> AutoupdateStatus? {
+        for line in lines {
+            if let m = line.wholeMatch(of: /==> Auto-update is (not )?installed, (not )?enabled/) {
+                return AutoupdateStatus(installed: m.1 == nil, enabled: m.2 == nil)
+            }
+        }
+        return nil
+    }
+}
