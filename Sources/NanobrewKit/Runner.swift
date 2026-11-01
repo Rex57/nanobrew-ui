@@ -3,8 +3,8 @@ import Foundation
 /// One nb run: started at an absolute path with an argv list (never a shell), in its own process group.
 public final class NBProcess: @unchecked Sendable {
     public let pid: pid_t
-    /// stdout and stderr lines, ANSI codes removed. The stream ends after the process exits.
-    public let lines: AsyncStream<String>
+    /// stdout and stderr lines, ANSI codes removed, one batch per read. The stream ends after the process exits.
+    public let lines: AsyncStream<[String]>
     private let lock = NSLock()
     private var waitStatus: Int32 = 0
     private var cancelled = false
@@ -36,22 +36,22 @@ public final class NBProcess: @unchecked Sendable {
         }
         self.pid = pid
 
-        let (stream, continuation) = AsyncStream<String>.makeStream()
+        let (stream, continuation) = AsyncStream<[String]>.makeStream()
         lines = stream
         let readFD = fds[0]
         Thread.detachNewThread { [self] in
             var pending = Data()
-            var buffer = [UInt8](repeating: 0, count: 4096)
+            var buffer = [UInt8](repeating: 0, count: 65536)
             while true {
                 let n = read(readFD, &buffer, buffer.count)
                 if n <= 0 { break }
                 pending.append(contentsOf: buffer[0..<n])
-                while let newline = pending.firstIndex(of: 10) {
-                    continuation.yield(Self.clean(pending[pending.startIndex..<newline]))
-                    pending.removeSubrange(pending.startIndex...newline)
-                }
+                guard let last = pending.lastIndex(of: 10) else { continue }
+                let complete = pending[pending.startIndex..<last]
+                continuation.yield(complete.split(separator: 10, omittingEmptySubsequences: false).map(Self.clean))
+                pending.removeSubrange(pending.startIndex...last)
             }
-            if !pending.isEmpty { continuation.yield(Self.clean(pending)) }
+            if !pending.isEmpty { continuation.yield([Self.clean(pending)]) }
             close(readFD)
             var status: Int32 = 0
             while waitpid(self.pid, &status, 0) == -1 && errno == EINTR {}

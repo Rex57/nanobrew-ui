@@ -14,6 +14,8 @@ public final class AppModel {
     /// The changing command that runs now, and the changing commands that wait for their turn.
     public private(set) var running: NBCommand?
     public private(set) var waiting: [NBCommand] = []
+    /// Every command that runs now, read-only ones too.
+    public private(set) var inProgress: [NBCommand] = []
     private var processes: [NBProcess] = []
     private var lastChange: Task<Void, Never>?
 
@@ -76,8 +78,10 @@ public final class AppModel {
             return
         }
         processes.append(process)
-        for await line in process.lines { console.append(line) }
+        inProgress.append(command)
+        for await batch in process.lines { console.append(contentsOf: batch) }
         processes.removeAll { $0 === process }
+        inProgress.remove(at: inProgress.firstIndex(of: command)!)
         if process.wasCancelled {
             console.append("Cancelled: \(command.title)")
         } else if let code = process.exitCode, code == 0 {

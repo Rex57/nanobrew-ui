@@ -73,7 +73,7 @@ struct MaintenanceView: View {
 
     var body: some View {
         Form {
-            Button("Doctor") { model.run(.doctor) }
+            Button("Doctor") { model.run(.doctor) }.disabled(model.inProgress.contains(.doctor))
         }
         .formStyle(.grouped)
     }
