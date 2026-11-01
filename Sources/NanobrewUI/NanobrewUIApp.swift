@@ -123,14 +123,17 @@ struct ContentView: View {
                     VStack(spacing: 0) {
                         VStack(spacing: 0) {
                             if model.restartOffered {
-                                HStack {
-                                    Text("Restart to use the new version")
-                                    Button("Restart", action: relaunch)
+                                HStack(spacing: 12) {
+                                    Text("Restart to use the new version").foregroundStyle(Theme.amberText)
+                                    Button("Restart", action: relaunch).buttonStyle(OutlinedButtonStyle())
                                 }
-                                .padding(8).frame(maxWidth: .infinity, alignment: .leading).background(.yellow.opacity(0.2))
+                                .font(.system(size: 13, weight: .medium))
+                                .padding(.horizontal, 24).padding(.vertical, 8)
+                                .frame(maxWidth: .infinity, alignment: .leading).background(Theme.amberBg)
                             }
                             if let error = model.stateError {
-                                Text(error).foregroundStyle(.red).padding(8).frame(maxWidth: .infinity, alignment: .leading)
+                                Text(error).font(.system(size: 13)).foregroundStyle(Theme.negative).textSelection(.enabled)
+                                    .padding(.horizontal, 24).padding(.vertical, 8).frame(maxWidth: .infinity, alignment: .leading)
                             }
                             if model.notInstalled && section != .settings {
                                 NotInstalledView()
@@ -221,14 +224,16 @@ struct ContentView: View {
 /// D25: the install command as selectable text; Cmd-R checks again.
 struct NotInstalledView: View {
     var body: some View {
-        VStack(spacing: 12) {
-            Text("nanobrew is not installed").font(.title2)
-            Text("Install it in Terminal:")
+        VStack(alignment: .leading, spacing: 16) {
+            ScreenTitle(title: "nanobrew is not installed") { Text("Install it in Terminal, then press ⌘R.") }
             Text(verbatim: "curl -fsSL https://nanobrew.trilok.ai/install | bash")
-                .font(.system(.body, design: .monospaced)).textSelection(.enabled)
-            Text("Then press ⌘R. If nb is in another place, set its path in Settings.").foregroundStyle(.secondary)
+                .font(.system(size: 12, design: .monospaced)).foregroundStyle(Theme.text).textSelection(.enabled)
+                .padding(.horizontal, 12).padding(.vertical, 10)
+                .background(Theme.raised, in: RoundedRectangle(cornerRadius: 8))
+            Text("If nb is in another place, set its path in Settings.").font(.system(size: 13)).foregroundStyle(Theme.muted)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 
@@ -236,15 +241,18 @@ struct NotSetUpView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        VStack(spacing: 12) {
-            Text("nanobrew is not set up").font(.title2)
-            Text("Set-up runs nb init as administrator; macOS asks for your password.")
+        VStack(alignment: .leading, spacing: 16) {
+            ScreenTitle(title: "nanobrew is not set up") {
+                Text("Set-up runs nb init as administrator; macOS asks for your password.")
+            }
             Button("Set up nanobrew") {
                 if let nb = model.nbPath { model.request(.initNanobrew(nbPath: nb)) }
             }
+            .buttonStyle(PrimaryButtonStyle())
             .disabled(model.askBeforeQuit)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 

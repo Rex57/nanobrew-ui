@@ -238,7 +238,7 @@ public final class AppModel {
         }
         outdatedChecked = true
         updatesCount = outdatedPackages.isEmpty ? nil : outdatedPackages.count
-        guard report, let snapshot else { return }
+        guard report, outdatedError == nil, let snapshot else { return }
         status = CommandStatus(kind: .success, text: "Checked \(snapshot.formulae.count + snapshot.casks.count) packages in "
                                + formatDuration(now() - start))
     }

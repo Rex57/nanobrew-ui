@@ -137,6 +137,12 @@ import Testing
         #expect(model.status?.kind == .skipped)
     }
 
+    @Test func noCheckedStatusWithoutNb() async {
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nil)
+        await model.refresh()
+        #expect(model.status == nil)
+    }
+
     @Test func refreshReadsTheStateAndChecksOutdated() async throws {
         let nb = try FakeNB()
         let model = AppModel(statePath: fixture("state.json"), nbPath: nb.path, now: StepClock(.milliseconds(7)).now)
