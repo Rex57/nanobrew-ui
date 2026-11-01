@@ -24,14 +24,16 @@ enum Theme {
     static let onPrimary = pair(0xffffff, 0x000000)
     static let pillBg = pair(0xebedee, 0x262626)
     static let pillInk = pair(0x353736, 0xd4d4d4)
+    /// Behind a dialog: #131416 at 28% on light, black at 50% on dark.
+    static let scrim = pair(0x131416, 0x000000, alpha: (0.28, 0.5))
 
-    private static func pair(_ light: UInt32, _ dark: UInt32) -> Color {
-        func color(_ hex: UInt32) -> NSColor {
+    private static func pair(_ light: UInt32, _ dark: UInt32, alpha: (CGFloat, CGFloat) = (1, 1)) -> Color {
+        func color(_ hex: UInt32, _ alpha: CGFloat) -> NSColor {
             NSColor(srgbRed: CGFloat(hex >> 16 & 0xff) / 255, green: CGFloat(hex >> 8 & 0xff) / 255,
-                    blue: CGFloat(hex & 0xff) / 255, alpha: 1)
+                    blue: CGFloat(hex & 0xff) / 255, alpha: alpha)
         }
         return Color(nsColor: NSColor(name: nil) {
-            $0.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? color(dark) : color(light)
+            $0.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? color(dark, alpha.1) : color(light, alpha.0)
         })
     }
 }
@@ -172,10 +174,11 @@ struct TextButtonStyle: ButtonStyle {
 /// The neutral grey pill ("Pinned", "Installed").
 struct Pill: View {
     let text: String
+    var height: CGFloat = 20
 
     var body: some View {
         Text(text).font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.pillInk)
-            .padding(.horizontal, 8).frame(height: 20)
+            .padding(.horizontal, 8).frame(height: height)
             .background(Theme.pillBg, in: RoundedRectangle(cornerRadius: 4))
     }
 }

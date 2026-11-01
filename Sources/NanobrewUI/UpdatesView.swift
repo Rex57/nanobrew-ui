@@ -6,7 +6,8 @@ struct UpdatesView: View {
     @Environment(AppModel.self) private var model
     /// The text of the top-bar search field.
     let filter: String
-    @State private var reinstalling: OutdatedPackage?
+    /// The row whose Reinstall dialog is open; the dialog belongs to the window's root (ContentView).
+    @Binding var reinstalling: OutdatedPackage?
 
     /// One source with the sidebar count and Installed: the model's last outdated check.
     private var rows: [OutdatedPackage]? { model.outdatedChecked && model.outdatedError == nil ? model.outdatedPackages : nil }
@@ -58,7 +59,6 @@ struct UpdatesView: View {
         }
         .padding(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .overlay { if let reinstalling { ReinstallDialog(row: reinstalling) { self.reinstalling = nil } } }
     }
 
     /// "4 updates: 2 ready, 1 pinned, 1 needs a reinstall"; parts at 0 are left out.
@@ -66,7 +66,7 @@ struct UpdatesView: View {
         guard let rows, !rows.isEmpty else { return rows == nil ? " " : "Nothing to upgrade" }
         let ready = model.readyUpdates(rows).count
         let pinned = rows.filter(\.pinned).count
-        let reinstall = rows.filter { !$0.pinned && model.verdict(for: $0) != nil }.count
+        let reinstall = rows.count - ready - pinned
         let parts = [ready > 0 ? "\(ready) ready" : nil, pinned > 0 ? "\(pinned) pinned" : nil,
                      reinstall > 0 ? "\(reinstall) \(reinstall == 1 ? "needs" : "need") a reinstall" : nil]
         return "\(rows.count) \(rows.count == 1 ? "update" : "updates"): " + parts.compactMap { $0 }.joined(separator: ", ")
@@ -79,7 +79,7 @@ struct UpdatesView: View {
                          from: Text(row.installed).foregroundStyle(Theme.muted),
                          to: Text(row.latest).fontWeight(.medium).foregroundStyle(row.pinned ? Theme.muted : Theme.amberText)) {
             if row.pinned {
-                Pill(text: "Pinned, skipped")
+                Pill(text: "Pinned, skipped", height: 22)
             } else if let reason {
                 HStack(spacing: 6) {
                     IconView(icon: .triangleAlert, size: 14)
@@ -137,7 +137,6 @@ struct UpdateRow<Status: View, Action: View>: View {
 /// is the default; "Remove and Reinstall" is outlined in the negative colour.
 struct ReinstallDialog: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.colorScheme) private var scheme
     let row: OutdatedPackage
     let close: () -> Void
 
@@ -150,42 +149,40 @@ struct ReinstallDialog: View {
     }
 
     var body: some View {
-        ZStack(alignment: .top) {
-            // The mockup's scrim: #131416 at 28% on light, black at 50% on dark.
-            (scheme == .dark ? Color.black.opacity(0.5) : Theme.text.opacity(0.28)).onTapGesture(perform: close)
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 10) {
-                    IconView(icon: .triangleAlert, size: 20).foregroundStyle(Theme.amber)
-                    Text("Reinstall \(row.name)?").font(.system(size: 16, weight: .semibold))
-                }
-                Text(why + " Reinstall removes \(row.name) \(row.installed) first, then installs \(row.latest).")
-                Text("If the install fails, for example with no network, \(row.name) stays removed until you install it "
-                     + "again. Your settings in ~/Library stay.")
-                Text("Quit \(row.name) before you continue.").fontWeight(.semibold)
-                HStack(spacing: 8) {
-                    Spacer()
-                    Button("Remove and Reinstall") {
-                        close()
-                        model.reinstall(row.name)
-                    }
-                    .buttonStyle(OutlinedButtonStyle(color: Theme.negative, border: Theme.negative, height: 32))
-                    Button("Cancel", action: close)
-                        .buttonStyle(PrimaryButtonStyle())
-                        .keyboardShortcut(.defaultAction)
-                    Button("", action: close).keyboardShortcut(.cancelAction).opacity(0).frame(width: 0)
-                }
-                .padding(.top, 4)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                IconView(icon: .triangleAlert, size: 20).foregroundStyle(Theme.amber)
+                Text("Reinstall \(row.name)?").font(.system(size: 16, weight: .semibold))
             }
-            .font(.system(size: 13)).lineSpacing(4)
-            .fixedSize(horizontal: false, vertical: true)
-            .foregroundStyle(Theme.text)
-            .padding(EdgeInsets(top: 20, leading: 20, bottom: 16, trailing: 20))
-            .frame(width: 460)
-            .background(Theme.sheet, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.border))
-            .shadow(color: .black.opacity(0.22), radius: 20, y: 16)
-            .padding(.top, 84)
+            Text(why + " Reinstall removes \(row.name) \(row.installed) first, then installs \(row.latest).")
+            Text("If the install fails, for example with no network, \(row.name) stays removed until you install it "
+                 + "again. Your settings in ~/Library stay.")
+            Text("Quit \(row.name) before you continue.").fontWeight(.semibold)
+            HStack(spacing: 8) {
+                Spacer()
+                Button("Remove and Reinstall") {
+                    close()
+                    model.reinstall(row.name)
+                }
+                .buttonStyle(OutlinedButtonStyle(color: Theme.negative, border: Theme.negative, height: 32))
+                Button("Cancel", action: close)
+                    .buttonStyle(PrimaryButtonStyle())
+                    .keyboardShortcut(.defaultAction)
+                Button("", action: close).keyboardShortcut(.cancelAction).opacity(0).frame(width: 0)
+            }
+            .padding(.top, 4)
         }
+        .font(.system(size: 13)).lineSpacing(4)
+        .fixedSize(horizontal: false, vertical: true)
+        .foregroundStyle(Theme.text)
+        .padding(EdgeInsets(top: 20, leading: 20, bottom: 16, trailing: 20))
+        .frame(width: 460)
+        .background(Theme.sheet, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.border))
+        .shadow(color: .black.opacity(0.22), radius: 20, y: 16)
+        .padding(.top, 132)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background { Theme.scrim.contentShape(Rectangle()).onTapGesture(perform: close) }
         .accessibilityAddTraits(.isModal)
     }
 }

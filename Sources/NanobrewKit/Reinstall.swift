@@ -38,11 +38,13 @@ extension AppModel {
         for skip in skips {
             defaults.set(["installed": skip.installed, "reason": skip.reason], forKey: Self.verdictKey(skip.token))
         }
+        if !skips.isEmpty { verdictsRecorded += 1 }
     }
 
     /// nb's reason when it skipped this cask, at this installed version, as unsupported; none once the installed
     /// version changed (an upgrade or a reinstall). A read never deletes: the next skip of the token overwrites it.
     public func verdict(for row: OutdatedPackage) -> String? {
+        _ = verdictsRecorded
         guard row.isCask, let saved = defaults.dictionary(forKey: Self.verdictKey(row.name)) as? [String: String],
               saved["installed"] == row.installed else { return nil }
         return saved["reason"]

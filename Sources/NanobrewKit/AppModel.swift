@@ -48,6 +48,9 @@ public final class AppModel {
     private let now: @MainActor () -> ContinuousClock.Instant
     /// The app's own preferences: the Reinstall verdicts (DD15).
     let defaults: UserDefaults
+    /// Counts the verdicts recorded: a view that reads a verdict redraws when one is recorded (UserDefaults is
+    /// not observed, and an outdated check with the same rows does not notify).
+    var verdictsRecorded = 0
 
     /// A line in the console and a failure in the status line that is not a command's own result.
     func reportFailure(_ text: String) {

@@ -95,6 +95,8 @@ struct ContentView: View {
     /// The top-bar search field; each section that has one reads it, and a section change clears it.
     @State private var query = ""
     @FocusState private var searchFocused: Bool
+    /// The Updates row whose Reinstall dialog is open: it covers the whole window, as in Reinstall.dc.html.
+    @State private var reinstalling: OutdatedPackage?
 
     var body: some View {
         HStack(spacing: 0) {
@@ -153,6 +155,7 @@ struct ContentView: View {
             }
         }
         .background(Theme.frame)
+        .overlay { if let reinstalling { ReinstallDialog(row: reinstalling) { self.reinstalling = nil } } }
         .ignoresSafeArea()
         .task { await model.checkOutdated(report: true) }
         .onChange(of: section) { query = "" }
@@ -208,7 +211,7 @@ struct ContentView: View {
     @ViewBuilder private var sectionView: some View {
         switch section {
         case .installed, nil: InstalledView(filter: query, section: $section)
-        case .updates: UpdatesView(filter: query)
+        case .updates: UpdatesView(filter: query, reinstalling: $reinstalling)
         case .discover: DiscoverView()
         case .services: ServicesView()
         case .maintenance: MaintenanceView()
