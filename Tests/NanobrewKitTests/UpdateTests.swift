@@ -23,7 +23,6 @@ import Testing
         #expect(NBCommand.upgrade("node") == NBCommand(args: ["upgrade", "node"], changes: true))
         #expect(NBCommand.upgradeCask("puremac") == NBCommand(args: ["upgrade", "--cask", "puremac"], changes: true))
         #expect(NBCommand.upgradeAll == NBCommand(args: ["upgrade"], changes: true))
-        #expect(NBCommand.upgradeAllCasks == NBCommand(args: ["upgrade", "--cask"], changes: true))
     }
 }
 
@@ -55,7 +54,11 @@ import Testing
     @Test func restartOfferAfterASuccessfulUpgradeAll() async throws {
         let nb = try FakeNB()
         let model = try selfUpgradeModel(nb)
-        await model.run(.upgradeAllCasks).value
+        // Upgrade All Casks as the app sends it: the ready casks by name.
+        let rows = try await model.outdated()
+        let command = try #require(model.upgradeAllCasks(rows))
+        #expect(command == NBCommand(args: ["upgrade", "--cask", "puremac", "nanobrew-ui"], changes: true))
+        await model.run(command).value
         #expect(model.restartOffered)
     }
 
