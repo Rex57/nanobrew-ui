@@ -1,0 +1,195 @@
+{
+  "kegs": [
+    {
+      "name": "bzip2",
+      "version": "1.0.8",
+      "sha256": "e823d1ae6f9409cd524669dfe94dd9922e5661998be5ae416b237aa4713c8d54",
+      "pinned": false,
+      "installed_at": 1782796697,
+      "probe_success": false,
+      "probed_at": 0,
+      "probe_schema": 0,
+      "probe_platform": 0
+    },
+    {
+      "name": "ncurses",
+      "version": "6.6",
+      "sha256": "b43443ba3c3c8728e79413c7c3fed4a0eb293bd77c8492c1ec4c5d05233a97f1",
+      "pinned": false,
+      "installed_at": 1782796697,
+      "probe_success": false,
+      "probed_at": 0,
+      "probe_schema": 0,
+      "probe_platform": 0
+    },
+    {
+      "name": "libedit",
+      "version": "20260512-3.1",
+      "sha256": "5c492117cec71184a93a09376a1aee72909f40c335a81646c0f74f38803544e1",
+      "pinned": false,
+      "installed_at": 1782796697,
+      "probe_success": false,
+      "probed_at": 0,
+      "probe_schema": 0,
+      "probe_platform": 0
+    },
+    {
+      "name": "xcodegen",
+      "version": "2.46.0",
+      "sha256": "f8763683b5538a556ac4de3a86132558a086fdd976ac4088ff87d09fae1982b5",
+      "pinned": false,
+      "installed_at": 1784510732,
+      "probe_success": false,
+      "probed_at": 0,
+      "probe_schema": 0,
+      "probe_platform": 0
+    },
+    {
+      "name": "libffi",
+      "version": "3.8.0",
+      "sha256": "a36f51cb6041fb1c5e70a6300a05a58dfc3b3503e621f83198731f1eaed63f2f",
+      "pinned": true,
+      "installed_at": 1786324535,
+      "probe_success": false,
+      "probed_at": 1786324535,
+      "probe_schema": 3,
+      "probe_platform": 1
+    },
+    {
+      "name": "libarchive",
+      "version": "3.8.11",
+      "sha256": "f9daa6da55d53558557ea005b19786be9a2153cf4cad43f5d0439c9d35ab7144",
+      "pinned": false,
+      "installed_at": 1793511304,
+      "probe_success": true,
+      "probed_at": 1793511304,
+      "probe_schema": 3,
+      "probe_platform": 1
+    },
+    {
+      "name": "node",
+      "version": "26.13.0_2",
+      "sha256": "29930aa85327fddd18e62d99158ffa735364f6a53b3ebc924775f6b27303613f",
+      "pinned": false,
+      "installed_at": 1793511319,
+      "probe_success": true,
+      "probed_at": 1793511319,
+      "probe_schema": 3,
+      "probe_platform": 1
+    }
+  ],
+  "casks": [
+    {
+      "token": "clickhouse",
+      "canonical_token": "clickhouse",
+      "version": "26.10.2.103-stable",
+      "sha256": "992a893f01bba4419a50b50d2ce4557e9e0c2f9f7f3ae344dd5a4361cb81ba88",
+      "probe_success": true,
+      "probed_at": 1792980317,
+      "probe_schema": 3,
+      "probe_platform": 1,
+      "apps": [],
+      "binaries": [
+        "clickhouse"
+      ]
+    },
+    {
+      "token": "puremac",
+      "canonical_token": "puremac",
+      "version": "3.2.0",
+      "sha256": "5ba35fde0b60a645d61edacc8a8b8f198625ea91ac3750c60d41efe22a240a50",
+      "probe_success": true,
+      "probed_at": 1793258237,
+      "probe_schema": 3,
+      "probe_platform": 1,
+      "apps": [
+        "PureMac.app"
+      ],
+      "binaries": []
+    },
+    {
+      "token": "codex",
+      "canonical_token": "codex",
+      "version": "0.166.0",
+      "sha256": "55a440cb579f970abe7c79ab181e54b0ea4c419be99f333bbd868eebac9c21f0",
+      "probe_success": true,
+      "probed_at": 1793508982,
+      "probe_schema": 3,
+      "probe_platform": 1,
+      "apps": [],
+      "binaries": [
+        "codex"
+      ]
+    },
+    {
+      "token": "nanobrew-ui",
+      "canonical_token": "nanobrew-ui",
+      "version": "1.0.1",
+      "sha256": "5ba35fde0b60a645d61edacc8a8b8f198625ea91ac3750c60d41efe22a240a50",
+      "probe_success": true,
+      "probed_at": 1793258237,
+      "probe_schema": 3,
+      "probe_platform": 1,
+      "apps": [
+        "Nanobrew UI.app"
+      ],
+      "binaries": []
+    }
+  ],
+  "history": {
+    "node": [
+      {
+        "version": "26.9.0",
+        "sha256": "af32e7b3770a4baed79dc4b8cb5af8acea5f772e7f869398233b28ce6c938e6b",
+        "installed_at": 1790042677
+      },
+      {
+        "version": "26.10.0_1",
+        "sha256": "a0e40226c78b59e15d17b381fc1b314cd1a3fee5999ea9659b217b28a88dafa5",
+        "installed_at": 1790302011
+      },
+      {
+        "version": "26.12.0",
+        "sha256": "0a15f8924e9c9c4bdfbbf7f8ce0c9cf4f6364c84e09142885c86be134dea3637",
+        "installed_at": 1792483964
+      },
+      {
+        "version": "26.12.1_1",
+        "sha256": "93e19da2ee93d9bc2498e2c21c5ab30b61855afa2b845c9ca41b86d808c9885f",
+        "installed_at": 1792980495
+      }
+    ],
+    "libarchive": [
+      {
+        "version": "3.8.9",
+        "sha256": "0d24892c4031758a148bece7e41b82cc8be8c8af020eb379d43a98cf984ba26d",
+        "installed_at": 1791347679
+      },
+      {
+        "version": "3.8.10",
+        "sha256": "18b30e3f5753983dc16c61cc3bb127ce02818085b8c6483f3d720dbfe78d5aaf",
+        "installed_at": 1792483976
+      }
+    ],
+    "libffi": [
+      {
+        "version": "3.6.0",
+        "sha256": "1f96862811dfc633265945abd4ecf85c9c7e7bf255824d12578965e2551e53f2",
+        "installed_at": 1782796697
+      },
+      {
+        "version": "3.7.1",
+        "sha256": "1f96862811dfc633265945abd4ecf85c9c7e7bf255824d12578965e2551e53f2",
+        "installed_at": 1783905465
+      }
+    ],
+    "xcodegen": [
+      {
+        "version": "2.45.4",
+        "sha256": "f8763683b5538a556ac4de3a86132558a086fdd976ac4088ff87d09fae1982b5",
+        "installed_at": 1782380324
+      }
+    ]
+  },
+  "deb_packages": []
+}

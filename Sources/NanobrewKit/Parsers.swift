@@ -75,3 +75,28 @@ public struct SearchResult: Equatable, Hashable, Sendable {
         }
     }
 }
+
+/// One row of `nb outdated` (nanobrew main.zig runOutdated): `name (old -> new)[ (cask)][ [pinned]]`.
+public struct OutdatedPackage: Equatable, Hashable, Sendable {
+    public var name: String
+    public var installed: String
+    public var latest: String
+    public var isCask: Bool
+    public var pinned: Bool
+
+    public init(name: String, installed: String, latest: String, isCask: Bool, pinned: Bool) {
+        self.name = name
+        self.installed = installed
+        self.latest = latest
+        self.isCask = isCask
+        self.pinned = pinned
+    }
+
+    public static func parse(_ lines: [String]) -> [OutdatedPackage] {
+        lines.compactMap { line in
+            guard let m = line.wholeMatch(of: /(\S+) \((.+) -> (.+?)\)( \(cask\))?( \[pinned\])?/) else { return nil }
+            return OutdatedPackage(name: String(m.1), installed: String(m.2), latest: String(m.3),
+                                   isCask: m.4 != nil, pinned: m.5 != nil)
+        }
+    }
+}

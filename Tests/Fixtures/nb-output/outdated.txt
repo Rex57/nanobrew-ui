@@ -1,0 +1,7 @@
+==> Checking for outdated packages...
+==> Checking 10 package(s) for updates...
+node (26.13.0_2 -> 26.14.0)
+libffi (3.8.0 -> 3.9.0) [pinned]
+puremac (3.2.0 -> 3.3.0) (cask)
+
+==> 3 outdated package(s)

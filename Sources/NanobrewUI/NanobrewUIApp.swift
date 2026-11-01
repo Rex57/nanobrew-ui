@@ -56,6 +56,7 @@ struct NanobrewUIApp: App {
 
 enum Section: String, CaseIterable, Identifiable {
     case installed = "Installed"
+    case updates = "Updates"
     case discover = "Discover"
     case maintenance = "Maintenance"
     var id: String { rawValue }
@@ -71,11 +72,19 @@ struct ContentView: View {
         } detail: {
             VSplitView {
                 VStack(spacing: 0) {
+                    if model.restartOffered {
+                        HStack {
+                            Text("Restart to use the new version")
+                            Button("Restart", action: relaunch)
+                        }
+                        .padding(8).frame(maxWidth: .infinity, alignment: .leading).background(.yellow.opacity(0.2))
+                    }
                     if let error = model.stateError {
                         Text(error).foregroundStyle(.red).padding(8).frame(maxWidth: .infinity, alignment: .leading)
                     }
                     switch section {
                     case .installed, nil: InstalledView()
+                    case .updates: UpdatesView()
                     case .discover: DiscoverView()
                     case .maintenance: MaintenanceView()
                     }
@@ -103,4 +112,14 @@ struct MaintenanceView: View {
         }
         .formStyle(.grouped)
     }
+}
+
+/// Opens the app bundle again as a new copy (the upgraded one nb put in place) and quits this one.
+@MainActor func relaunch() {
+    let open = Process()
+    open.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+    open.arguments = ["-n", Bundle.main.bundlePath]
+    try? open.run()
+    open.waitUntilExit()
+    NSApp.terminate(nil)
 }

@@ -40,5 +40,11 @@ public struct NBCommand: Equatable, Hashable, Sendable {
         NBCommand(args: ["install"] + (cask ? ["--cask"] : []) + (shims ? ["--shims"] : [])
             + (trustedOnly ? ["--trusted-only"] : []) + [trusted ? name + "@trusted" : name], changes: true)
     }
+    public static let outdated = NBCommand(args: ["outdated"], changes: false)
+    public static let outdatedCasks = NBCommand(args: ["outdated", "--cask"], changes: false)
+    public static func upgrade(_ name: String) -> NBCommand { NBCommand(args: ["upgrade", name], changes: true) }
+    public static func upgradeCask(_ token: String) -> NBCommand { NBCommand(args: ["upgrade", "--cask", token], changes: true) }
+    public static let upgradeAll = NBCommand(args: ["upgrade"], changes: true)
+    public static let upgradeAllCasks = NBCommand(args: ["upgrade", "--cask"], changes: true)
     public static func depsTree(_ name: String) -> NBCommand { NBCommand(args: ["deps", "--tree", name], changes: false) }
 }

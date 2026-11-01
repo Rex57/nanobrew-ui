@@ -5,6 +5,10 @@ import Observation
 @MainActor @Observable
 public final class AppModel {
     public let statePath: String
+    /// The version of the running app; nil in tests that do not care.
+    public let appVersion: String?
+    /// True after a successful upgrade replaced Nanobrew UI itself (D20).
+    public private(set) var restartOffered = false
     public private(set) var nbPath: String?
     public private(set) var snapshot: StateSnapshot?
     public private(set) var notSetUp = false
@@ -25,14 +29,16 @@ public final class AppModel {
     public var askBeforeQuit: Bool { running != nil || !waiting.isEmpty }
     public var canCancel: Bool { !processes.isEmpty }
 
-    public init(statePath: String, nbPath: String?) {
+    public init(statePath: String, nbPath: String?, appVersion: String? = nil) {
         self.statePath = statePath
         self.nbPath = nbPath
+        self.appVersion = appVersion
     }
 
     /// The model the app starts with: launch arguments first, then the default places.
     public static func fromLaunch() -> AppModel {
-        AppModel(statePath: launchArgument("NBStatePath") ?? StateReader.defaultPath, nbPath: NBLocator.locate())
+        AppModel(statePath: launchArgument("NBStatePath") ?? StateReader.defaultPath, nbPath: NBLocator.locate(),
+                 appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String)
     }
 
     /// Reads state.json again. A broken file keeps the last good snapshot.
@@ -98,6 +104,13 @@ public final class AppModel {
         SearchResult.parse(await capture(.search(query)).lines)
     }
 
+    /// Formulae from `nb outdated`, casks from `nb outdated --cask`.
+    public func outdated() async -> [OutdatedPackage] {
+        async let formulae = capture(.outdated)
+        async let casks = capture(.outdatedCasks)
+        return await OutdatedPackage.parse(formulae.lines).filter { !$0.isCask } + OutdatedPackage.parse(casks.lines)
+    }
+
     /// The detail pane of a package: parsed info (or nb's error text) and, for a formula, the dependency tree.
     public func detail(name: String, cask: Bool) async -> PackageDetail {
         let (lines, code) = await capture(cask ? .caskInfo(name) : .info(name))
@@ -134,5 +147,15 @@ public final class AppModel {
             console.append("Failed: \(command.title) (exit code \(process.exitCode.map(String.init) ?? "signal"))")
         }
         reload()
+        if !process.wasCancelled, process.exitCode == 0, replacedSelf(command) { restartOffered = true }
+    }
+
+    /// An upgrade of nanobrew-ui (or of everything) after which state.json holds another version than this app.
+    private func replacedSelf(_ command: NBCommand) -> Bool {
+        let token = "nanobrew-ui"
+        guard command.args.first == "upgrade", let appVersion,
+              let installed = snapshot?.casks.first(where: { $0.token == token })?.version else { return false }
+        let names = command.args.dropFirst().filter { !$0.hasPrefix("-") }
+        return (names.isEmpty || names.contains { $0 == token || $0.hasSuffix("/" + token) }) && installed != appVersion
     }
 }

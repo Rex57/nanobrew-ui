@@ -1,0 +1,6 @@
+==> Checking for outdated packages...
+==> Checking 4 package(s) for updates...
+puremac (3.2.0 -> 3.3.0) (cask)
+nanobrew-ui (1.0.0 -> 1.0.1) (cask)
+
+==> 2 outdated package(s)
