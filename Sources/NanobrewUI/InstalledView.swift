@@ -164,7 +164,10 @@ struct PackageDetailView: View {
         package.cask ? model.snapshot?.casks.contains { $0.token == package.name } == true : formula != nil
     }
     private var update: OutdatedPackage? {
-        model.outdatedPackages.first { $0.name == package.name && $0.isCask == package.cask && !$0.pinned }
+        // No Upgrade primary for a cask nb skips as unsupported (its Reinstall is on Updates).
+        model.outdatedPackages.first {
+            $0.name == package.name && $0.isCask == package.cask && !$0.pinned && model.verdict(for: $0) == nil
+        }
     }
 
     @ViewBuilder private var actions: some View {

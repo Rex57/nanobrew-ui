@@ -47,3 +47,28 @@ import Testing
         #expect(model.updatesCount == nil)
     }
 }
+
+@MainActor @Suite struct OutdatedCheckTests {
+    @Test func aFailedCheckKeepsNbErrorText() async throws {
+        let nb = try FakeNB()
+        try nb.exit("outdated", code: 1)
+        try nb.stderr("outdated", text: "nb: could not open database\n")
+        let model = nb.model()
+        #expect(!model.outdatedChecked)
+        await model.checkOutdated()
+        #expect(model.outdatedChecked)
+        #expect(model.outdatedError == "nb: could not open database")
+        #expect(model.outdatedPackages.isEmpty)
+    }
+
+    @Test func aGoodCheckClearsTheError() async throws {
+        let nb = try FakeNB()
+        try nb.exit("outdated", code: 1)
+        let model = nb.model()
+        await model.checkOutdated()
+        try FileManager.default.removeItem(at: nb.dir.appendingPathComponent("exit-outdated"))
+        await model.checkOutdated()
+        #expect(model.outdatedError == nil)
+        #expect(model.outdatedPackages.map(\.name) == ["node", "libffi", "puremac", "nanobrew-ui"])
+    }
+}

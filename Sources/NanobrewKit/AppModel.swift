@@ -15,8 +15,12 @@ public final class AppModel {
     public private(set) var stateError: String?
     /// The number on Updates in the sidebar: outdated formulae plus casks; nil for 0 or when the check failed.
     public private(set) var updatesCount: Int?
-    /// The rows of the last outdated check (empty when it failed): the status marks of Installed.
+    /// The rows of the last outdated check (empty when it failed): Updates, and the status marks of Installed.
     public private(set) var outdatedPackages: [OutdatedPackage] = []
+    /// nb's error text when the last outdated check failed.
+    public private(set) var outdatedError: String?
+    /// False until the first outdated check has ended.
+    public private(set) var outdatedChecked = false
     /// The console: one line per output line, with a header and an end line per command.
     // shortcut: every line of the session is kept (a few MB at the expected load); cap it if sessions
     // reach tens of MB of output (for example a long-running command left open for days).
@@ -215,7 +219,14 @@ public final class AppModel {
     /// line (launch and Cmd-R), so it does not replace the result of the command that just ended.
     public func checkOutdated(report: Bool = false) async {
         let start = now()
-        outdatedPackages = (try? await outdated()) ?? []
+        do {
+            outdatedPackages = try await outdated()
+            outdatedError = nil
+        } catch {
+            outdatedPackages = []
+            outdatedError = error.localizedDescription
+        }
+        outdatedChecked = true
         updatesCount = outdatedPackages.isEmpty ? nil : outdatedPackages.count
         guard report, let snapshot else { return }
         status = CommandStatus(kind: .success, text: "Checked \(snapshot.formulae.count + snapshot.casks.count) packages in "

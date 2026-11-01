@@ -6,16 +6,18 @@ struct UpdatesView: View {
     @Environment(AppModel.self) private var model
     /// The text of the top-bar search field.
     let filter: String
-    @State private var error: String?
-    @State private var rows: [OutdatedPackage]?
     @State private var reinstalling: OutdatedPackage?
+
+    /// One source with the sidebar count and Installed: the model's last outdated check.
+    private var rows: [OutdatedPackage]? { model.outdatedChecked && model.outdatedError == nil ? model.outdatedPackages : nil }
+    private var error: String? { model.outdatedError }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 16) {
                 ScreenTitle(title: "Updates") { Text(subline) }
                 HStack(spacing: 16) {
-                    Button("Check Again") { Task { await load() } }
+                    Button("Check Again") { Task { await model.checkOutdated(report: true) } }
                     Button("Upgrade All") { model.request(.upgradeAll) }
                         .help("nb upgrade: every outdated formula and cask that nb can upgrade")
                     Button("Upgrade All Casks") { if let command = model.upgradeAllCasks(rows ?? []) { model.request(command) } }
@@ -56,8 +58,6 @@ struct UpdatesView: View {
         }
         .padding(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .task { await load() }
-        .onChange(of: model.running) { _, running in if running == nil { Task { await load() } } }
         .overlay { if let reinstalling { ReinstallDialog(row: reinstalling) { self.reinstalling = nil } } }
     }
 
@@ -107,16 +107,6 @@ struct UpdatesView: View {
         .font(.system(size: 14)).foregroundStyle(Theme.text)
         .frame(height: 52)
         .overlay(alignment: .bottom) { Theme.rule.frame(height: 1) }
-    }
-
-    private func load() async {
-        do {
-            rows = try await model.outdated()
-            error = nil
-        } catch {
-            rows = nil
-            self.error = error.localizedDescription
-        }
     }
 }
 
