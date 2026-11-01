@@ -4,7 +4,8 @@ import SwiftUI
 struct MaintenanceView: View {
     @Environment(AppModel.self) private var model
     @State private var probePackage = ""
-    @State private var dryRunDone = false
+    /// The --prune-kegs setting of the last successful dry run; Clean Up runs only with that same setting.
+    @State private var dryRunFor: Bool?
     @State private var pruneKegs = false
     @State private var autoupdate: AutoupdateStatus?
     @State private var alsoUpgrade = false
@@ -22,21 +23,21 @@ struct MaintenanceView: View {
             }
             SwiftUI.Section("Cleanup") {
                 HStack {
-                    Toggle("Prune old kegs (--prune-kegs)", isOn: $pruneKegs)
-                        .onChange(of: pruneKegs) { dryRunDone = false } // the dry run must match the real run
+                    Toggle("Remove phantom keg entries (--prune-kegs)", isOn: $pruneKegs)
                     Button("Dry Run") {
                         Task {
-                            let dryRun = NBCommand.cleanupDryRun(pruneKegs: pruneKegs)
+                            let prune = pruneKegs // the setting this dry run shows, even if the switch moves meanwhile
+                            let dryRun = NBCommand.cleanupDryRun(pruneKegs: prune)
                             await model.run(dryRun).value
-                            dryRunDone = model.lastRunSucceeded(dryRun) // not after a failure or a cancel
+                            dryRunFor = model.lastRunSucceeded(dryRun) ? prune : nil // not after a failure or a cancel
                         }
                     }
                     Button("Clean Up…") {
-                        dryRunDone = false
+                        dryRunFor = nil
                         model.request(.cleanup(pruneKegs: pruneKegs))
                     }
-                    .disabled(!dryRunDone)
-                    Text(dryRunDone ? "Check the dry run in the console first." : "Run a dry run first.")
+                    .disabled(dryRunFor != pruneKegs)
+                    Text(dryRunFor == pruneKegs ? "Check the dry run in the console first." : "Run a dry run first.")
                         .foregroundStyle(.secondary)
                 }
             }

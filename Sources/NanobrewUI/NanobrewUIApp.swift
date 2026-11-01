@@ -15,7 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard model.askBeforeQuit else { return true }
         let alert = NSAlert()
         alert.messageText = "A command is still running"
-        alert.informativeText = "Quit now and nb may stop half done."
+        alert.informativeText = "nb keeps running in the background until it ends. You will not see its output."
         alert.addButton(withTitle: "Keep Running")
         alert.addButton(withTitle: "Quit")
         return alert.runModal() == .alertSecondButtonReturn
