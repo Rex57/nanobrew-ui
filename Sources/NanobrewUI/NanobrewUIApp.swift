@@ -8,29 +8,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidBecomeActive(_ notification: Notification) { model.checkAgain() }
 
-    private var quitConfirmed = false
     private var closeGuard: CloseGuard?
 
     /// Asks first while a changing command runs or waits; true when the app may quit.
     func mayQuit() -> Bool {
-        guard model.askBeforeQuit, !quitConfirmed else { return true }
+        guard model.askBeforeQuit else { return true }
         let alert = NSAlert()
         alert.messageText = "A command is still running"
         alert.informativeText = "Quit now and nb may stop half done."
         alert.addButton(withTitle: "Keep Running")
         alert.addButton(withTitle: "Quit")
-        quitConfirmed = alert.runModal() == .alertSecondButtonReturn
-        return quitConfirmed
+        return alert.runModal() == .alertSecondButtonReturn
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         mayQuit() ? .terminateNow : .terminateCancel
     }
 
-    /// Closing the window quits the app (D29), so the close asks first too.
+    /// Closing the one main window quits the app (D29): the close becomes a quit, which asks first while a
+    /// changing command runs or waits. The window itself never closes alone, so no "confirmed" state is kept.
     func guardClose(of window: NSWindow) {
         guard closeGuard?.window !== window else { return }
-        closeGuard = CloseGuard(window: window) { [unowned self] in mayQuit() }
+        closeGuard = CloseGuard(window: window) {
+            NSApp.terminate(nil)
+            return false
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
@@ -41,7 +43,8 @@ struct NanobrewUIApp: App {
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
 
     var body: some Scene {
-        WindowGroup("Nanobrew UI") {
+        // One main window (D29): a Window scene has no File > New Window.
+        Window("Nanobrew UI", id: "main") {
             ContentView().environment(delegate.model)
                 .background(WindowReader { delegate.guardClose(of: $0) })
         }
