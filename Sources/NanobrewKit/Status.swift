@@ -18,17 +18,19 @@ public struct CommandStatus: Equatable, Sendable {
                         "unpin": "Unpinned", "link": "Linked", "unlink": "Unlinked", "rollback": "Rolled back",
                         "switch": "Switched to"]
 
-    /// The result of an ended command; `exitCode` nil is a signal.
-    init(command: NBCommand, exitCode: Int32?, cancelled: Bool, duration: Duration) {
+    /// The result of an ended command; `exitCode` nil is a signal. `skipped`: casks nb skipped as unsupported, left
+    /// out of the names and named after the time.
+    init(command: NBCommand, exitCode: Int32?, cancelled: Bool, duration: Duration, skipped: [String] = []) {
         if cancelled {
             self.init(kind: .cancelled, text: "Cancelled: \(command.title)")
         } else if exitCode != 0 {
             self.init(kind: .failure, text: "Failed: \(command.title) (exit code \(exitCode.map(String.init) ?? "signal"))")
         } else {
-            let names = command.args.dropFirst().filter { !$0.hasPrefix("-") }
+            let names = command.args.dropFirst().filter { !$0.hasPrefix("-") && !skipped.contains($0) }
             let verb = command.program == nil ? command.args.first.flatMap { Self.verbs[$0] } : nil
             let what = verb.map { names.isEmpty ? nil : "\($0) \(names.joined(separator: " "))" } ?? nil
-            self.init(kind: .success, text: "\(what ?? "\(command.title) finished") in \(formatDuration(duration))")
+            let skips = skipped.isEmpty ? "" : "; skipped \(skipped.joined(separator: ", ")) (can't upgrade in place)"
+            self.init(kind: .success, text: "\(what ?? "\(command.title) finished") in \(formatDuration(duration))" + skips)
         }
     }
 }

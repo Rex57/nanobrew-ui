@@ -244,9 +244,10 @@ public final class AppModel {
             console.append(contentsOf: batch)
             if command.args.first == "upgrade" { output += batch }
         }
-        record(UnsupportedSkip.parse(output))
+        let skips = UnsupportedSkip.parse(output)
+        record(skips)
         status = CommandStatus(command: command, exitCode: process.wasCancelled ? nil : process.exitCode,
-                               cancelled: process.wasCancelled, duration: now() - start)
+                               cancelled: process.wasCancelled, duration: now() - start, skipped: skips.map(\.token))
         processes.removeAll { $0 === process }
         inProgress.remove(at: inProgress.firstIndex(of: command)!)
         if inProgress.isEmpty, !consolePinned { consoleShown = false }

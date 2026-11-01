@@ -51,6 +51,15 @@ let firefoxReason = "this download format does not support staged upgrades yet"
         #expect(again.verdict(for: firefox) == firefoxReason)
     }
 
+    @Test func theStatusLeavesOutASkippedCaskAndSaysItWasSkipped() async throws {
+        let nb = try FakeNB()
+        let scratch = ScratchDefaults()
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nb.path, now: StepClock(.milliseconds(84)).now,
+                             defaults: scratch.defaults)
+        await model.run(NBCommand(args: ["upgrade", "--cask", "firefox", "puremac"], changes: true)).value
+        #expect(model.status?.text == "Upgraded puremac in 84 ms; skipped firefox (can't upgrade in place)")
+    }
+
     @Test func upgradeReadyAndUpgradeAllCasksLeaveOutPinnedAndUnsupported() async throws {
         let nb = try FakeNB()
         let scratch = ScratchDefaults()
