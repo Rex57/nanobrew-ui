@@ -73,7 +73,7 @@ struct SettingsView: View {
                     TextField("Path to nb", text: $nbPath).themedField(width: 260)
                     Button("Save") { model.saveNBPath(nbPath) }
                 }
-                SettingsRow(title: "Telemetry", description: "nanobrew's anonymous usage reports. Now: "
+                SettingsRow(title: "Telemetry", description: "Anonymous download timings; install outcomes only after On. Now: "
                             + (telemetry.map { $0 ? "on." : "off." } ?? "unknown.")) {
                     Button("On") { model.request(.telemetry(on: true)) }
                     Button("Off") { model.request(.telemetry(on: false)) }
@@ -96,9 +96,9 @@ struct SettingsView: View {
                 .frame(height: 120)
                 .background(Theme.raised, in: RoundedRectangle(cornerRadius: 8))
                 .padding(.vertical, 12)
-                SettingsRow(title: "Trust attest", description: "Writes a verification record of a package, for nanobrew's maintainers to review and sign.") {
+                SettingsRow(title: "Trust attest", description: "Runs the package's probe and writes an attestation for maintainers to review and sign.") {
                     TextField("Package", text: $attestPackage).themedField(width: 140)
-                    Toggle(isOn: $attestCask) { Text("Cask").font(.system(size: 13)) }
+                    Toggle(isOn: $attestCask) { flagLabel("It is a cask", "--cask") }
                     TextField("Output file (optional)", text: $attestOutput).themedField(width: 180)
                     Button("Attest") {
                         model.request(.trustAttest(attestPackage, cask: attestCask, output: attestOutput.isEmpty ? nil : attestOutput))

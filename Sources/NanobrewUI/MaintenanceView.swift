@@ -60,7 +60,7 @@ struct MaintenanceView: View {
                     Button("Where") { model.request(.where(pattern)) }.disabled(pattern.isEmpty)
                 }
                 SettingsRow(title: "Leaves", description: "Lists the packages that nothing else depends on.") {
-                    Toggle(isOn: $leavesTree) { Text("Tree").font(.system(size: 13)) }
+                    Toggle(isOn: $leavesTree) { flagLabel("Show as a tree", "--tree") }
                     Button("Leaves") { model.request(.leaves(tree: leavesTree)) }
                 }
             }
