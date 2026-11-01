@@ -61,8 +61,12 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public static func doctorProbe(_ package: String?) -> NBCommand {
         NBCommand(args: ["doctor", "--probe"] + (package.map { [$0] } ?? []), changes: true)
     }
-    public static let cleanupDryRun = NBCommand(args: ["cleanup", "--dry-run"], changes: false)
-    public static let cleanup = NBCommand(args: ["cleanup"], changes: true, confirmation: .ask)
+    public static func cleanupDryRun(pruneKegs: Bool) -> NBCommand {
+        NBCommand(args: ["cleanup", "--dry-run"] + (pruneKegs ? ["--prune-kegs"] : []), changes: false)
+    }
+    public static func cleanup(pruneKegs: Bool) -> NBCommand {
+        NBCommand(args: ["cleanup"] + (pruneKegs ? ["--prune-kegs"] : []), changes: true, confirmation: .ask)
+    }
     public static let update = NBCommand(args: ["update"], changes: true)
     public static let updateRegistry = NBCommand(args: ["update-registry"], changes: true)
     public enum AutoupdateAction: String, Sendable { case enable, disable, run }

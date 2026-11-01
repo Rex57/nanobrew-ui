@@ -5,6 +5,7 @@ struct MaintenanceView: View {
     @Environment(AppModel.self) private var model
     @State private var probePackage = ""
     @State private var dryRunDone = false
+    @State private var pruneKegs = false
     @State private var autoupdate: AutoupdateStatus?
     @State private var alsoUpgrade = false
     @State private var pattern = ""
@@ -21,15 +22,18 @@ struct MaintenanceView: View {
             }
             SwiftUI.Section("Cleanup") {
                 HStack {
+                    Toggle("Prune old kegs (--prune-kegs)", isOn: $pruneKegs)
+                        .onChange(of: pruneKegs) { dryRunDone = false } // the dry run must match the real run
                     Button("Dry Run") {
                         Task {
-                            await model.run(.cleanupDryRun).value
-                            dryRunDone = true
+                            let dryRun = NBCommand.cleanupDryRun(pruneKegs: pruneKegs)
+                            await model.run(dryRun).value
+                            dryRunDone = model.lastRunSucceeded(dryRun) // not after a failure or a cancel
                         }
                     }
                     Button("Clean Up…") {
                         dryRunDone = false
-                        model.request(.cleanup)
+                        model.request(.cleanup(pruneKegs: pruneKegs))
                     }
                     .disabled(!dryRunDone)
                     Text(dryRunDone ? "Check the dry run in the console first." : "Run a dry run first.")

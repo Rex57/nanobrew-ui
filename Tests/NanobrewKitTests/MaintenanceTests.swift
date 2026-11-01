@@ -6,8 +6,10 @@ import Testing
     @Test func catalogueGivesMaintenanceCommands() {
         #expect(NBCommand.doctorProbe(nil) == NBCommand(args: ["doctor", "--probe"], changes: true))
         #expect(NBCommand.doctorProbe("jq") == NBCommand(args: ["doctor", "--probe", "jq"], changes: true))
-        #expect(NBCommand.cleanupDryRun == NBCommand(args: ["cleanup", "--dry-run"], changes: false))
-        #expect(NBCommand.cleanup == NBCommand(args: ["cleanup"], changes: true, confirmation: .ask))
+        #expect(NBCommand.cleanupDryRun(pruneKegs: false) == NBCommand(args: ["cleanup", "--dry-run"], changes: false))
+        #expect(NBCommand.cleanupDryRun(pruneKegs: true) == NBCommand(args: ["cleanup", "--dry-run", "--prune-kegs"], changes: false))
+        #expect(NBCommand.cleanup(pruneKegs: false) == NBCommand(args: ["cleanup"], changes: true, confirmation: .ask))
+        #expect(NBCommand.cleanup(pruneKegs: true) == NBCommand(args: ["cleanup", "--prune-kegs"], changes: true, confirmation: .ask))
         #expect(NBCommand.update == NBCommand(args: ["update"], changes: true))
         #expect(NBCommand.updateRegistry == NBCommand(args: ["update-registry"], changes: true))
         #expect(NBCommand.autoupdateStatus == NBCommand(args: ["autoupdate", "status"], changes: false))
@@ -34,5 +36,31 @@ import Testing
         await model.run(.where("jq")).value
         #expect(model.console.contains("==> installed matching \"jq\":"))
         #expect(!model.console.contains { $0.contains("\u{1B}") })
+    }
+}
+
+@MainActor @Suite struct LastRunTests {
+    @Test func onlyAnExitZeroCountsAsSucceeded() async throws {
+        let nb = try FakeNB()
+        let model = nb.model()
+        let dryRun = NBCommand.cleanupDryRun(pruneKegs: false)
+        #expect(!model.lastRunSucceeded(dryRun))
+        await model.run(dryRun).value
+        #expect(model.lastRunSucceeded(dryRun))
+        try nb.exit("cleanup", code: 1)
+        await model.run(dryRun).value
+        #expect(!model.lastRunSucceeded(dryRun))
+    }
+
+    @Test func aCancelledRunDidNotSucceed() async throws {
+        let nb = try FakeNB()
+        try nb.wait("cleanup", seconds: 30)
+        let model = nb.model()
+        let dryRun = NBCommand.cleanupDryRun(pruneKegs: false)
+        let task = model.run(dryRun)
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        model.cancel()
+        await task.value
+        #expect(!model.lastRunSucceeded(dryRun))
     }
 }
