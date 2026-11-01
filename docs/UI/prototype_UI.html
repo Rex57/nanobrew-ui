@@ -1,0 +1,1667 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nanobrew UI prototype</title>
+<style>
+body{margin:0;background:#f4f5f6;color:#131416;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif}
+.doc{max-width:1360px;margin:0 auto;padding:32px 40px 8px}
+.doc h1{margin:0;font-size:28px;font-weight:600;line-height:34px}
+.doc p{margin:8px 0 0;font-size:15px;line-height:22px;color:#4d4f51;max-width:760px}
+.doc nav{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px}
+.doc nav a{color:#131416}
+h2.screen{max-width:1280px;margin:40px auto 0;padding:0 40px;font-size:20px;font-weight:600;line-height:26px}
+@media (prefers-color-scheme: dark){body{background:#0b0b0c;color:#fff}.doc p{color:#b4b4b4}.doc nav a{color:#fff}}
+.ab-installed .nb-light{--page:#e4e7ea;--frame:#f9fbfc;--sheet:#ffffff;--raised:#f4f6f8;--active:#ebedee;--border:#e8eaec;--rule:#f0f1f2;--control:#cdced1;--edge:#d5d8db;--text:#131416;--muted:#5d5f60;--amber:#ba8122;--amber-text:#8b6019;--amber-bg:#fbf4e6;--positive:#1e7b4f;--negative:#c4242a;--primary:#131416;--on-primary:#ffffff;--pill-bg:#ebedee;--pill-ink:#353736;--scrim:rgba(19,20,22,.28)}.ab-installed .nb-dark{--page:#1c1c1e;--frame:#000000;--sheet:#111111;--raised:#1a1a1a;--active:#262626;--border:#2e2e2e;--rule:#1e1e1e;--control:#444444;--edge:#3a3a3a;--text:#ffffff;--muted:#b4b4b4;--amber:#f8ac2d;--amber-text:#f8ac2d;--amber-bg:#2a2112;--positive:#3fc07a;--negative:#e5566f;--primary:#ffffff;--on-primary:#000000;--pill-bg:#262626;--pill-ink:#d4d4d4;--scrim:rgba(0,0,0,.5)}.ab-installed .nb-light input::placeholder,.ab-installed .nb-dark input::placeholder{color:var(--muted)}.ab-installed button,.ab-installed input{font-family:inherit}.ab-installed input[type=checkbox]{accent-color:var(--primary)}.ab-installed a{color:inherit}.ab-installed a:hover{opacity:.85}
+
+.ab-updates .nb-light{--page:#e4e7ea;--frame:#f9fbfc;--sheet:#ffffff;--raised:#f4f6f8;--active:#ebedee;--border:#e8eaec;--rule:#f0f1f2;--control:#cdced1;--edge:#d5d8db;--text:#131416;--muted:#5d5f60;--amber:#ba8122;--amber-text:#8b6019;--amber-bg:#fbf4e6;--positive:#1e7b4f;--negative:#c4242a;--primary:#131416;--on-primary:#ffffff;--pill-bg:#ebedee;--pill-ink:#353736;--scrim:rgba(19,20,22,.28)}.ab-updates .nb-dark{--page:#1c1c1e;--frame:#000000;--sheet:#111111;--raised:#1a1a1a;--active:#262626;--border:#2e2e2e;--rule:#1e1e1e;--control:#444444;--edge:#3a3a3a;--text:#ffffff;--muted:#b4b4b4;--amber:#f8ac2d;--amber-text:#f8ac2d;--amber-bg:#2a2112;--positive:#3fc07a;--negative:#e5566f;--primary:#ffffff;--on-primary:#000000;--pill-bg:#262626;--pill-ink:#d4d4d4;--scrim:rgba(0,0,0,.5)}.ab-updates .nb-light input::placeholder,.ab-updates .nb-dark input::placeholder{color:var(--muted)}.ab-updates button,.ab-updates input{font-family:inherit}.ab-updates a{color:inherit}.ab-updates a:hover{opacity:.85}
+
+.ab-reinstall .nb-light{--page:#e4e7ea;--frame:#f9fbfc;--sheet:#ffffff;--raised:#f4f6f8;--active:#ebedee;--border:#e8eaec;--rule:#f0f1f2;--control:#cdced1;--edge:#d5d8db;--text:#131416;--muted:#5d5f60;--amber:#ba8122;--amber-text:#8b6019;--amber-bg:#fbf4e6;--positive:#1e7b4f;--negative:#c4242a;--primary:#131416;--on-primary:#ffffff;--pill-bg:#ebedee;--pill-ink:#353736;--scrim:rgba(19,20,22,.28)}.ab-reinstall .nb-dark{--page:#1c1c1e;--frame:#000000;--sheet:#111111;--raised:#1a1a1a;--active:#262626;--border:#2e2e2e;--rule:#1e1e1e;--control:#444444;--edge:#3a3a3a;--text:#ffffff;--muted:#b4b4b4;--amber:#f8ac2d;--amber-text:#f8ac2d;--amber-bg:#2a2112;--positive:#3fc07a;--negative:#e5566f;--primary:#ffffff;--on-primary:#000000;--pill-bg:#262626;--pill-ink:#d4d4d4;--scrim:rgba(0,0,0,.5)}.ab-reinstall .nb-light input::placeholder,.ab-reinstall .nb-dark input::placeholder{color:var(--muted)}.ab-reinstall button,.ab-reinstall input{font-family:inherit}.ab-reinstall a{color:inherit}.ab-reinstall a:hover{opacity:.85}
+
+.ab-discover .nb-light{--page:#e4e7ea;--frame:#f9fbfc;--sheet:#ffffff;--raised:#f4f6f8;--active:#ebedee;--border:#e8eaec;--rule:#f0f1f2;--control:#cdced1;--edge:#d5d8db;--text:#131416;--muted:#5d5f60;--amber:#ba8122;--amber-text:#8b6019;--amber-bg:#fbf4e6;--positive:#1e7b4f;--negative:#c4242a;--primary:#131416;--on-primary:#ffffff;--pill-bg:#ebedee;--pill-ink:#353736;--scrim:rgba(19,20,22,.28)}.ab-discover .nb-dark{--page:#1c1c1e;--frame:#000000;--sheet:#111111;--raised:#1a1a1a;--active:#262626;--border:#2e2e2e;--rule:#1e1e1e;--control:#444444;--edge:#3a3a3a;--text:#ffffff;--muted:#b4b4b4;--amber:#f8ac2d;--amber-text:#f8ac2d;--amber-bg:#2a2112;--positive:#3fc07a;--negative:#e5566f;--primary:#ffffff;--on-primary:#000000;--pill-bg:#262626;--pill-ink:#d4d4d4;--scrim:rgba(0,0,0,.5)}.ab-discover .nb-light input::placeholder,.ab-discover .nb-dark input::placeholder{color:var(--muted)}.ab-discover button,.ab-discover input{font-family:inherit}.ab-discover input[type=checkbox]{accent-color:var(--primary);width:14px;height:14px;margin:0}.ab-discover a{color:inherit}.ab-discover a:hover{opacity:.85}
+
+</style>
+</head>
+<body>
+<header class="doc">
+<h1>Nanobrew UI prototype</h1>
+<p>The approved mockups of the Nanobrew UI 1.0.0 design pass: each screen in light and dark. The Updates rows (and the Installed update and pin marks) are sample data; the other figures were read from a real nanobrew 0.1.214. The "Recently upgraded" list on the Updates screens is a future idea: it is not in 1.0.0 (see the README's "Future ideas").</p>
+<nav aria-label="Screens"><a href="#installed">Installed</a><a href="#updates">Updates</a><a href="#reinstall">Reinstall dialog</a><a href="#discover">Discover</a></nav>
+</header>
+<section id="installed" class="ab-installed" aria-labelledby="installed-h">
+<h2 id="installed-h" class="screen">Installed</h2>
+<div style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column">
+
+<section class="nb-light" aria-label="Light" style="background: var(--page); padding: 32px 40px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+<p style="margin: 0; width: 100%; max-width: 1280px; font: 500 13px/20px -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; color: var(--muted)">Light</p>
+<div style="width: 100%; max-width: 1280px; overflow-x: auto">
+<div style="min-width: 1100px; height: 800px; box-sizing: border-box; display: grid; grid-template-columns: 228px minmax(0, 1fr); background: var(--frame); border: 1px solid var(--edge); border-radius: 12px; overflow: hidden; position: relative; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; font-variant-numeric: tabular-nums">
+
+<nav aria-label="Sections" style="display: flex; flex-direction: column; gap: 2px; padding: 14px 10px 12px; min-height: 0">
+<div aria-hidden="true" style="display: flex; gap: 8px; align-items: center; height: 20px; padding: 0 6px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840"></span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 8px 14px">
+<img src="../../Sources/NanobrewKit/Resources/nanobrew-logo.png" alt="" style="width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: #ffffff">
+<div style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 14px; font-weight: 600; line-height: 18px">Nanobrew UI</span><span style="font-size: 12px; line-height: 16px; color: var(--muted); white-space: nowrap">nb 0.1.214 · /opt/nanobrew</span></div>
+</div>
+<p style="margin: 6px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">Packages</p>
+<a href="#installed" aria-current="page" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; background: var(--active); color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path></svg>
+<span style="flex: 1">Installed</span></a>
+<a href="#updates" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><circle cx="12" cy="12" r="10"></circle><path d="m16 12-4-4-4 4"></path><path d="M12 16V8"></path></svg>
+<span style="flex: 1">Updates</span><span aria-label="4 updates" style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 600; line-height: 18px; text-align: center">4</span></a>
+<a href="#discover" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<span style="flex: 1">Discover</span></a>
+<p style="margin: 14px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">System</p>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>
+<span style="flex: 1">Services</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"></path></svg>
+<span style="flex: 1">Maintenance</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>
+<span style="flex: 1">Bundle</span></a>
+<a href="#" style="margin-top: auto; display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span style="flex: 1">Settings</span></a>
+</nav>
+
+<div style="display: grid; grid-template-rows: 48px minmax(0, 1fr); min-width: 0; min-height: 0">
+<div style="display: flex; align-items: center; justify-content: center; position: relative; padding: 0 16px">
+<label style="display: flex; align-items: center; gap: 8px; width: 400px; height: 32px; padding: 0 10px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<input type="search" aria-label="Search installed packages" placeholder="Search installed packages" style="flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 13px; color: var(--text)">
+<span style="font-size: 12px; color: var(--muted)">⌘F</span>
+</label>
+<button type="button" aria-label="Check for updates" style="position: absolute; right: 16px; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+</button>
+</div>
+
+<div style="margin: 0 8px 8px 0; background: var(--sheet); border: 1px solid var(--border); border-radius: 16px; display: flex; flex-direction: column; min-height: 0; overflow: hidden">
+<div style="flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px">
+
+<div style="display: flex; flex-direction: column; padding: 24px 24px 0; min-width: 0; min-height: 0">
+<h1 style="margin: 0; font-size: 22px; font-weight: 600; line-height: 28px">Installed</h1>
+<p style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--muted)">152 formulae · 6 casks · <a href="#updates" style="color: var(--amber-text); text-decoration: none; font-weight: 500">4 updates waiting</a></p>
+<div style="display: flex; gap: 24px; margin-top: 16px; border-bottom: 1px solid var(--border)">
+<button type="button" aria-pressed="true" style="height: 36px; padding: 0; margin-bottom: -1px; border: 0; border-bottom: 2px solid var(--amber); background: none; color: var(--text); font-size: 14px; font-weight: 600">Formulae <span style="font-weight: 400; color: var(--muted)">152</span></button>
+<button type="button" aria-pressed="false" style="height: 36px; padding: 0; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); font-size: 14px">Casks <span>6</span></button>
+</div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 36px; padding: 0 12px; font-size: 12px; color: var(--muted)">
+<span>Name</span><span style="text-align: right">Version</span><span style="text-align: right">Installed</span><span>Status</span>
+</div>
+<div style="display: flex; flex-direction: column; overflow: auto; min-height: 0">
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">bzip2</span>
+<span style="text-align: right">1.0.8</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-06-30</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">libedit</span>
+<span style="text-align: right">20260512-3.1</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-06-30</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">libffi</span>
+<span style="text-align: right">3.8.0</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-10</span>
+<span style="display: flex; align-items: center">
+
+<span style="display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 4px; background: var(--pill-bg); color: var(--pill-ink); font-size: 12px; font-weight: 500">Pinned</span>
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">libpsl</span>
+<span style="text-align: right">0.23.3</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-26</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">libtasn1</span>
+<span style="text-align: right">4.21.0</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-26</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">libxcrypt</span>
+<span style="text-align: right">4.5.2</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-26</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">lua</span>
+<span style="text-align: right">5.5.1</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-26</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">ncurses</span>
+<span style="text-align: right">6.6</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-06-30</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: var(--active); font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">node</span>
+<span style="text-align: right">26.13.0_2</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+<span style="display: flex; align-items: center">
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--amber-text)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m16 12-4-4-4 4"></path><path d="M12 16V8"></path></svg>Update 26.14.0</span>
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">xcodegen</span>
+<span style="text-align: right">2.46.0</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-07-20</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">zstd</span>
+<span style="text-align: right">1.5.7_1</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-26</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+</div>
+</div>
+
+<section aria-label="node details" style="border-left: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; gap: 14px; overflow: auto; min-height: 0">
+<div style="display: flex; align-items: baseline; gap: 8px"><h2 style="margin: 0; font-size: 18px; font-weight: 600; line-height: 24px">node</h2><span style="font-size: 14px; color: var(--muted)">26.13.0_2</span></div>
+<p style="margin: -6px 0 0; font-size: 14px; line-height: 20px">Open-source, cross-platform JavaScript runtime environment</p>
+<div style="display: grid; grid-template-columns: 72px minmax(0, 1fr); row-gap: 6px; font-size: 13px; line-height: 18px">
+<span style="color: var(--muted)">Homepage</span><a href="https://nodejs.org/" style="display: inline-flex; align-items: center; gap: 4px; text-decoration: none">nodejs.org <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+<span style="color: var(--muted)">License</span><span>MIT</span>
+<span style="color: var(--muted)">Trust</span><span>Install verified · local probe passed</span>
+</div>
+<button type="button" style="align-self: flex-start; height: 32px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 500">Upgrade to 26.14.0</button>
+<div style="display: flex; align-items: center; gap: 16px; font-size: 13px">
+<button type="button" style="padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Pin</button>
+<button type="button" style="padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Unlink</button>
+<button type="button" style="margin-left: auto; padding: 0; border: 0; background: none; color: var(--negative); font-size: 13px">Remove…</button>
+</div>
+<div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 6px"><h3 style="margin: 0; font-size: 14px; font-weight: 600">Dependencies</h3><span style="font-size: 12px; color: var(--muted)">20 direct</span></div>
+<pre style="margin: -4px 0 0; padding: 10px 12px; max-height: 144px; overflow: auto; border-radius: 8px; background: var(--raised); font: 12px/18px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--text)">node
+├── abseil
+├── ada-url
+│   ├── fmt
+│   └── simdutf
+│       └── icu4c@79
+├── brotli
+├── c-ares
+├── hdrhistogram_c
+├── icu4c@79
+├── libffi
+├── libnghttp2
+├── libuv
+├── llhttp
+├── merve
+│   └── simdutf
+│       └── icu4c@79
+├── nbytes
+├── openssl@4
+│   └── ca-certificates
+├── simdjson
+├── simdutf
+│   └── icu4c@79
+├── sqlite
+│   └── readline
+│       └── ncurses
+├── uvwasi
+│   └── libuv
+├── zstd
+│   ├── lz4
+│   └── xz
+├── highway
+└── python</pre>
+<div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 6px"><h3 style="margin: 0; font-size: 14px; font-weight: 600">Earlier versions</h3><button type="button" style="padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Roll back to 26.12.1_1</button></div>
+<div style="display: flex; flex-direction: column; margin-top: -6px">
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 90px 56px; gap: 12px; align-items: center; height: 30px; font-size: 13px; border-bottom: 1px solid var(--rule)">
+<span>26.12.1_1</span><span style="text-align: right; color: var(--muted)">2026-10-26</span><button type="button" style="justify-self: end; padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Switch</button>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 90px 56px; gap: 12px; align-items: center; height: 30px; font-size: 13px; border-bottom: 1px solid var(--rule)">
+<span>26.12.0</span><span style="text-align: right; color: var(--muted)">2026-10-20</span><button type="button" style="justify-self: end; padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Switch</button>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 90px 56px; gap: 12px; align-items: center; height: 30px; font-size: 13px; border-bottom: 1px solid var(--rule)">
+<span>26.10.0_1</span><span style="text-align: right; color: var(--muted)">2026-09-25</span><button type="button" style="justify-self: end; padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Switch</button>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 90px 56px; gap: 12px; align-items: center; height: 30px; font-size: 13px; border-bottom: 1px solid var(--rule)">
+<span>26.9.0</span><span style="text-align: right; color: var(--muted)">2026-09-22</span><button type="button" style="justify-self: end; padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Switch</button>
+</div>
+
+</div>
+</section>
+</div>
+
+<footer style="height: 36px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted)">
+<span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: var(--positive)"></span>
+<span style="color: var(--text)">Checked 158 packages in 7 ms</span><span>· 12:04</span>
+<button type="button" aria-label="Show console" style="margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font-size: 12px">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19h8"></path><path d="m4 17 6-6-6-6"></path></svg>Console <span>⌘J</span></button>
+</footer>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="nb-dark" aria-label="Dark" style="background: var(--page); padding: 32px 40px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+<p style="margin: 0; width: 100%; max-width: 1280px; font: 500 13px/20px -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; color: var(--muted)">Dark</p>
+<div style="width: 100%; max-width: 1280px; overflow-x: auto">
+<div style="min-width: 1100px; height: 800px; box-sizing: border-box; display: grid; grid-template-columns: 228px minmax(0, 1fr); background: var(--frame); border: 1px solid var(--edge); border-radius: 12px; overflow: hidden; position: relative; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; font-variant-numeric: tabular-nums">
+
+<nav aria-label="Sections" style="display: flex; flex-direction: column; gap: 2px; padding: 14px 10px 12px; min-height: 0">
+<div aria-hidden="true" style="display: flex; gap: 8px; align-items: center; height: 20px; padding: 0 6px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840"></span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 8px 14px">
+<img src="../../Sources/NanobrewKit/Resources/nanobrew-logo.png" alt="" style="width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: #ffffff">
+<div style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 14px; font-weight: 600; line-height: 18px">Nanobrew UI</span><span style="font-size: 12px; line-height: 16px; color: var(--muted); white-space: nowrap">nb 0.1.214 · /opt/nanobrew</span></div>
+</div>
+<p style="margin: 6px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">Packages</p>
+<a href="#installed" aria-current="page" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; background: var(--active); color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path></svg>
+<span style="flex: 1">Installed</span></a>
+<a href="#updates" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><circle cx="12" cy="12" r="10"></circle><path d="m16 12-4-4-4 4"></path><path d="M12 16V8"></path></svg>
+<span style="flex: 1">Updates</span><span aria-label="4 updates" style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 600; line-height: 18px; text-align: center">4</span></a>
+<a href="#discover" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<span style="flex: 1">Discover</span></a>
+<p style="margin: 14px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">System</p>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>
+<span style="flex: 1">Services</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"></path></svg>
+<span style="flex: 1">Maintenance</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>
+<span style="flex: 1">Bundle</span></a>
+<a href="#" style="margin-top: auto; display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span style="flex: 1">Settings</span></a>
+</nav>
+
+<div style="display: grid; grid-template-rows: 48px minmax(0, 1fr); min-width: 0; min-height: 0">
+<div style="display: flex; align-items: center; justify-content: center; position: relative; padding: 0 16px">
+<label style="display: flex; align-items: center; gap: 8px; width: 400px; height: 32px; padding: 0 10px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<input type="search" aria-label="Search installed packages" placeholder="Search installed packages" style="flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 13px; color: var(--text)">
+<span style="font-size: 12px; color: var(--muted)">⌘F</span>
+</label>
+<button type="button" aria-label="Check for updates" style="position: absolute; right: 16px; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+</button>
+</div>
+
+<div style="margin: 0 8px 8px 0; background: var(--sheet); border: 1px solid var(--border); border-radius: 16px; display: flex; flex-direction: column; min-height: 0; overflow: hidden">
+<div style="flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px">
+
+<div style="display: flex; flex-direction: column; padding: 24px 24px 0; min-width: 0; min-height: 0">
+<h1 style="margin: 0; font-size: 22px; font-weight: 600; line-height: 28px">Installed</h1>
+<p style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--muted)">152 formulae · 6 casks · <a href="#updates" style="color: var(--amber-text); text-decoration: none; font-weight: 500">4 updates waiting</a></p>
+<div style="display: flex; gap: 24px; margin-top: 16px; border-bottom: 1px solid var(--border)">
+<button type="button" aria-pressed="true" style="height: 36px; padding: 0; margin-bottom: -1px; border: 0; border-bottom: 2px solid var(--amber); background: none; color: var(--text); font-size: 14px; font-weight: 600">Formulae <span style="font-weight: 400; color: var(--muted)">152</span></button>
+<button type="button" aria-pressed="false" style="height: 36px; padding: 0; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); font-size: 14px">Casks <span>6</span></button>
+</div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 36px; padding: 0 12px; font-size: 12px; color: var(--muted)">
+<span>Name</span><span style="text-align: right">Version</span><span style="text-align: right">Installed</span><span>Status</span>
+</div>
+<div style="display: flex; flex-direction: column; overflow: auto; min-height: 0">
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">bzip2</span>
+<span style="text-align: right">1.0.8</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-06-30</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">libedit</span>
+<span style="text-align: right">20260512-3.1</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-06-30</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">libffi</span>
+<span style="text-align: right">3.8.0</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-10</span>
+<span style="display: flex; align-items: center">
+
+<span style="display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 4px; background: var(--pill-bg); color: var(--pill-ink); font-size: 12px; font-weight: 500">Pinned</span>
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">libpsl</span>
+<span style="text-align: right">0.23.3</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-26</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">libtasn1</span>
+<span style="text-align: right">4.21.0</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-26</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">libxcrypt</span>
+<span style="text-align: right">4.5.2</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-26</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">lua</span>
+<span style="text-align: right">5.5.1</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-26</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">ncurses</span>
+<span style="text-align: right">6.6</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-06-30</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: var(--active); font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">node</span>
+<span style="text-align: right">26.13.0_2</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+<span style="display: flex; align-items: center">
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--amber-text)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m16 12-4-4-4 4"></path><path d="M12 16V8"></path></svg>Update 26.14.0</span>
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">xcodegen</span>
+<span style="text-align: right">2.46.0</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-07-20</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 150px; gap: 16px; align-items: center; height: 44px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent; font-size: 14px">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">zstd</span>
+<span style="text-align: right">1.5.7_1</span>
+<span style="text-align: right; font-size: 13px; color: var(--muted)">2026-08-26</span>
+<span style="display: flex; align-items: center">
+
+
+</span>
+</div>
+
+</div>
+</div>
+
+<section aria-label="node details" style="border-left: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; gap: 14px; overflow: auto; min-height: 0">
+<div style="display: flex; align-items: baseline; gap: 8px"><h2 style="margin: 0; font-size: 18px; font-weight: 600; line-height: 24px">node</h2><span style="font-size: 14px; color: var(--muted)">26.13.0_2</span></div>
+<p style="margin: -6px 0 0; font-size: 14px; line-height: 20px">Open-source, cross-platform JavaScript runtime environment</p>
+<div style="display: grid; grid-template-columns: 72px minmax(0, 1fr); row-gap: 6px; font-size: 13px; line-height: 18px">
+<span style="color: var(--muted)">Homepage</span><a href="https://nodejs.org/" style="display: inline-flex; align-items: center; gap: 4px; text-decoration: none">nodejs.org <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+<span style="color: var(--muted)">License</span><span>MIT</span>
+<span style="color: var(--muted)">Trust</span><span>Install verified · local probe passed</span>
+</div>
+<button type="button" style="align-self: flex-start; height: 32px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 500">Upgrade to 26.14.0</button>
+<div style="display: flex; align-items: center; gap: 16px; font-size: 13px">
+<button type="button" style="padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Pin</button>
+<button type="button" style="padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Unlink</button>
+<button type="button" style="margin-left: auto; padding: 0; border: 0; background: none; color: var(--negative); font-size: 13px">Remove…</button>
+</div>
+<div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 6px"><h3 style="margin: 0; font-size: 14px; font-weight: 600">Dependencies</h3><span style="font-size: 12px; color: var(--muted)">20 direct</span></div>
+<pre style="margin: -4px 0 0; padding: 10px 12px; max-height: 144px; overflow: auto; border-radius: 8px; background: var(--raised); font: 12px/18px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--text)">node
+├── abseil
+├── ada-url
+│   ├── fmt
+│   └── simdutf
+│       └── icu4c@79
+├── brotli
+├── c-ares
+├── hdrhistogram_c
+├── icu4c@79
+├── libffi
+├── libnghttp2
+├── libuv
+├── llhttp
+├── merve
+│   └── simdutf
+│       └── icu4c@79
+├── nbytes
+├── openssl@4
+│   └── ca-certificates
+├── simdjson
+├── simdutf
+│   └── icu4c@79
+├── sqlite
+│   └── readline
+│       └── ncurses
+├── uvwasi
+│   └── libuv
+├── zstd
+│   ├── lz4
+│   └── xz
+├── highway
+└── python</pre>
+<div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 6px"><h3 style="margin: 0; font-size: 14px; font-weight: 600">Earlier versions</h3><button type="button" style="padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Roll back to 26.12.1_1</button></div>
+<div style="display: flex; flex-direction: column; margin-top: -6px">
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 90px 56px; gap: 12px; align-items: center; height: 30px; font-size: 13px; border-bottom: 1px solid var(--rule)">
+<span>26.12.1_1</span><span style="text-align: right; color: var(--muted)">2026-10-26</span><button type="button" style="justify-self: end; padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Switch</button>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 90px 56px; gap: 12px; align-items: center; height: 30px; font-size: 13px; border-bottom: 1px solid var(--rule)">
+<span>26.12.0</span><span style="text-align: right; color: var(--muted)">2026-10-20</span><button type="button" style="justify-self: end; padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Switch</button>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 90px 56px; gap: 12px; align-items: center; height: 30px; font-size: 13px; border-bottom: 1px solid var(--rule)">
+<span>26.10.0_1</span><span style="text-align: right; color: var(--muted)">2026-09-25</span><button type="button" style="justify-self: end; padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Switch</button>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 90px 56px; gap: 12px; align-items: center; height: 30px; font-size: 13px; border-bottom: 1px solid var(--rule)">
+<span>26.9.0</span><span style="text-align: right; color: var(--muted)">2026-09-22</span><button type="button" style="justify-self: end; padding: 0; border: 0; background: none; color: var(--text); font-size: 13px">Switch</button>
+</div>
+
+</div>
+</section>
+</div>
+
+<footer style="height: 36px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted)">
+<span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: var(--positive)"></span>
+<span style="color: var(--text)">Checked 158 packages in 7 ms</span><span>· 12:04</span>
+<button type="button" aria-label="Show console" style="margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font-size: 12px">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19h8"></path><path d="m4 17 6-6-6-6"></path></svg>Console <span>⌘J</span></button>
+</footer>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+</section>
+<section id="updates" class="ab-updates" aria-labelledby="updates-h">
+<h2 id="updates-h" class="screen">Updates</h2>
+<div style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column">
+
+<section class="nb-light" aria-label="Light" style="background: var(--page); padding: 32px 40px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+<p style="margin: 0; width: 100%; max-width: 1280px; font: 500 13px/20px -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; color: var(--muted)">Light</p>
+<div style="width: 100%; max-width: 1280px; overflow-x: auto">
+<div style="min-width: 1100px; height: 800px; box-sizing: border-box; display: grid; grid-template-columns: 228px minmax(0, 1fr); background: var(--frame); border: 1px solid var(--edge); border-radius: 12px; overflow: hidden; position: relative; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; font-variant-numeric: tabular-nums">
+
+<nav aria-label="Sections" style="display: flex; flex-direction: column; gap: 2px; padding: 14px 10px 12px; min-height: 0">
+<div aria-hidden="true" style="display: flex; gap: 8px; align-items: center; height: 20px; padding: 0 6px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840"></span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 8px 14px">
+<img src="../../Sources/NanobrewKit/Resources/nanobrew-logo.png" alt="" style="width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: #ffffff">
+<div style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 14px; font-weight: 600; line-height: 18px">Nanobrew UI</span><span style="font-size: 12px; line-height: 16px; color: var(--muted); white-space: nowrap">nb 0.1.214 · /opt/nanobrew</span></div>
+</div>
+<p style="margin: 6px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">Packages</p>
+<a href="#installed" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path></svg>
+<span style="flex: 1">Installed</span></a>
+<a href="#updates" aria-current="page" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; background: var(--active); color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m16 12-4-4-4 4"></path><path d="M12 16V8"></path></svg>
+<span style="flex: 1">Updates</span><span aria-label="4 updates" style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 600; line-height: 18px; text-align: center">4</span></a>
+<a href="#discover" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<span style="flex: 1">Discover</span></a>
+<p style="margin: 14px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">System</p>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>
+<span style="flex: 1">Services</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"></path></svg>
+<span style="flex: 1">Maintenance</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>
+<span style="flex: 1">Bundle</span></a>
+<a href="#" style="margin-top: auto; display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span style="flex: 1">Settings</span></a>
+</nav>
+
+<div style="display: grid; grid-template-rows: 48px minmax(0, 1fr); min-width: 0; min-height: 0">
+<div style="display: flex; align-items: center; justify-content: center; position: relative; padding: 0 16px">
+<label style="display: flex; align-items: center; gap: 8px; width: 400px; height: 32px; padding: 0 10px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<input type="search" aria-label="Search updates" placeholder="Search updates" style="flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 13px; color: var(--text)">
+<span style="font-size: 12px; color: var(--muted)">⌘F</span>
+</label>
+<button type="button" aria-label="Check for updates" style="position: absolute; right: 16px; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+</button>
+</div>
+
+<div style="margin: 0 8px 8px 0; background: var(--sheet); border: 1px solid var(--border); border-radius: 16px; display: flex; flex-direction: column; min-height: 0; overflow: hidden">
+<div style="flex: 1; min-height: 0; overflow: auto; padding: 24px 24px 16px; display: flex; flex-direction: column">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px">
+<div><h1 style="margin: 0; font-size: 22px; font-weight: 600; line-height: 28px">Updates</h1>
+<p style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--muted)">4 updates: 2 ready, 1 pinned, 1 needs a reinstall</p></div>
+<button type="button" style="height: 32px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 500">Upgrade 2</button>
+</div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 36px; margin-top: 20px; padding: 0 12px; font-size: 12px; color: var(--muted)">
+<span>Package</span><span>Kind</span><span style="text-align: right">Installed</span><span style="text-align: right">Available</span><span>Status</span><span style="text-align: right">Action</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">node</span>
+<span style="font-size: 13px; color: var(--muted)">formula</span>
+<span style="text-align: right; color: var(--muted)">26.13.0_2</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">26.14.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+<span style="font-size: 13px; color: var(--muted)">Ready</span>
+
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+<button type="button" style="height: 28px; padding: 0 12px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Upgrade</button>
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">libffi</span>
+<span style="font-size: 13px; color: var(--muted)">formula</span>
+<span style="text-align: right; color: var(--muted)">3.8.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--muted)">3.9.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+
+<span style="display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 4px; background: var(--pill-bg); color: var(--pill-ink); font-size: 12px; font-weight: 500; white-space: nowrap">Pinned, skipped</span>
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+
+<button type="button" style="height: 28px; padding: 0 4px; border: 0; background: none; color: var(--text); font-size: 13px">Unpin</button>
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">puremac</span>
+<span style="font-size: 13px; color: var(--muted)">cask</span>
+<span style="text-align: right; color: var(--muted)">3.2.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">3.3.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+<span style="font-size: 13px; color: var(--muted)">Ready</span>
+
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+<button type="button" style="height: 28px; padding: 0 12px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Upgrade</button>
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">firefox</span>
+<span style="font-size: 13px; color: var(--muted)">cask</span>
+<span style="text-align: right; color: var(--muted)">144.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">145.0.1</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+
+
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 4px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 500; white-space: nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>Can't upgrade in place: disk image</span>
+</span>
+<span style="display: flex; justify-content: flex-end">
+
+
+<a href="#reinstall" style="display: inline-flex; align-items: center; height: 28px; padding: 0 12px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500; text-decoration: none">Reinstall…</a>
+</span>
+</div>
+
+
+<h2 style="margin: 36px 0 0; font-size: 16px; font-weight: 600; line-height: 22px">Recently upgraded</h2>
+<p style="margin: 2px 0 0; font-size: 13px; line-height: 18px; color: var(--muted)">From nanobrew’s history on this Mac</p>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 36px; margin-top: 8px; padding: 0 12px; font-size: 12px; color: var(--muted)">
+<span>Package</span><span style="text-align: right">From</span><span></span><span style="text-align: right">To</span><span style="text-align: right">Date</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>python@3.14</span><span style="text-align: right; color: var(--muted)">3.14.9</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">3.14.10</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>node</span><span style="text-align: right; color: var(--muted)">26.12.1_1</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">26.13.0_2</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>simdutf</span><span style="text-align: right; color: var(--muted)">9.3.2_1</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">9.3.3</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>uv</span><span style="text-align: right; color: var(--muted)">0.13.5</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">0.13.6</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>simdjson</span><span style="text-align: right; color: var(--muted)">5.0.5</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">5.1.0</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+</div>
+
+<footer style="height: 36px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted)">
+<span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: var(--positive)"></span>
+<span style="color: var(--text)">Checked 158 packages in 7 ms</span><span>· 12:04</span>
+<button type="button" aria-label="Show console" style="margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font-size: 12px">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19h8"></path><path d="m4 17 6-6-6-6"></path></svg>Console <span>⌘J</span></button>
+</footer>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="nb-dark" aria-label="Dark" style="background: var(--page); padding: 32px 40px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+<p style="margin: 0; width: 100%; max-width: 1280px; font: 500 13px/20px -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; color: var(--muted)">Dark</p>
+<div style="width: 100%; max-width: 1280px; overflow-x: auto">
+<div style="min-width: 1100px; height: 800px; box-sizing: border-box; display: grid; grid-template-columns: 228px minmax(0, 1fr); background: var(--frame); border: 1px solid var(--edge); border-radius: 12px; overflow: hidden; position: relative; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; font-variant-numeric: tabular-nums">
+
+<nav aria-label="Sections" style="display: flex; flex-direction: column; gap: 2px; padding: 14px 10px 12px; min-height: 0">
+<div aria-hidden="true" style="display: flex; gap: 8px; align-items: center; height: 20px; padding: 0 6px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840"></span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 8px 14px">
+<img src="../../Sources/NanobrewKit/Resources/nanobrew-logo.png" alt="" style="width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: #ffffff">
+<div style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 14px; font-weight: 600; line-height: 18px">Nanobrew UI</span><span style="font-size: 12px; line-height: 16px; color: var(--muted); white-space: nowrap">nb 0.1.214 · /opt/nanobrew</span></div>
+</div>
+<p style="margin: 6px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">Packages</p>
+<a href="#installed" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path></svg>
+<span style="flex: 1">Installed</span></a>
+<a href="#updates" aria-current="page" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; background: var(--active); color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m16 12-4-4-4 4"></path><path d="M12 16V8"></path></svg>
+<span style="flex: 1">Updates</span><span aria-label="4 updates" style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 600; line-height: 18px; text-align: center">4</span></a>
+<a href="#discover" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<span style="flex: 1">Discover</span></a>
+<p style="margin: 14px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">System</p>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>
+<span style="flex: 1">Services</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"></path></svg>
+<span style="flex: 1">Maintenance</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>
+<span style="flex: 1">Bundle</span></a>
+<a href="#" style="margin-top: auto; display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span style="flex: 1">Settings</span></a>
+</nav>
+
+<div style="display: grid; grid-template-rows: 48px minmax(0, 1fr); min-width: 0; min-height: 0">
+<div style="display: flex; align-items: center; justify-content: center; position: relative; padding: 0 16px">
+<label style="display: flex; align-items: center; gap: 8px; width: 400px; height: 32px; padding: 0 10px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<input type="search" aria-label="Search updates" placeholder="Search updates" style="flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 13px; color: var(--text)">
+<span style="font-size: 12px; color: var(--muted)">⌘F</span>
+</label>
+<button type="button" aria-label="Check for updates" style="position: absolute; right: 16px; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+</button>
+</div>
+
+<div style="margin: 0 8px 8px 0; background: var(--sheet); border: 1px solid var(--border); border-radius: 16px; display: flex; flex-direction: column; min-height: 0; overflow: hidden">
+<div style="flex: 1; min-height: 0; overflow: auto; padding: 24px 24px 16px; display: flex; flex-direction: column">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px">
+<div><h1 style="margin: 0; font-size: 22px; font-weight: 600; line-height: 28px">Updates</h1>
+<p style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--muted)">4 updates: 2 ready, 1 pinned, 1 needs a reinstall</p></div>
+<button type="button" style="height: 32px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 500">Upgrade 2</button>
+</div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 36px; margin-top: 20px; padding: 0 12px; font-size: 12px; color: var(--muted)">
+<span>Package</span><span>Kind</span><span style="text-align: right">Installed</span><span style="text-align: right">Available</span><span>Status</span><span style="text-align: right">Action</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">node</span>
+<span style="font-size: 13px; color: var(--muted)">formula</span>
+<span style="text-align: right; color: var(--muted)">26.13.0_2</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">26.14.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+<span style="font-size: 13px; color: var(--muted)">Ready</span>
+
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+<button type="button" style="height: 28px; padding: 0 12px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Upgrade</button>
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">libffi</span>
+<span style="font-size: 13px; color: var(--muted)">formula</span>
+<span style="text-align: right; color: var(--muted)">3.8.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--muted)">3.9.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+
+<span style="display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 4px; background: var(--pill-bg); color: var(--pill-ink); font-size: 12px; font-weight: 500; white-space: nowrap">Pinned, skipped</span>
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+
+<button type="button" style="height: 28px; padding: 0 4px; border: 0; background: none; color: var(--text); font-size: 13px">Unpin</button>
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">puremac</span>
+<span style="font-size: 13px; color: var(--muted)">cask</span>
+<span style="text-align: right; color: var(--muted)">3.2.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">3.3.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+<span style="font-size: 13px; color: var(--muted)">Ready</span>
+
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+<button type="button" style="height: 28px; padding: 0 12px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Upgrade</button>
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">firefox</span>
+<span style="font-size: 13px; color: var(--muted)">cask</span>
+<span style="text-align: right; color: var(--muted)">144.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">145.0.1</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+
+
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 4px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 500; white-space: nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>Can't upgrade in place: disk image</span>
+</span>
+<span style="display: flex; justify-content: flex-end">
+
+
+<a href="#reinstall" style="display: inline-flex; align-items: center; height: 28px; padding: 0 12px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500; text-decoration: none">Reinstall…</a>
+</span>
+</div>
+
+
+<h2 style="margin: 36px 0 0; font-size: 16px; font-weight: 600; line-height: 22px">Recently upgraded</h2>
+<p style="margin: 2px 0 0; font-size: 13px; line-height: 18px; color: var(--muted)">From nanobrew’s history on this Mac</p>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 36px; margin-top: 8px; padding: 0 12px; font-size: 12px; color: var(--muted)">
+<span>Package</span><span style="text-align: right">From</span><span></span><span style="text-align: right">To</span><span style="text-align: right">Date</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>python@3.14</span><span style="text-align: right; color: var(--muted)">3.14.9</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">3.14.10</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>node</span><span style="text-align: right; color: var(--muted)">26.12.1_1</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">26.13.0_2</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>simdutf</span><span style="text-align: right; color: var(--muted)">9.3.2_1</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">9.3.3</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>uv</span><span style="text-align: right; color: var(--muted)">0.13.5</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">0.13.6</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>simdjson</span><span style="text-align: right; color: var(--muted)">5.0.5</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">5.1.0</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+</div>
+
+<footer style="height: 36px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted)">
+<span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: var(--positive)"></span>
+<span style="color: var(--text)">Checked 158 packages in 7 ms</span><span>· 12:04</span>
+<button type="button" aria-label="Show console" style="margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font-size: 12px">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19h8"></path><path d="m4 17 6-6-6-6"></path></svg>Console <span>⌘J</span></button>
+</footer>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+</section>
+<section id="reinstall" class="ab-reinstall" aria-labelledby="reinstall-h">
+<h2 id="reinstall-h" class="screen">Reinstall dialog</h2>
+<div style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column">
+
+<section class="nb-light" aria-label="Light" style="background: var(--page); padding: 32px 40px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+<p style="margin: 0; width: 100%; max-width: 1280px; font: 500 13px/20px -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; color: var(--muted)">Light</p>
+<div style="width: 100%; max-width: 1280px; overflow-x: auto">
+<div style="min-width: 1100px; height: 800px; box-sizing: border-box; display: grid; grid-template-columns: 228px minmax(0, 1fr); background: var(--frame); border: 1px solid var(--edge); border-radius: 12px; overflow: hidden; position: relative; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; font-variant-numeric: tabular-nums">
+
+<nav aria-label="Sections" style="display: flex; flex-direction: column; gap: 2px; padding: 14px 10px 12px; min-height: 0">
+<div aria-hidden="true" style="display: flex; gap: 8px; align-items: center; height: 20px; padding: 0 6px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840"></span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 8px 14px">
+<img src="../../Sources/NanobrewKit/Resources/nanobrew-logo.png" alt="" style="width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: #ffffff">
+<div style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 14px; font-weight: 600; line-height: 18px">Nanobrew UI</span><span style="font-size: 12px; line-height: 16px; color: var(--muted); white-space: nowrap">nb 0.1.214 · /opt/nanobrew</span></div>
+</div>
+<p style="margin: 6px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">Packages</p>
+<a href="#installed" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path></svg>
+<span style="flex: 1">Installed</span></a>
+<a href="#updates" aria-current="page" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; background: var(--active); color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m16 12-4-4-4 4"></path><path d="M12 16V8"></path></svg>
+<span style="flex: 1">Updates</span><span aria-label="4 updates" style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 600; line-height: 18px; text-align: center">4</span></a>
+<a href="#discover" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<span style="flex: 1">Discover</span></a>
+<p style="margin: 14px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">System</p>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>
+<span style="flex: 1">Services</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"></path></svg>
+<span style="flex: 1">Maintenance</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>
+<span style="flex: 1">Bundle</span></a>
+<a href="#" style="margin-top: auto; display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span style="flex: 1">Settings</span></a>
+</nav>
+
+<div style="display: grid; grid-template-rows: 48px minmax(0, 1fr); min-width: 0; min-height: 0">
+<div style="display: flex; align-items: center; justify-content: center; position: relative; padding: 0 16px">
+<label style="display: flex; align-items: center; gap: 8px; width: 400px; height: 32px; padding: 0 10px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<input type="search" aria-label="Search updates" placeholder="Search updates" style="flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 13px; color: var(--text)">
+<span style="font-size: 12px; color: var(--muted)">⌘F</span>
+</label>
+<button type="button" aria-label="Check for updates" style="position: absolute; right: 16px; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+</button>
+</div>
+
+<div style="margin: 0 8px 8px 0; background: var(--sheet); border: 1px solid var(--border); border-radius: 16px; display: flex; flex-direction: column; min-height: 0; overflow: hidden">
+<div style="flex: 1; min-height: 0; overflow: auto; padding: 24px 24px 16px; display: flex; flex-direction: column">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px">
+<div><h1 style="margin: 0; font-size: 22px; font-weight: 600; line-height: 28px">Updates</h1>
+<p style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--muted)">4 updates: 2 ready, 1 pinned, 1 needs a reinstall</p></div>
+<button type="button" style="height: 32px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 500">Upgrade 2</button>
+</div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 36px; margin-top: 20px; padding: 0 12px; font-size: 12px; color: var(--muted)">
+<span>Package</span><span>Kind</span><span style="text-align: right">Installed</span><span style="text-align: right">Available</span><span>Status</span><span style="text-align: right">Action</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">node</span>
+<span style="font-size: 13px; color: var(--muted)">formula</span>
+<span style="text-align: right; color: var(--muted)">26.13.0_2</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">26.14.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+<span style="font-size: 13px; color: var(--muted)">Ready</span>
+
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+<button type="button" style="height: 28px; padding: 0 12px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Upgrade</button>
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">libffi</span>
+<span style="font-size: 13px; color: var(--muted)">formula</span>
+<span style="text-align: right; color: var(--muted)">3.8.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--muted)">3.9.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+
+<span style="display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 4px; background: var(--pill-bg); color: var(--pill-ink); font-size: 12px; font-weight: 500; white-space: nowrap">Pinned, skipped</span>
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+
+<button type="button" style="height: 28px; padding: 0 4px; border: 0; background: none; color: var(--text); font-size: 13px">Unpin</button>
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">puremac</span>
+<span style="font-size: 13px; color: var(--muted)">cask</span>
+<span style="text-align: right; color: var(--muted)">3.2.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">3.3.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+<span style="font-size: 13px; color: var(--muted)">Ready</span>
+
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+<button type="button" style="height: 28px; padding: 0 12px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Upgrade</button>
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">firefox</span>
+<span style="font-size: 13px; color: var(--muted)">cask</span>
+<span style="text-align: right; color: var(--muted)">144.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">145.0.1</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+
+
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 4px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 500; white-space: nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>Can't upgrade in place: disk image</span>
+</span>
+<span style="display: flex; justify-content: flex-end">
+
+
+<button type="button" style="height: 28px; padding: 0 12px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Reinstall…</button>
+</span>
+</div>
+
+
+<h2 style="margin: 36px 0 0; font-size: 16px; font-weight: 600; line-height: 22px">Recently upgraded</h2>
+<p style="margin: 2px 0 0; font-size: 13px; line-height: 18px; color: var(--muted)">From nanobrew’s history on this Mac</p>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 36px; margin-top: 8px; padding: 0 12px; font-size: 12px; color: var(--muted)">
+<span>Package</span><span style="text-align: right">From</span><span></span><span style="text-align: right">To</span><span style="text-align: right">Date</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>python@3.14</span><span style="text-align: right; color: var(--muted)">3.14.9</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">3.14.10</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>node</span><span style="text-align: right; color: var(--muted)">26.12.1_1</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">26.13.0_2</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>simdutf</span><span style="text-align: right; color: var(--muted)">9.3.2_1</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">9.3.3</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>uv</span><span style="text-align: right; color: var(--muted)">0.13.5</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">0.13.6</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>simdjson</span><span style="text-align: right; color: var(--muted)">5.0.5</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">5.1.0</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+</div>
+
+<footer style="height: 36px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted)">
+<span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: var(--positive)"></span>
+<span style="color: var(--text)">Checked 158 packages in 7 ms</span><span>· 12:04</span>
+<button type="button" aria-label="Show console" style="margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font-size: 12px">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19h8"></path><path d="m4 17 6-6-6-6"></path></svg>Console <span>⌘J</span></button>
+</footer>
+</div>
+</div>
+
+<div aria-hidden="true" style="position: absolute; inset: 0; background: var(--scrim)"></div>
+<div role="dialog" aria-modal="true" aria-label="Reinstall Firefox?" style="position: absolute; left: 50%; top: 132px; transform: translateX(-50%); width: 460px; box-sizing: border-box; padding: 20px 20px 16px; display: flex; flex-direction: column; gap: 12px; background: var(--sheet); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22); color: var(--text)">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--amber); flex: none"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+<h2 style="margin: 0; font-size: 16px; font-weight: 600; line-height: 22px">Reinstall Firefox?</h2>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 20px">nb can't upgrade Firefox in place, because it comes as a disk image. Reinstall removes Firefox 144.0 first, then installs 145.0.1.</p>
+<p style="margin: 0; font-size: 13px; line-height: 20px">If the install fails, for example with no network, Firefox stays removed until you install it again. Your settings in ~/Library stay.</p>
+<p style="margin: 0; font-size: 13px; line-height: 20px; font-weight: 600">Quit Firefox before you continue.</p>
+<div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px">
+<button type="button" style="height: 32px; padding: 0 14px; border: 1px solid var(--negative); border-radius: 6px; background: transparent; color: var(--negative); font-size: 13px; font-weight: 500">Remove and Reinstall</button>
+<a href="#updates" style="display: inline-flex; align-items: center; height: 32px; padding: 0 16px; box-sizing: border-box; border-radius: 6px; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 500; text-decoration: none">Cancel</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="nb-dark" aria-label="Dark" style="background: var(--page); padding: 32px 40px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+<p style="margin: 0; width: 100%; max-width: 1280px; font: 500 13px/20px -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; color: var(--muted)">Dark</p>
+<div style="width: 100%; max-width: 1280px; overflow-x: auto">
+<div style="min-width: 1100px; height: 800px; box-sizing: border-box; display: grid; grid-template-columns: 228px minmax(0, 1fr); background: var(--frame); border: 1px solid var(--edge); border-radius: 12px; overflow: hidden; position: relative; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; font-variant-numeric: tabular-nums">
+
+<nav aria-label="Sections" style="display: flex; flex-direction: column; gap: 2px; padding: 14px 10px 12px; min-height: 0">
+<div aria-hidden="true" style="display: flex; gap: 8px; align-items: center; height: 20px; padding: 0 6px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840"></span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 8px 14px">
+<img src="../../Sources/NanobrewKit/Resources/nanobrew-logo.png" alt="" style="width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: #ffffff">
+<div style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 14px; font-weight: 600; line-height: 18px">Nanobrew UI</span><span style="font-size: 12px; line-height: 16px; color: var(--muted); white-space: nowrap">nb 0.1.214 · /opt/nanobrew</span></div>
+</div>
+<p style="margin: 6px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">Packages</p>
+<a href="#installed" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path></svg>
+<span style="flex: 1">Installed</span></a>
+<a href="#updates" aria-current="page" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; background: var(--active); color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m16 12-4-4-4 4"></path><path d="M12 16V8"></path></svg>
+<span style="flex: 1">Updates</span><span aria-label="4 updates" style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 600; line-height: 18px; text-align: center">4</span></a>
+<a href="#discover" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<span style="flex: 1">Discover</span></a>
+<p style="margin: 14px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">System</p>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>
+<span style="flex: 1">Services</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"></path></svg>
+<span style="flex: 1">Maintenance</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>
+<span style="flex: 1">Bundle</span></a>
+<a href="#" style="margin-top: auto; display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span style="flex: 1">Settings</span></a>
+</nav>
+
+<div style="display: grid; grid-template-rows: 48px minmax(0, 1fr); min-width: 0; min-height: 0">
+<div style="display: flex; align-items: center; justify-content: center; position: relative; padding: 0 16px">
+<label style="display: flex; align-items: center; gap: 8px; width: 400px; height: 32px; padding: 0 10px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<input type="search" aria-label="Search updates" placeholder="Search updates" style="flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 13px; color: var(--text)">
+<span style="font-size: 12px; color: var(--muted)">⌘F</span>
+</label>
+<button type="button" aria-label="Check for updates" style="position: absolute; right: 16px; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+</button>
+</div>
+
+<div style="margin: 0 8px 8px 0; background: var(--sheet); border: 1px solid var(--border); border-radius: 16px; display: flex; flex-direction: column; min-height: 0; overflow: hidden">
+<div style="flex: 1; min-height: 0; overflow: auto; padding: 24px 24px 16px; display: flex; flex-direction: column">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px">
+<div><h1 style="margin: 0; font-size: 22px; font-weight: 600; line-height: 28px">Updates</h1>
+<p style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--muted)">4 updates: 2 ready, 1 pinned, 1 needs a reinstall</p></div>
+<button type="button" style="height: 32px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 500">Upgrade 2</button>
+</div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 36px; margin-top: 20px; padding: 0 12px; font-size: 12px; color: var(--muted)">
+<span>Package</span><span>Kind</span><span style="text-align: right">Installed</span><span style="text-align: right">Available</span><span>Status</span><span style="text-align: right">Action</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">node</span>
+<span style="font-size: 13px; color: var(--muted)">formula</span>
+<span style="text-align: right; color: var(--muted)">26.13.0_2</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">26.14.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+<span style="font-size: 13px; color: var(--muted)">Ready</span>
+
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+<button type="button" style="height: 28px; padding: 0 12px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Upgrade</button>
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">libffi</span>
+<span style="font-size: 13px; color: var(--muted)">formula</span>
+<span style="text-align: right; color: var(--muted)">3.8.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--muted)">3.9.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+
+<span style="display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 4px; background: var(--pill-bg); color: var(--pill-ink); font-size: 12px; font-weight: 500; white-space: nowrap">Pinned, skipped</span>
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+
+<button type="button" style="height: 28px; padding: 0 4px; border: 0; background: none; color: var(--text); font-size: 13px">Unpin</button>
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">puremac</span>
+<span style="font-size: 13px; color: var(--muted)">cask</span>
+<span style="text-align: right; color: var(--muted)">3.2.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">3.3.0</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+<span style="font-size: 13px; color: var(--muted)">Ready</span>
+
+
+</span>
+<span style="display: flex; justify-content: flex-end">
+<button type="button" style="height: 28px; padding: 0 12px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Upgrade</button>
+
+
+</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 72px 110px 110px 290px 116px; gap: 16px; align-items: center; height: 52px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span style="font-weight: 500">firefox</span>
+<span style="font-size: 13px; color: var(--muted)">cask</span>
+<span style="text-align: right; color: var(--muted)">144.0</span>
+<span style="text-align: right; font-weight: 500; color: var(--amber-text)">145.0.1</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+
+
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 4px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 500; white-space: nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>Can't upgrade in place: disk image</span>
+</span>
+<span style="display: flex; justify-content: flex-end">
+
+
+<button type="button" style="height: 28px; padding: 0 12px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Reinstall…</button>
+</span>
+</div>
+
+
+<h2 style="margin: 36px 0 0; font-size: 16px; font-weight: 600; line-height: 22px">Recently upgraded</h2>
+<p style="margin: 2px 0 0; font-size: 13px; line-height: 18px; color: var(--muted)">From nanobrew’s history on this Mac</p>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 36px; margin-top: 8px; padding: 0 12px; font-size: 12px; color: var(--muted)">
+<span>Package</span><span style="text-align: right">From</span><span></span><span style="text-align: right">To</span><span style="text-align: right">Date</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>python@3.14</span><span style="text-align: right; color: var(--muted)">3.14.9</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">3.14.10</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>node</span><span style="text-align: right; color: var(--muted)">26.12.1_1</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">26.13.0_2</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>simdutf</span><span style="text-align: right; color: var(--muted)">9.3.2_1</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">9.3.3</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>uv</span><span style="text-align: right; color: var(--muted)">0.13.5</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">0.13.6</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 110px 20px 110px 110px; gap: 16px; align-items: center; height: 40px; flex: none; padding: 0 12px; border-bottom: 1px solid var(--rule); font-size: 14px">
+<span>simdjson</span><span style="text-align: right; color: var(--muted)">5.0.5</span><span aria-hidden="true" style="text-align: center; color: var(--muted)">→</span><span style="text-align: right">5.1.0</span><span style="text-align: right; font-size: 13px; color: var(--muted)">2026-11-01</span>
+</div>
+
+</div>
+
+<footer style="height: 36px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted)">
+<span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: var(--positive)"></span>
+<span style="color: var(--text)">Checked 158 packages in 7 ms</span><span>· 12:04</span>
+<button type="button" aria-label="Show console" style="margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font-size: 12px">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19h8"></path><path d="m4 17 6-6-6-6"></path></svg>Console <span>⌘J</span></button>
+</footer>
+</div>
+</div>
+
+<div aria-hidden="true" style="position: absolute; inset: 0; background: var(--scrim)"></div>
+<div role="dialog" aria-modal="true" aria-label="Reinstall Firefox?" style="position: absolute; left: 50%; top: 132px; transform: translateX(-50%); width: 460px; box-sizing: border-box; padding: 20px 20px 16px; display: flex; flex-direction: column; gap: 12px; background: var(--sheet); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22); color: var(--text)">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--amber); flex: none"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+<h2 style="margin: 0; font-size: 16px; font-weight: 600; line-height: 22px">Reinstall Firefox?</h2>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 20px">nb can't upgrade Firefox in place, because it comes as a disk image. Reinstall removes Firefox 144.0 first, then installs 145.0.1.</p>
+<p style="margin: 0; font-size: 13px; line-height: 20px">If the install fails, for example with no network, Firefox stays removed until you install it again. Your settings in ~/Library stay.</p>
+<p style="margin: 0; font-size: 13px; line-height: 20px; font-weight: 600">Quit Firefox before you continue.</p>
+<div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px">
+<button type="button" style="height: 32px; padding: 0 14px; border: 1px solid var(--negative); border-radius: 6px; background: transparent; color: var(--negative); font-size: 13px; font-weight: 500">Remove and Reinstall</button>
+<a href="#updates" style="display: inline-flex; align-items: center; height: 32px; padding: 0 16px; box-sizing: border-box; border-radius: 6px; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 500; text-decoration: none">Cancel</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+</section>
+<section id="discover" class="ab-discover" aria-labelledby="discover-h">
+<h2 id="discover-h" class="screen">Discover</h2>
+<div style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column">
+
+<section class="nb-light" aria-label="Light" style="background: var(--page); padding: 32px 40px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+<p style="margin: 0; width: 100%; max-width: 1280px; font: 500 13px/20px -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; color: var(--muted)">Light</p>
+<div style="width: 100%; max-width: 1280px; overflow-x: auto">
+<div style="min-width: 1100px; height: 800px; box-sizing: border-box; display: grid; grid-template-columns: 228px minmax(0, 1fr); background: var(--frame); border: 1px solid var(--edge); border-radius: 12px; overflow: hidden; position: relative; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; font-variant-numeric: tabular-nums">
+
+<nav aria-label="Sections" style="display: flex; flex-direction: column; gap: 2px; padding: 14px 10px 12px; min-height: 0">
+<div aria-hidden="true" style="display: flex; gap: 8px; align-items: center; height: 20px; padding: 0 6px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840"></span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 8px 14px">
+<img src="../../Sources/NanobrewKit/Resources/nanobrew-logo.png" alt="" style="width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: #ffffff">
+<div style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 14px; font-weight: 600; line-height: 18px">Nanobrew UI</span><span style="font-size: 12px; line-height: 16px; color: var(--muted); white-space: nowrap">nb 0.1.214 · /opt/nanobrew</span></div>
+</div>
+<p style="margin: 6px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">Packages</p>
+<a href="#installed" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path></svg>
+<span style="flex: 1">Installed</span></a>
+<a href="#updates" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><circle cx="12" cy="12" r="10"></circle><path d="m16 12-4-4-4 4"></path><path d="M12 16V8"></path></svg>
+<span style="flex: 1">Updates</span><span aria-label="4 updates" style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 600; line-height: 18px; text-align: center">4</span></a>
+<a href="#discover" aria-current="page" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; background: var(--active); color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<span style="flex: 1">Discover</span></a>
+<p style="margin: 14px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">System</p>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>
+<span style="flex: 1">Services</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"></path></svg>
+<span style="flex: 1">Maintenance</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>
+<span style="flex: 1">Bundle</span></a>
+<a href="#" style="margin-top: auto; display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span style="flex: 1">Settings</span></a>
+</nav>
+
+<div style="display: grid; grid-template-rows: 48px minmax(0, 1fr); min-width: 0; min-height: 0">
+<div style="display: flex; align-items: center; justify-content: center; position: relative; padding: 0 16px">
+<label style="display: flex; align-items: center; gap: 8px; width: 400px; height: 32px; padding: 0 10px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<input type="search" aria-label="Search formulae and casks" placeholder="Search formulae and casks" value="jq" readOnly="true" style="flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 13px; color: var(--text)">
+<span style="font-size: 12px; color: var(--muted)">⌘F</span>
+</label>
+<button type="button" aria-label="Check for updates" style="position: absolute; right: 16px; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+</button>
+</div>
+
+<div style="margin: 0 8px 8px 0; background: var(--sheet); border: 1px solid var(--border); border-radius: 16px; display: grid; grid-template-rows: minmax(0, 1fr) 212px; min-height: 0; overflow: hidden">
+<div style="min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 420px">
+
+<div style="display: flex; flex-direction: column; padding: 24px 24px 0; min-width: 0; min-height: 0">
+<h1 style="margin: 0; font-size: 22px; font-weight: 600; line-height: 28px">Discover</h1>
+<p style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--muted)">17 results for “jq” · searched in 6 ms</p>
+<div style="display: flex; flex-direction: column; margin-top: 16px; overflow: auto; min-height: 0">
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">gojq</span><span style="font-size: 13px; color: var(--muted)">0.12.19</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Pure Go implementation of jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">hq</span><span style="font-size: 13px; color: var(--muted)">1.2.2</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Jq, but for HTML</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">ijq</span><span style="font-size: 13px; color: var(--muted)">1.4.2</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Interactive jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jaq</span><span style="font-size: 13px; color: var(--muted)">3.1.2</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">JQ clone focussed on correctness, speed, and simplicity</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jnv</span><span style="font-size: 13px; color: var(--muted)">0.7.1</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Interactive JSON filter using jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: var(--active)">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jq</span><span style="font-size: 13px; color: var(--muted)">1.8.2</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Lightweight and flexible command-line JSON processor</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jq-lsp</span><span style="font-size: 13px; color: var(--muted)">0.1.19</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Jq language server</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jqfmt</span><span style="font-size: 13px; color: var(--muted)">0.1.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Opinionated formatter for jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jql</span><span style="font-size: 13px; color: var(--muted)">9.0.3</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">JSON query language CLI tool</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jqp</span><span style="font-size: 13px; color: var(--muted)">0.8.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">TUI playground to experiment and play with jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">mdq</span><span style="font-size: 13px; color: var(--muted)">0.10.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Like jq but for Markdown</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">mq</span><span style="font-size: 13px; color: var(--muted)">0.10.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Jq-like command-line tool for markdown processing</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">oq</span><span style="font-size: 13px; color: var(--muted)">1.3.5_2</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Performant, and portable jq wrapper to support formats other than JSON</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">python-yq</span><span style="font-size: 13px; color: var(--muted)">4.4.5</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Command-line YAML and XML processor that wraps jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">sq</span><span style="font-size: 13px; color: var(--muted)">0.55.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Data wrangler with jq-like query language</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">yh</span><span style="font-size: 13px; color: var(--muted)">0.4.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">YAML syntax highlighter to bring colours where only jq could</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jquake</span><span style="font-size: 13px; color: var(--muted)">1.8.5</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">cask</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Real-time earthquake monitoring software for Japan</span>
+</div>
+
+</div>
+</div>
+
+<section aria-label="jq details" style="border-left: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; gap: 12px; overflow: auto; min-height: 0">
+<div style="display: flex; align-items: baseline; gap: 8px"><h2 style="margin: 0; font-size: 18px; font-weight: 600; line-height: 24px">jq</h2><span style="font-size: 14px; color: var(--muted)">1.8.2</span></div>
+<p style="margin: -4px 0 0; font-size: 14px; line-height: 20px">Lightweight and flexible command-line JSON processor</p>
+<div style="display: grid; grid-template-columns: 72px minmax(0, 1fr); row-gap: 6px; font-size: 13px; line-height: 18px">
+<span style="color: var(--muted)">Homepage</span><a href="https://jqlang.github.io/jq/" style="display: inline-flex; align-items: center; gap: 4px; text-decoration: none">jqlang.github.io/jq <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+<span style="color: var(--muted)">License</span><span>MIT</span>
+<span style="color: var(--muted)">Trust</span><span>Checksum verified · not probed yet</span>
+</div>
+<div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 4px"><h3 style="margin: 0; font-size: 14px; font-weight: 600">Dependencies</h3><span style="font-size: 12px; color: var(--muted)">1 direct</span></div>
+<pre style="margin: -4px 0 0; padding: 8px 12px; border-radius: 8px; background: var(--raised); font: 12px/18px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--text)">jq
+└── oniguruma</pre>
+<fieldset style="margin: 4px 0 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 2px">
+<legend style="padding: 0; margin-bottom: 6px; font-size: 14px; font-weight: 600">Install options</legend>
+<label style="display: flex; align-items: center; gap: 8px; min-height: 26px; font-size: 13px"><input type="checkbox">Keep dependency tools private <code style="font: 12px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--muted)">--shims</code></label>
+<label style="display: flex; align-items: center; gap: 8px; min-height: 26px; font-size: 13px"><input type="checkbox">Only verified packages <code style="font: 12px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--muted)">--trusted-only</code></label>
+<label style="display: flex; align-items: center; gap: 8px; min-height: 26px; font-size: 13px"><input type="checkbox">Newest verified build <code style="font: 12px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--muted)">@trusted</code></label>
+</fieldset>
+<button type="button" disabled="true" style="align-self: flex-start; height: 32px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--active); color: var(--muted); font-size: 13px; font-weight: 500">Installing jq…</button>
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px">
+<label for="tap-nb-light" style="font-size: 13px; font-weight: 500">Install from a tap</label>
+<div style="display: flex">
+<input id="tap-nb-light" type="text" placeholder="user/tap/name" style="flex: 1; min-width: 0; height: 32px; padding: 0 10px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px 0 0 6px; background: var(--sheet); color: var(--text); font-size: 13px; outline: none">
+<button type="button" style="height: 32px; padding: 0 12px; border: 1px solid var(--control); border-left: 0; border-radius: 0 6px 6px 0; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Install</button>
+</div>
+</div>
+</section>
+</div>
+
+<section aria-label="Console" style="border-top: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0">
+<div style="height: 40px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 24px">
+<span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: var(--amber)"></span>
+<span style="font-size: 13px; font-weight: 600">Running: nb install jq</span><span style="font-size: 12px; color: var(--muted)">1.2 s</span>
+<button type="button" style="margin-left: auto; height: 26px; padding: 0 10px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 12px; font-weight: 500">Cancel</button>
+<button type="button" aria-pressed="false" style="height: 26px; padding: 0 8px; border: 0; background: none; color: var(--muted); font-size: 12px">Keep open</button>
+<button type="button" aria-label="Hide console (⌘J)" style="width: 26px; height: 26px; display: grid; place-items: center; border: 0; border-radius: 6px; background: none; color: var(--muted)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+</div>
+<pre style="margin: 0; padding: 0 24px 12px; flex: 1; min-height: 0; overflow: auto; font: 12px/18px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--text)"><span style="color: var(--muted)">$ nb install jq</span>
+==&gt; Resolving dependencies...
+    [84ms]
+==&gt; Installing 2 package(s):
+    oniguruma 6.9.10
+    jq 1.8.2
+==&gt; Downloading + installing 2 packages...
+    ✓ oniguruma</pre>
+</section>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="nb-dark" aria-label="Dark" style="background: var(--page); padding: 32px 40px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+<p style="margin: 0; width: 100%; max-width: 1280px; font: 500 13px/20px -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; color: var(--muted)">Dark</p>
+<div style="width: 100%; max-width: 1280px; overflow-x: auto">
+<div style="min-width: 1100px; height: 800px; box-sizing: border-box; display: grid; grid-template-columns: 228px minmax(0, 1fr); background: var(--frame); border: 1px solid var(--edge); border-radius: 12px; overflow: hidden; position: relative; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; font-variant-numeric: tabular-nums">
+
+<nav aria-label="Sections" style="display: flex; flex-direction: column; gap: 2px; padding: 14px 10px 12px; min-height: 0">
+<div aria-hidden="true" style="display: flex; gap: 8px; align-items: center; height: 20px; padding: 0 6px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840"></span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 8px 14px">
+<img src="../../Sources/NanobrewKit/Resources/nanobrew-logo.png" alt="" style="width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: #ffffff">
+<div style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 14px; font-weight: 600; line-height: 18px">Nanobrew UI</span><span style="font-size: 12px; line-height: 16px; color: var(--muted); white-space: nowrap">nb 0.1.214 · /opt/nanobrew</span></div>
+</div>
+<p style="margin: 6px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">Packages</p>
+<a href="#installed" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path></svg>
+<span style="flex: 1">Installed</span></a>
+<a href="#updates" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><circle cx="12" cy="12" r="10"></circle><path d="m16 12-4-4-4 4"></path><path d="M12 16V8"></path></svg>
+<span style="flex: 1">Updates</span><span aria-label="4 updates" style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: var(--amber-bg); color: var(--amber-text); font-size: 12px; font-weight: 600; line-height: 18px; text-align: center">4</span></a>
+<a href="#discover" aria-current="page" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; background: var(--active); color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<span style="flex: 1">Discover</span></a>
+<p style="margin: 14px 8px 4px; font-size: 12px; line-height: 16px; color: var(--muted)">System</p>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>
+<span style="flex: 1">Services</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"></path></svg>
+<span style="flex: 1">Maintenance</span></a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>
+<span style="flex: 1">Bundle</span></a>
+<a href="#" style="margin-top: auto; display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span style="flex: 1">Settings</span></a>
+</nav>
+
+<div style="display: grid; grid-template-rows: 48px minmax(0, 1fr); min-width: 0; min-height: 0">
+<div style="display: flex; align-items: center; justify-content: center; position: relative; padding: 0 16px">
+<label style="display: flex; align-items: center; gap: 8px; width: 400px; height: 32px; padding: 0 10px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+<input type="search" aria-label="Search formulae and casks" placeholder="Search formulae and casks" value="jq" readOnly="true" style="flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 13px; color: var(--text)">
+<span style="font-size: 12px; color: var(--muted)">⌘F</span>
+</label>
+<button type="button" aria-label="Check for updates" style="position: absolute; right: 16px; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--muted)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+</button>
+</div>
+
+<div style="margin: 0 8px 8px 0; background: var(--sheet); border: 1px solid var(--border); border-radius: 16px; display: grid; grid-template-rows: minmax(0, 1fr) 212px; min-height: 0; overflow: hidden">
+<div style="min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 420px">
+
+<div style="display: flex; flex-direction: column; padding: 24px 24px 0; min-width: 0; min-height: 0">
+<h1 style="margin: 0; font-size: 22px; font-weight: 600; line-height: 28px">Discover</h1>
+<p style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--muted)">17 results for “jq” · searched in 6 ms</p>
+<div style="display: flex; flex-direction: column; margin-top: 16px; overflow: auto; min-height: 0">
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">gojq</span><span style="font-size: 13px; color: var(--muted)">0.12.19</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Pure Go implementation of jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">hq</span><span style="font-size: 13px; color: var(--muted)">1.2.2</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Jq, but for HTML</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">ijq</span><span style="font-size: 13px; color: var(--muted)">1.4.2</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Interactive jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jaq</span><span style="font-size: 13px; color: var(--muted)">3.1.2</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">JQ clone focussed on correctness, speed, and simplicity</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jnv</span><span style="font-size: 13px; color: var(--muted)">0.7.1</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Interactive JSON filter using jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: var(--active)">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jq</span><span style="font-size: 13px; color: var(--muted)">1.8.2</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Lightweight and flexible command-line JSON processor</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jq-lsp</span><span style="font-size: 13px; color: var(--muted)">0.1.19</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Jq language server</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jqfmt</span><span style="font-size: 13px; color: var(--muted)">0.1.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Opinionated formatter for jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jql</span><span style="font-size: 13px; color: var(--muted)">9.0.3</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">JSON query language CLI tool</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jqp</span><span style="font-size: 13px; color: var(--muted)">0.8.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">TUI playground to experiment and play with jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">mdq</span><span style="font-size: 13px; color: var(--muted)">0.10.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Like jq but for Markdown</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">mq</span><span style="font-size: 13px; color: var(--muted)">0.10.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Jq-like command-line tool for markdown processing</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">oq</span><span style="font-size: 13px; color: var(--muted)">1.3.5_2</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Performant, and portable jq wrapper to support formats other than JSON</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">python-yq</span><span style="font-size: 13px; color: var(--muted)">4.4.5</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Command-line YAML and XML processor that wraps jq</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">sq</span><span style="font-size: 13px; color: var(--muted)">0.55.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Data wrangler with jq-like query language</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">yh</span><span style="font-size: 13px; color: var(--muted)">0.4.0</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">formula</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">YAML syntax highlighter to bring colours where only jq could</span>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 52px; flex: none; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid var(--rule); background: transparent">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px"><span style="font-weight: 500">jquake</span><span style="font-size: 13px; color: var(--muted)">1.8.5</span><span style="margin-left: auto; font-size: 12px; color: var(--muted)">cask</span></div>
+<span style="font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Real-time earthquake monitoring software for Japan</span>
+</div>
+
+</div>
+</div>
+
+<section aria-label="jq details" style="border-left: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; gap: 12px; overflow: auto; min-height: 0">
+<div style="display: flex; align-items: baseline; gap: 8px"><h2 style="margin: 0; font-size: 18px; font-weight: 600; line-height: 24px">jq</h2><span style="font-size: 14px; color: var(--muted)">1.8.2</span></div>
+<p style="margin: -4px 0 0; font-size: 14px; line-height: 20px">Lightweight and flexible command-line JSON processor</p>
+<div style="display: grid; grid-template-columns: 72px minmax(0, 1fr); row-gap: 6px; font-size: 13px; line-height: 18px">
+<span style="color: var(--muted)">Homepage</span><a href="https://jqlang.github.io/jq/" style="display: inline-flex; align-items: center; gap: 4px; text-decoration: none">jqlang.github.io/jq <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+<span style="color: var(--muted)">License</span><span>MIT</span>
+<span style="color: var(--muted)">Trust</span><span>Checksum verified · not probed yet</span>
+</div>
+<div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 4px"><h3 style="margin: 0; font-size: 14px; font-weight: 600">Dependencies</h3><span style="font-size: 12px; color: var(--muted)">1 direct</span></div>
+<pre style="margin: -4px 0 0; padding: 8px 12px; border-radius: 8px; background: var(--raised); font: 12px/18px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--text)">jq
+└── oniguruma</pre>
+<fieldset style="margin: 4px 0 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 2px">
+<legend style="padding: 0; margin-bottom: 6px; font-size: 14px; font-weight: 600">Install options</legend>
+<label style="display: flex; align-items: center; gap: 8px; min-height: 26px; font-size: 13px"><input type="checkbox">Keep dependency tools private <code style="font: 12px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--muted)">--shims</code></label>
+<label style="display: flex; align-items: center; gap: 8px; min-height: 26px; font-size: 13px"><input type="checkbox">Only verified packages <code style="font: 12px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--muted)">--trusted-only</code></label>
+<label style="display: flex; align-items: center; gap: 8px; min-height: 26px; font-size: 13px"><input type="checkbox">Newest verified build <code style="font: 12px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--muted)">@trusted</code></label>
+</fieldset>
+<button type="button" disabled="true" style="align-self: flex-start; height: 32px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--active); color: var(--muted); font-size: 13px; font-weight: 500">Installing jq…</button>
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px">
+<label for="tap-nb-dark" style="font-size: 13px; font-weight: 500">Install from a tap</label>
+<div style="display: flex">
+<input id="tap-nb-dark" type="text" placeholder="user/tap/name" style="flex: 1; min-width: 0; height: 32px; padding: 0 10px; box-sizing: border-box; border: 1px solid var(--control); border-radius: 6px 0 0 6px; background: var(--sheet); color: var(--text); font-size: 13px; outline: none">
+<button type="button" style="height: 32px; padding: 0 12px; border: 1px solid var(--control); border-left: 0; border-radius: 0 6px 6px 0; background: var(--sheet); color: var(--text); font-size: 13px; font-weight: 500">Install</button>
+</div>
+</div>
+</section>
+</div>
+
+<section aria-label="Console" style="border-top: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0">
+<div style="height: 40px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 24px">
+<span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: var(--amber)"></span>
+<span style="font-size: 13px; font-weight: 600">Running: nb install jq</span><span style="font-size: 12px; color: var(--muted)">1.2 s</span>
+<button type="button" style="margin-left: auto; height: 26px; padding: 0 10px; border: 1px solid var(--control); border-radius: 6px; background: var(--sheet); color: var(--text); font-size: 12px; font-weight: 500">Cancel</button>
+<button type="button" aria-pressed="false" style="height: 26px; padding: 0 8px; border: 0; background: none; color: var(--muted); font-size: 12px">Keep open</button>
+<button type="button" aria-label="Hide console (⌘J)" style="width: 26px; height: 26px; display: grid; place-items: center; border: 0; border-radius: 6px; background: none; color: var(--muted)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+</div>
+<pre style="margin: 0; padding: 0 24px 12px; flex: 1; min-height: 0; overflow: auto; font: 12px/18px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--text)"><span style="color: var(--muted)">$ nb install jq</span>
+==&gt; Resolving dependencies...
+    [84ms]
+==&gt; Installing 2 package(s):
+    oniguruma 6.9.10
+    jq 1.8.2
+==&gt; Downloading + installing 2 packages...
+    ✓ oniguruma</pre>
+</section>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+</section>
+</body>
+</html>

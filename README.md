@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/images/nanobrew-ui-icon.jpg" alt="The Nanobrew UI app icon in the macOS Dock" width="480">
+</p>
+
 # Nanobrew UI
 
 A native macOS app for [nanobrew](https://github.com/justrach/nanobrew) (`nb`). It shows what nb has installed,
@@ -59,6 +63,15 @@ open -n "dist/Nanobrew UI.app" --args -NBPath /tmp/nbfake/nb -NBStatePath /tmp/n
 ```
 
 The fake nb logs every command it gets to `/tmp/nbfake/fake-nb.log`. `-NBAppearance light|dark` is for tests only.
+
+## Docs
+
+- [Architecture](docs/ARCHITECTURE.md): how the app is built and how it runs nb.
+- [Design language](docs/DESIGN.md): the look, the colours and what they mean, the components.
+- [Decisions](docs/DECISIONS.md): the main choices and their reasons.
+- [Testing](docs/TESTING.md): the tests, the fake nb, and how to check the app safely.
+- [Releasing](docs/RELEASING.md): the zip, the cask and the release checks.
+- [UI prototype](docs/UI/prototype_UI.html): the approved mockups, in light and dark (open the file in a browser).
 
 ## Future ideas
 
