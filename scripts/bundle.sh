@@ -10,16 +10,19 @@ APP="$DIST/Nanobrew UI.app"
 ZIP="$DIST/Nanobrew-UI-$VERSION.zip"
 
 swift build -c release --package-path "$ROOT"
-BIN="$(swift build -c release --package-path "$ROOT" --show-bin-path)/NanobrewUI"
+BINDIR="$(swift build -c release --package-path "$ROOT" --show-bin-path)"
+BIN="$BINDIR/NanobrewUI"
 
 rm -rf "$APP" "$ZIP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/NanobrewUI"
+# NanobrewKit's resources (the Lucide icons and the logo) go in Contents/Resources, where codesign seals them.
+cp -R "$BINDIR/NanobrewUI_NanobrewKit.bundle" "$APP/Contents/Resources/"
 
 # The icon at every size, from nanobrew's logo (scripts/make-icon.swift).
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
-swift "$ROOT/scripts/make-icon.swift" "$ROOT/Assets/nanobrew-logo.png" "$WORK/icon_1024.png"
+swift "$ROOT/scripts/make-icon.swift" "$ROOT/Sources/NanobrewKit/Resources/nanobrew-logo.png" "$WORK/icon_1024.png"
 ICONSET="$WORK/AppIcon.iconset"
 mkdir "$ICONSET"
 for s in 16 32 128 256 512; do

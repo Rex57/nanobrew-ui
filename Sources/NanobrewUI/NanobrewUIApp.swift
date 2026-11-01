@@ -8,6 +8,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidBecomeActive(_ notification: Notification) { model.checkAgain() }
 
+    /// Test-only `-NBAppearance light|dark`: macOS ignores `-AppleInterfaceStyle Light` on a Mac set to dark.
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        switch launchArgument("NBAppearance") {
+        case "light": NSApp.appearance = NSAppearance(named: .aqua)
+        case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
+        default: break
+        }
+    }
+
     private var closeGuard: CloseGuard?
 
     /// Asks first while a changing command runs or waits; true when the app may quit.
@@ -48,11 +57,16 @@ struct NanobrewUIApp: App {
             ContentView().environment(delegate.model)
                 .background(WindowReader { delegate.guardClose(of: $0) })
         }
+        .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1100, height: 760)
         .commands {
             CommandGroup(replacing: .appInfo) { AboutMenuItem() }
             CommandGroup(after: .toolbar) {
-                Button("Reload") { delegate.model.checkAgain() }.keyboardShortcut("r")
+                Button("Reload") {
+                    delegate.model.checkAgain()
+                    Task { await delegate.model.checkOutdated() }
+                }
+                .keyboardShortcut("r")
             }
         }
         Window("About Nanobrew UI", id: "about") {
@@ -79,32 +93,59 @@ struct ContentView: View {
     @State private var typed = ""
 
     var body: some View {
-        NavigationSplitView {
-            List(Section.allCases, selection: $section) { Text($0.rawValue).tag($0) }
-        } detail: {
-            VSplitView {
-                VStack(spacing: 0) {
-                    if model.restartOffered {
-                        HStack {
-                            Text("Restart to use the new version")
-                            Button("Restart", action: relaunch)
-                        }
-                        .padding(8).frame(maxWidth: .infinity, alignment: .leading).background(.yellow.opacity(0.2))
+        HStack(spacing: 0) {
+            Sidebar(section: $section).frame(width: 228)
+            VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    Button(action: checkAgain) {
+                        IconView(icon: .rotateCW).foregroundStyle(Theme.muted)
+                            .frame(width: 32, height: 32)
+                            .background(Theme.sheet, in: RoundedRectangle(cornerRadius: 6))
+                            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Theme.control))
                     }
-                    if let error = model.stateError {
-                        Text(error).foregroundStyle(.red).padding(8).frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    if model.notInstalled && section != .settings {
-                        NotInstalledView()
-                    } else if model.notSetUp && section != .settings {
-                        NotSetUpView()
-                    } else {
-                        sectionView
-                    }
+                    .buttonStyle(.plain)
+                    .help("Check again (⌘R)")
+                    .accessibilityLabel("Check again")
                 }
-                .frame(minHeight: 200, maxHeight: .infinity)
-                ConsoleView().frame(minHeight: 120, idealHeight: 180)
+                .padding(.horizontal, 16)
+                .frame(height: 48)
+                // The sheet (DD11): inset 8px from the right and bottom edges, 16px corners, a 1px edge, no shadow.
+                VSplitView {
+                    VStack(spacing: 0) {
+                        if model.restartOffered {
+                            HStack {
+                                Text("Restart to use the new version")
+                                Button("Restart", action: relaunch)
+                            }
+                            .padding(8).frame(maxWidth: .infinity, alignment: .leading).background(.yellow.opacity(0.2))
+                        }
+                        if let error = model.stateError {
+                            Text(error).foregroundStyle(.red).padding(8).frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        if model.notInstalled && section != .settings {
+                            NotInstalledView()
+                        } else if model.notSetUp && section != .settings {
+                            NotSetUpView()
+                        } else {
+                            sectionView
+                        }
+                    }
+                    .frame(minHeight: 200, maxHeight: .infinity)
+                    ConsoleView().frame(minHeight: 120, idealHeight: 180)
+                }
+                .background(Theme.sheet)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Theme.border))
+                .padding(.trailing, 8).padding(.bottom, 8)
             }
+        }
+        .background(Theme.frame)
+        .ignoresSafeArea()
+        .task { await model.checkOutdated() }
+        // After each command: the count on Updates may have changed.
+        .onChange(of: model.inProgress) { old, new in
+            if new.count < old.count { Task { await model.checkOutdated() } }
         }
         // After a command (nuke, init) left nb or the state folder gone, show the screen that says so.
         // Not on a Settings path change: the user stays there to fix a typo.
@@ -130,6 +171,11 @@ struct ContentView: View {
                  ? "This removes nanobrew and everything it installed. Type yes to go on."
                  : "This changes your system.")
         }
+    }
+
+    private func checkAgain() {
+        model.checkAgain()
+        Task { await model.checkOutdated() }
     }
 
     @ViewBuilder private var sectionView: some View {

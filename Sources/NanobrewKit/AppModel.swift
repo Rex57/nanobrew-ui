@@ -13,6 +13,8 @@ public final class AppModel {
     public private(set) var snapshot: StateSnapshot?
     public private(set) var notSetUp = false
     public private(set) var stateError: String?
+    /// The number on Updates in the sidebar: outdated formulae plus casks; nil for 0 or when the check failed.
+    public private(set) var updatesCount: Int?
     /// The console: one line per output line, with a header and an end line per command.
     // shortcut: every line of the session is kept (a few MB at the expected load); cap it if sessions
     // reach tens of MB of output (for example a long-running command left open for days).
@@ -172,6 +174,12 @@ public final class AppModel {
         async let formulae = captureStdout(.outdated)
         async let casks = captureStdout(.outdatedCasks)
         return try await OutdatedPackage.parse(formulae).filter { !$0.isCask } + OutdatedPackage.parse(casks)
+    }
+
+    /// Sets `updatesCount` (at launch, on Cmd-R and after each command).
+    public func checkOutdated() async {
+        let count = (try? await outdated())?.count ?? 0
+        updatesCount = count > 0 ? count : nil
     }
 
     /// The detail pane of a package: parsed info (or nb's error text) and, for a formula, the dependency tree.

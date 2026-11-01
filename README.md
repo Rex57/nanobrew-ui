@@ -42,5 +42,8 @@ nb prints text for people, and the app reads that text. When nanobrew adds `--js
 
 Apache-2.0 (see LICENSE). No code is copied from Homebrew's BrewUI.
 
-The nanobrew logo (`Assets/nanobrew-logo.png`, used in the app icon) is Copyright 2026 Rach Pradhan, licensed
+The nanobrew logo (`Sources/NanobrewKit/Resources/nanobrew-logo.png`, used in the app icon and the sidebar) is Copyright 2026 Rach Pradhan, licensed
 under Apache-2.0, from the nanobrew repository.
+
+The icons are from [Lucide](https://lucide.dev) (lucide-static 1.66.0, `Sources/NanobrewKit/Resources/Icons`, drawn
+at stroke width 1.5), licensed under the ISC License, Copyright (c) Lucide Contributors.
