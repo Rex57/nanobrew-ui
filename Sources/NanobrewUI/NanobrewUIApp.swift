@@ -47,10 +47,15 @@ struct NanobrewUIApp: App {
         }
         .defaultSize(width: 1100, height: 760)
         .commands {
+            CommandGroup(replacing: .appInfo) { AboutMenuItem() }
             CommandGroup(after: .toolbar) {
                 Button("Reload") { delegate.model.checkAgain() }.keyboardShortcut("r")
             }
         }
+        Window("About Nanobrew UI", id: "about") {
+            AboutView().environment(delegate.model)
+        }
+        .windowResizability(.contentSize)
     }
 }
 

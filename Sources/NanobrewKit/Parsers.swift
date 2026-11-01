@@ -145,3 +145,11 @@ public struct AutoupdateStatus: Equatable, Sendable {
 public func parseTelemetry(_ lines: [String]) -> Bool? {
     lines.lazy.compactMap { $0.wholeMatch(of: /Telemetry is (on|off)\./).map { $0.1 == "on" } }.first
 }
+
+/// The nb version this app was tested with (D18).
+public let testedNBVersion = "0.1.214"
+
+/// `nb version` prints the bare version, for example `0.1.214`.
+public func parseNBVersion(_ lines: [String]) -> String? {
+    lines.lazy.compactMap { $0.trimmingCharacters(in: .whitespaces).wholeMatch(of: /\d+(\.\d+)+/).map { String($0.0) } }.first
+}

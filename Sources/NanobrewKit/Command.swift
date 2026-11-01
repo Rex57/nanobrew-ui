@@ -102,5 +102,6 @@ public struct NBCommand: Equatable, Hashable, Sendable {
         NBCommand(program: "/usr/bin/osascript", args: ["-e", initScript(), nbPath], changes: true, label: "sudo nb init")
     }
 
+    public static let version = NBCommand(args: ["version"], changes: false)
     public static func depsTree(_ name: String) -> NBCommand { NBCommand(args: ["deps", "--tree", name], changes: false) }
 }

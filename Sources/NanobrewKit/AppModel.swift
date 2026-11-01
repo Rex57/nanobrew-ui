@@ -138,6 +138,8 @@ public final class AppModel {
         nbPath = NBLocator.locate(defaults: defaults)
     }
 
+    public func nbVersion() async -> String? { parseNBVersion(await capture(.version).lines) }
+
     public func services() async -> [Service] { Service.parse(await capture(.servicesList).lines) }
 
     /// Formulae from `nb outdated`, casks from `nb outdated --cask`.
