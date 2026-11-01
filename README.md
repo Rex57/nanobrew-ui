@@ -33,10 +33,13 @@ scripts/bundle.sh           # dist/Nanobrew UI.app, dist/Nanobrew-UI-1.0.0.zip, 
 A Swift package, no Xcode project and no third-party dependency: the library `NanobrewKit` holds all logic, and
 the `NanobrewUI` target holds the SwiftUI views. `scripts/make-icon.swift` makes the icon from nanobrew's logo.
 
-## Plans
+## Future ideas
 
-nb prints text for people, and the app reads that text. When nanobrew adds `--json` output (for `list`,
-`outdated`, `info`, `search`, `leaves`, `deps`, `services list` and `where`), the app will use it.
+- **nb's `--json` output.** nb prints text for people, and the app reads that text. When nanobrew adds `--json`
+  output (for `list`, `outdated`, `info`, `search`, `leaves`, `deps`, `services list` and `where`), the app will
+  use it.
+- **"Recently upgraded" on Updates.** A list of the last upgrades (package, from, to, date), built from the
+  history in nanobrew's state.json. It was drawn on the design canvas and left out of 1.0.0.
 
 ## License
 
