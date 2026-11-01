@@ -90,10 +90,13 @@ struct SettingsView: View {
                 }
             }
             SwiftUI.Section("Danger zone") {
+                // Only on an idle app: a queued nuke could not be withdrawn (Cancel would start it).
                 HStack {
                     Button("Migrate from Homebrew…") { model.request(.migrate) }
                     Button("Remove nanobrew (nuke)…") { model.request(.nuke) }
+                    if model.askBeforeQuit { Text("Wait until no command runs.").foregroundStyle(.secondary) }
                 }
+                .disabled(model.askBeforeQuit)
             }
             SwiftUI.Section("nb path") {
                 HStack {

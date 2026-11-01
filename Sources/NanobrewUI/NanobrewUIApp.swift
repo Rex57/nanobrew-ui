@@ -103,6 +103,8 @@ struct ContentView: View {
                 ConsoleView().frame(minHeight: 120, idealHeight: 180)
             }
         }
+        // After nuke or a lost nb, show the screen that says so, not a stale section.
+        .onChange(of: model.notInstalled || model.notSetUp) { _, blocked in if blocked { section = .installed } }
         .alert(model.pendingConfirmation.map { "Run \($0.title)?" } ?? "",
                isPresented: Binding(get: { model.pendingConfirmation != nil }, set: { if !$0 { model.decline() } })) {
             if model.pendingConfirmation?.confirmation == .typeYes {
@@ -112,6 +114,7 @@ struct ContentView: View {
                 model.confirm(typed: typed)
                 typed = ""
             }
+            .disabled(model.pendingConfirmation?.confirmation == .typeYes && typed != "yes")
             Button("Cancel", role: .cancel) {
                 model.decline()
                 typed = ""
@@ -160,6 +163,7 @@ struct NotSetUpView: View {
             Button("Set up nanobrew") {
                 if let nb = model.nbPath { model.request(.initNanobrew(nbPath: nb)) }
             }
+            .disabled(model.askBeforeQuit)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
