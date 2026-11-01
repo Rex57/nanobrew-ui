@@ -47,7 +47,7 @@ struct InstalledView: View {
                     LazyVStack(spacing: 0) {
                         if casks {
                             ForEach(caskList.filter { match($0.token) }) { c in
-                                row(PackageRef(name: c.token, cask: true), version: c.version, date: "", pinned: false)
+                                row(PackageRef(name: c.token, cask: true), version: c.version, date: "—", pinned: false) // state.json has no install date for a cask
                             }
                         } else {
                             ForEach(formulae.filter { match($0.name) }) { f in

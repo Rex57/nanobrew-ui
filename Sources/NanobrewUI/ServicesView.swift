@@ -22,7 +22,7 @@ struct ServicesView: View {
                     row(name: Text("Name"), formula: Text("Formula")) { Text("Status") } actions: { Text("Actions") }
                         .font(.system(size: 12)).foregroundStyle(Theme.muted).frame(height: 36).padding(.top, 20)
                     ScrollView {
-                        LazyVStack(spacing: 0) {
+                        LazyVStack(alignment: .leading, spacing: 0) {
                             ForEach(rows, id: \.self) { service in
                                 row(name: Text(service.name).fontWeight(.medium),
                                     formula: Text(service.formula).foregroundStyle(Theme.muted)) {
@@ -65,6 +65,7 @@ struct ServicesView: View {
             HStack(spacing: 16) { actions() }.buttonStyle(TextButtonStyle()).frame(width: 200, alignment: .trailing)
         }
         .padding(.horizontal, 12)
+        .frame(maxWidth: 760, alignment: .leading) // app-screens §4.2: a short table keeps its columns close
     }
 
     private func load() async {
