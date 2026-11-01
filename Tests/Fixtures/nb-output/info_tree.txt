@@ -1,0 +1,7 @@
+tree 2.3.2 (bottled)
+  Display directories as trees (with optional color/HTML output)
+  homepage: https://oldmanprogrammer.net/source.php?dir=projects/tree
+  trust: source-verified (local probe: not recorded; run `nb doctor --probe tree`)
+  url: https://ghcr.io/v2/homebrew/core/tree/blobs/sha256:d1967d2ed08717f963addb249ea6b8ca11c26ecb59efba34f2860853a06bedc7
+  sha256: d1967d2ed08717f963addb249ea6b8ca11c26ecb59efba34f2860853a06bedc7
+  deps: 

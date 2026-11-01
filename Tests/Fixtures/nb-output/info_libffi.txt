@@ -1,0 +1,8 @@
+libffi 3.8.0 (bottled)
+  Portable Foreign Function Interface library
+  homepage: https://sourceware.org/libffi/
+  license: MIT
+  trust: checksum-verified (local probe: failed, 1786324535)
+  url: https://ghcr.io/v2/homebrew/core/libffi/blobs/sha256:a36f51cb6041fb1c5e70a6300a05a58dfc3b3503e621f83198731f1eaed63f2f
+  sha256: a36f51cb6041fb1c5e70a6300a05a58dfc3b3503e621f83198731f1eaed63f2f
+  deps: 

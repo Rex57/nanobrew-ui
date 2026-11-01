@@ -1,0 +1,12 @@
+node 26.13.0_2 (bottled)
+  Open-source, cross-platform JavaScript runtime environment
+  homepage: https://nodejs.org/
+  license: MIT
+  trust: install-verified (local probe: passed, 1793511319)
+  url: https://ghcr.io/v2/homebrew/core/node/blobs/sha256:29930aa85327fddd18e62d99158ffa735364f6a53b3ebc924775f6b27303613f
+  sha256: 29930aa85327fddd18e62d99158ffa735364f6a53b3ebc924775f6b27303613f
+  deps: abseil, ada-url, brotli, c-ares, hdrhistogram_c, icu4c@79, libffi, libnghttp2, libuv, llhttp, merve, nbytes, openssl@4, simdjson, simdutf, sqlite, uvwasi, zstd, highway, python
+  build deps: pkgconf, python@3.15, rust
+  caveats:
+    Single Executable Application is disabled as it doesn't work with shared libnode.
+    

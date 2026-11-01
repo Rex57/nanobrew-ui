@@ -1,0 +1,9 @@
+PureMac 3.2.0
+  Open-source application manager and system cleaner
+  homepage: https://github.com/momenbasel/PureMac
+  source: homebrew metadata
+  url: https://github.com/momenbasel/PureMac/releases/download/v3.2.0/PureMac-3.2.0.zip
+  sha256: 5ba35fde0b60a645d61edacc8a8b8f198625ea91ac3750c60d41efe22a240a50
+  trust: install-verified (local probe: passed, 1793258237)
+  artifacts:
+    app: PureMac.app

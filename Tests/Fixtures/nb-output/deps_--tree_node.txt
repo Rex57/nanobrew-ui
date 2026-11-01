@@ -1,0 +1,34 @@
+==> Resolving dependencies for node...
+node
+├── abseil
+├── ada-url
+│   ├── fmt
+│   └── simdutf
+│       └── icu4c@79
+├── brotli
+├── c-ares
+├── hdrhistogram_c
+├── icu4c@79
+├── libffi
+├── libnghttp2
+├── libuv
+├── llhttp
+├── merve
+│   └── simdutf
+│       └── icu4c@79
+├── nbytes
+├── openssl@4
+│   └── ca-certificates
+├── simdjson
+├── simdutf
+│   └── icu4c@79
+├── sqlite
+│   └── readline
+│       └── ncurses
+├── uvwasi
+│   └── libuv
+├── zstd
+│   ├── lz4
+│   └── xz
+├── highway
+└── python

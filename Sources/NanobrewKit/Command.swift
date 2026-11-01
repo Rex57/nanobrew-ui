@@ -17,4 +17,7 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public var title: String { (["nb"] + args).joined(separator: " ") }
 
     public static let doctor = NBCommand(args: ["doctor"], changes: false)
+    public static func info(_ name: String) -> NBCommand { NBCommand(args: ["info", name], changes: false) }
+    public static func caskInfo(_ token: String) -> NBCommand { NBCommand(args: ["info", "--cask", token], changes: false) }
+    public static func depsTree(_ name: String) -> NBCommand { NBCommand(args: ["deps", "--tree", name], changes: false) }
 }

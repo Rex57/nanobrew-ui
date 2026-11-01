@@ -29,6 +29,7 @@ struct NanobrewUIApp: App {
         WindowGroup("Nanobrew UI") {
             ContentView().environment(delegate.model)
         }
+        .defaultSize(width: 1100, height: 760)
         .commands {
             CommandGroup(after: .toolbar) {
                 Button("Reload") { delegate.model.reload() }.keyboardShortcut("r")

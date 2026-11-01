@@ -67,6 +67,27 @@ public final class AppModel {
         processes.forEach { $0.cancel() }
     }
 
+    /// Runs a read-only command without the console and returns its lines and exit code (nil: no nb, or a signal).
+    public func capture(_ command: NBCommand) async -> (lines: [String], exitCode: Int32?) {
+        guard let nbPath, let process = try? NBProcess(path: nbPath, args: command.args) else { return ([], nil) }
+        var lines: [String] = []
+        for await batch in process.lines { lines += batch }
+        return (lines, process.exitCode)
+    }
+
+    /// The detail pane of a package: parsed info (or nb's error text) and, for a formula, the dependency tree.
+    public func detail(name: String, cask: Bool) async -> PackageDetail {
+        let (lines, code) = await capture(cask ? .caskInfo(name) : .info(name))
+        let text = lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard code == 0, let info = PackageInfo.parse(lines) else {
+            return PackageDetail(error: text.isEmpty ? "nb info failed (exit code \(code.map(String.init) ?? "none"))" : text)
+        }
+        guard !cask else { return PackageDetail(info: info) }
+        let tree = await capture(.depsTree(name))
+        return PackageDetail(info: info, tree: tree.lines.filter { !$0.hasPrefix("==>") }.joined(separator: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines))
+    }
+
     private func execute(_ command: NBCommand) async {
         console.append("$ \(command.title)")
         guard let nbPath else { console.append("Failed: nb is not installed"); return }
