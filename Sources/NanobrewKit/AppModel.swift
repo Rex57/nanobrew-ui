@@ -282,7 +282,8 @@ public final class AppModel {
         }
         let skips = UnsupportedSkip.parse(output)
         record(skips)
-        if !quiet || running == nil {
+        // Decided at the end: a read-only command that started before a change must not hide it either.
+        if command.changes || running == nil {
             status = CommandStatus(command: command, exitCode: process.wasCancelled ? nil : process.exitCode,
                                    cancelled: process.wasCancelled, duration: now() - start, skipped: skips.map(\.token))
         }

@@ -128,6 +128,21 @@ import Testing
         #expect(model.status?.text.hasPrefix("Installed jq in ") == true)
     }
 
+    @Test func aReadOnlyCommandStartedBeforeAChangeDoesNotReplaceIt() async throws {
+        let nb = try FakeNB()
+        try nb.wait("doctor", seconds: 1)
+        try nb.wait("update-registry", seconds: 2)
+        let model = nb.model()
+        let doctor = model.run(.doctor)
+        await eventually { nb.log.contains { $0 == ["START", "doctor"] } }
+        let change = model.run(.updateRegistry)
+        await eventually { model.running == .updateRegistry }
+        await doctor.value
+        #expect(model.status?.kind == .running)
+        #expect(model.status?.text == "Running: nb update-registry")
+        await change.value
+    }
+
     @Test func noCheckedStatusWithoutNb() async {
         let model = AppModel(statePath: fixture("state.json"), nbPath: nil)
         await model.refresh()
