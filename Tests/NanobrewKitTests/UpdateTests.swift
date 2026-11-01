@@ -35,9 +35,9 @@ import Testing
     }
 
     /// The state file says nanobrew-ui 1.0.1 once the upgrade is done; the app runs 1.0.0.
-    func selfUpgradeModel(_ nb: FakeNB) throws -> AppModel {
+    func selfUpgradeModel(_ nb: FakeNB, state name: String = "state-self-upgraded.json") throws -> AppModel {
         let state = nb.dir.appendingPathComponent("state.json").path
-        try FileManager.default.copyItem(atPath: fixture("state-self-upgraded.json"), toPath: state)
+        try FileManager.default.copyItem(atPath: fixture(name), toPath: state)
         let model = AppModel(statePath: state, nbPath: nb.path, appVersion: "1.0.0")
         model.reload()
         return model
@@ -83,6 +83,35 @@ import Testing
         let model = AppModel(statePath: fixture("state-self-current.json"), nbPath: nb.path, appVersion: "1.0.0")
         model.reload()
         await model.run(.upgradeCask("nanobrew-ui")).value
+        #expect(!model.restartOffered)
+    }
+
+    // A tap install: nb records the cask as Rex57/tap/nanobrew-ui (token and canonical_token).
+    let tapToken = "Rex57/tap/nanobrew-ui"
+    let tapRows = [OutdatedPackage(name: "puremac", installed: "3.2.0", latest: "3.3.0", isCask: true, pinned: false),
+                   OutdatedPackage(name: "Rex57/tap/nanobrew-ui", installed: "1.0.0", latest: "1.0.1", isCask: true,
+                                   pinned: false)]
+
+    @Test func restartOfferAfterASuccessfulTapSelfUpgrade() async throws {
+        let nb = try FakeNB()
+        let model = try selfUpgradeModel(nb, state: "state-self-tap-upgraded.json")
+        await model.run(.upgradeCask(tapToken)).value
+        #expect(model.restartOffered)
+    }
+
+    @Test func restartOfferAfterUpgradeAllCasksWithTheTapCask() async throws {
+        let nb = try FakeNB()
+        let model = try selfUpgradeModel(nb, state: "state-self-tap-upgraded.json")
+        let command = try #require(model.upgradeAllCasks(tapRows))
+        #expect(command == NBCommand(args: ["upgrade", "--cask", "puremac", tapToken], changes: true))
+        await model.run(command).value
+        #expect(model.restartOffered)
+    }
+
+    @Test func noRestartOfferForTheTapCaskWhenTheVersionDidNotChange() async throws {
+        let nb = try FakeNB()
+        let model = try selfUpgradeModel(nb, state: "state-self-tap-current.json")
+        await model.run(try #require(model.upgradeAllCasks(tapRows))).value
         #expect(!model.restartOffered)
     }
 

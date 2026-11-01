@@ -305,9 +305,11 @@ public final class AppModel {
     /// An upgrade of nanobrew-ui (or of everything) after which state.json holds another version than this app.
     private func replacedSelf(_ command: NBCommand) -> Bool {
         let token = "nanobrew-ui"
+        // A tap install records the full name, for example Rex57/tap/nanobrew-ui.
+        let isSelf = { (name: String) in name == token || name.hasSuffix("/" + token) }
         guard command.args.first == "upgrade", let appVersion,
-              let installed = snapshot?.casks.first(where: { $0.token == token })?.version else { return false }
+              let installed = snapshot?.casks.first(where: { isSelf($0.token) })?.version else { return false }
         let names = command.args.dropFirst().filter { !$0.hasPrefix("-") }
-        return (names.isEmpty || names.contains { $0 == token || $0.hasSuffix("/" + token) }) && installed != appVersion
+        return (names.isEmpty || names.contains(where: isSelf)) && installed != appVersion
     }
 }
