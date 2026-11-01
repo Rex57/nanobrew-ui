@@ -160,8 +160,8 @@ the decision, the reason and the consequence.
 ### 17. No Sparkle: the app upgrades through nb
 
 - **Date:** 2026-11-01
-- **Decision:** The app has no update framework. It upgrades with `nb upgrade --cask nanobrew-ui`, from Terminal or
-  from its own Updates screen.
+- **Decision:** The app has no update framework. It upgrades with `nb upgrade --cask Rex57/tap/nanobrew-ui` (nb records a
+  tap cask under its full name), from Terminal or from its own Updates screen.
 - **Reason:** nb keeps managing the app like any other cask: in `state.json`, in `nb outdated` and in `nb remove`.
 - **Consequence:** After nb upgraded the app with success, a Restart button appears. There is no separate upgrade
   helper.

@@ -84,7 +84,7 @@ end
 **Why there is no `name`, `desc` or `homepage`.** nb's tap parser (`extractQuotedAfter` in nanobrew's
 `src/api/tap.zig`) looks for a keyword such as `app `, `name ` or `desc ` anywhere in a line, and takes the next
 quoted text after it. The cask holds only the lines nb needs, so no free text can match a keyword by mistake.
-Without a `name` line, nb shows the token, `nanobrew-ui`, as the name.
+Without a `name` line, nb shows the full tap name, `Rex57/tap/nanobrew-ui`, as the name.
 
 ## 5. Check the install
 
@@ -110,7 +110,8 @@ nb can upgrade an installed copy in place only when both are true:
    and its artifacts are apps or binaries (`unsupportedReason` in nanobrew's `src/cask/upgrade.zig`). nb skips a
    disk image (nanobrew #491). The release is a zip with one app, so nb can upgrade it.
 
-The user then upgrades with `nb upgrade --cask nanobrew-ui`, or with Upgrade on the app's Updates screen. After nb
+The user then upgrades with `nb upgrade --cask Rex57/tap/nanobrew-ui` (nb records a tap cask under its full
+name and does not accept the short name), or with Upgrade on the app's Updates screen. After nb
 exits with success, the app shows "Restart to use the new version". A real upgrade through the tap is not tested
 yet: it needs a second version.
 

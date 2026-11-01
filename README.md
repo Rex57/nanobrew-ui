@@ -32,7 +32,8 @@ console. nb does all the work; the app only shows what nb has and prints.
 nb install --cask Rex57/tap/nanobrew-ui
 ```
 
-Upgrade it like any other cask: `nb upgrade --cask nanobrew-ui` (or Updates > Upgrade in the app). After an
+Upgrade it with `nb upgrade --cask Rex57/tap/nanobrew-ui` (or Updates > Upgrade in the app). nb records a tap
+cask under its full name, so use the full name; `nb upgrade --cask nanobrew-ui` answers "not installed". After an
 upgrade of itself, the app offers a restart.
 
 The app is signed ad hoc, not with an Apple Developer ID, and it is not notarized. nb does not quarantine what it
