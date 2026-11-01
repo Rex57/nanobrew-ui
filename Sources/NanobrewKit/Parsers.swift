@@ -12,6 +12,7 @@ public struct PackageInfo: Equatable, Sendable {
     public var version = ""
     public var description = ""
     public var homepage = ""
+    public var license = ""
     public var trust = ""
     public var dependencies: [String] = []
     public var artifacts: [String] = []
@@ -38,12 +39,39 @@ public struct PackageInfo: Equatable, Sendable {
             switch section {
             case "": if index == 0 { info.description = text }
             case "homepage:": info.homepage = value
+            case "license:": info.license = value
             case "trust:": info.trust = value
             case "deps:": info.dependencies = value.split(separator: ", ").map(String.init)
             default: break
             }
         }
         return info
+    }
+}
+
+/// nb's trust line in plain words: `source-verified (local probe: not recorded; run …)` reads
+/// "Source verified · not probed yet".
+public struct Trust: Equatable, Sendable {
+    public enum Probe: Sendable { case passed, failed, notProbed, unknown }
+    public let level: String
+    public let probe: Probe
+
+    public init?(_ line: String) {
+        let word = line.prefix { $0 != " " && $0 != "(" }
+        guard !word.isEmpty else { return nil }
+        let level = word.replacingOccurrences(of: "-", with: " ")
+        self.level = level.prefix(1).uppercased() + level.dropFirst()
+        probe = line.contains("local probe: passed") ? .passed : line.contains("local probe: failed") ? .failed
+            : line.contains("local probe: not recorded") ? .notProbed : .unknown
+    }
+
+    public var text: String {
+        switch probe {
+        case .passed: "\(level) · local probe passed"
+        case .failed: "\(level) · local probe failed"
+        case .notProbed: "\(level) · not probed yet"
+        case .unknown: level
+        }
     }
 }
 

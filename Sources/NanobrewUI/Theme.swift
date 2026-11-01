@@ -51,6 +51,14 @@ struct IconView: View {
 }
 
 extension Section {
+    /// The placeholder of the top-bar search field; nil: the section has none.
+    var searchPrompt: String? {
+        switch self {
+        case .installed: "Search installed packages"
+        default: nil
+        }
+    }
+
     var icon: Icon {
         switch self {
         case .installed: .package
@@ -131,4 +139,62 @@ struct Sidebar: View {
         .accessibilityLabel(item.rawValue)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
+}
+
+/// The near-black primary button (white on dark), 32px high.
+struct PrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var enabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 13, weight: .medium))
+            .foregroundStyle(Theme.onPrimary)
+            .padding(.horizontal, 14).frame(height: 32)
+            .background(Theme.primary.opacity(enabled ? (configuration.isPressed ? 0.8 : 1) : 0.4),
+                        in: RoundedRectangle(cornerRadius: 6))
+    }
+}
+
+/// A text action ("Pin", "Switch", "Remove…" in the negative colour).
+struct TextButtonStyle: ButtonStyle {
+    var color = Theme.text
+    @Environment(\.isEnabled) private var enabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 13))
+            .foregroundStyle(color.opacity(enabled ? (configuration.isPressed ? 0.6 : 1) : 0.4))
+            .contentShape(Rectangle())
+    }
+}
+
+/// The neutral grey pill ("Pinned", "Installed").
+struct Pill: View {
+    let text: String
+
+    var body: some View {
+        Text(text).font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.pillInk)
+            .padding(.horizontal, 8).frame(height: 20)
+            .background(Theme.pillBg, in: RoundedRectangle(cornerRadius: 4))
+    }
+}
+
+/// One h1 per screen (22px) and its grey subline.
+struct ScreenTitle<Subline: View>: View {
+    let title: String
+    @ViewBuilder let subline: Subline
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title).font(.system(size: 22, weight: .semibold)).foregroundStyle(Theme.text)
+                .accessibilityAddTraits(.isHeader)
+            subline.font(.system(size: 14)).foregroundStyle(Theme.muted).monospacedDigit()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// An ISO date (2026-06-30) from a state.json time stamp.
+func isoDate(_ seconds: Int) -> String {
+    Date(timeIntervalSince1970: TimeInterval(seconds)).formatted(.iso8601.year().month().day())
 }

@@ -58,7 +58,7 @@ struct NanobrewUIApp: App {
                 .background(WindowReader { delegate.guardClose(of: $0) })
         }
         .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 1100, height: 760)
+        .defaultSize(width: 1280, height: 800)
         .commands {
             CommandGroup(replacing: .appInfo) { AboutMenuItem() }
             CommandGroup(after: .toolbar) {
@@ -92,6 +92,9 @@ struct ContentView: View {
     @Environment(AppModel.self) private var model
     @State private var section: Section? = .installed
     @State private var typed = ""
+    /// The top-bar search field; each section that has one reads it, and a section change clears it.
+    @State private var query = ""
+    @FocusState private var searchFocused: Bool
 
     var body: some View {
         HStack(spacing: 0) {
@@ -111,6 +114,11 @@ struct ContentView: View {
                 }
                 .padding(.horizontal, 16)
                 .frame(height: 48)
+                .overlay { if let prompt = (section ?? .installed).searchPrompt { searchField(prompt) } }
+                .background {
+                    // Cmd-F focuses the top-bar search field.
+                    Button("Find") { searchFocused = true }.keyboardShortcut("f").opacity(0).accessibilityHidden(true)
+                }
                 // The sheet (DD11): inset 8px from the right and bottom edges, 16px corners, a 1px edge, no shadow.
                 VStack(spacing: 0) {
                     VSplitView {
@@ -147,6 +155,7 @@ struct ContentView: View {
         .background(Theme.frame)
         .ignoresSafeArea()
         .task { await model.checkOutdated(report: true) }
+        .onChange(of: section) { query = "" }
         // After each command: the count on Updates may have changed.
         .onChange(of: model.inProgress) { old, new in
             if new.count < old.count { Task { await model.checkOutdated() } }
@@ -182,9 +191,23 @@ struct ContentView: View {
         Task { await model.checkOutdated(report: true) }
     }
 
+    private func searchField(_ prompt: String) -> some View {
+        HStack(spacing: 8) {
+            IconView(icon: .search, size: 14)
+            TextField(prompt, text: $query).textFieldStyle(.plain).font(.system(size: 13))
+                .foregroundStyle(Theme.text).focused($searchFocused)
+            Text("⌘F").font(.system(size: 12))
+        }
+        .foregroundStyle(Theme.muted)
+        .padding(.horizontal, 10)
+        .frame(width: 400, height: 32)
+        .background(Theme.sheet, in: RoundedRectangle(cornerRadius: 6))
+        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Theme.control))
+    }
+
     @ViewBuilder private var sectionView: some View {
         switch section {
-        case .installed, nil: InstalledView()
+        case .installed, nil: InstalledView(filter: query, section: $section)
         case .updates: UpdatesView()
         case .discover: DiscoverView()
         case .services: ServicesView()
