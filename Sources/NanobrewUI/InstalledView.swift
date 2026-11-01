@@ -39,6 +39,13 @@ struct InstalledView: View {
             .frame(minWidth: 300, maxWidth: .infinity, maxHeight: .infinity)
         }
         .searchable(text: $filter, prompt: "Filter")
+        .onChange(of: model.snapshot) { _, snapshot in
+            // A removed package leaves the detail pane.
+            guard let selected = selection else { return }
+            let present = selected.cask ? snapshot?.casks.contains { $0.token == selected.name }
+                                        : snapshot?.formulae.contains { $0.name == selected.name }
+            if present != true { selection = nil }
+        }
     }
 }
 
