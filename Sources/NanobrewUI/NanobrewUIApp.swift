@@ -103,8 +103,11 @@ struct ContentView: View {
                 ConsoleView().frame(minHeight: 120, idealHeight: 180)
             }
         }
-        // After nuke or a lost nb, show the screen that says so, not a stale section.
-        .onChange(of: model.notInstalled || model.notSetUp) { _, blocked in if blocked { section = .installed } }
+        // After a command (nuke, init) left nb or the state folder gone, show the screen that says so.
+        // Not on a Settings path change: the user stays there to fix a typo.
+        .onChange(of: model.running) { old, new in
+            if old != nil, new == nil, model.notInstalled || model.notSetUp { section = .installed }
+        }
         .alert(model.pendingConfirmation.map { "Run \($0.title)?" } ?? "",
                isPresented: Binding(get: { model.pendingConfirmation != nil }, set: { if !$0 { model.decline() } })) {
             if model.pendingConfirmation?.confirmation == .typeYes {

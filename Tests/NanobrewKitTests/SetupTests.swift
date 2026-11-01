@@ -40,7 +40,8 @@ import Testing
     /// The app's real admin argv, through the real osascript, with one script edit applied.
     func runAdminArgs(nbPath: String, replacing old: String, with new: String) async throws -> (lines: [String], code: Int32?) {
         var args = NBCommand.initNanobrew(nbPath: nbPath).args
-        #expect(args[1].contains(old))
+        // A hard stop: with the edit not applied, osascript would open a real admin password dialog.
+        try #require(args[1].contains(old))
         args[1] = args[1].replacingOccurrences(of: old, with: new)
         let process = try NBProcess(path: "/usr/bin/osascript", args: args)
         var lines: [String] = []
