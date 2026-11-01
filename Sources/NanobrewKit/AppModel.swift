@@ -63,12 +63,13 @@ public final class AppModel {
     /// The casks whose Reinstall has started and whose install step has not ended (F1: a quit asks first).
     public internal(set) var reinstalling: Set<String> = []
 
-    /// The text of the quit and close question.
+    /// The text of the quit and close question. A cask whose install step runs is not "removed" for good: nb's
+    /// install goes on after a quit (D34).
     public var quitMessage: String {
-        guard !reinstalling.isEmpty else {
+        let names = reinstalling.filter { running != .install($0, cask: true) }.sorted()
+        guard !names.isEmpty else {
             return "nb keeps running in the background until it ends. You will not see its output."
         }
-        let names = reinstalling.sorted()
         return "\(names.joined(separator: ", ")) \(names.count == 1 ? "is" : "are") removed, or being removed, and "
             + "\(names.count == 1 ? "is" : "are") not installed yet. If you quit, \(names.count == 1 ? "it stays" : "they stay") "
             + "removed until you install \(names.count == 1 ? "it" : "them") again from Discover."
@@ -253,12 +254,12 @@ public final class AppModel {
         // A run that cannot start must not leave an earlier success standing (the Reinstall guard reads it).
         succeeded.remove(command)
         console.append("$ \(command.title)")
-        guard let path = command.program ?? nbPath else { console.append("Failed: nb is not installed"); return }
+        guard let path = command.program ?? nbPath else { reportFailure("Failed: nb is not installed"); return }
         let process: NBProcess
         do {
             process = try NBProcess(path: path, args: command.args)
         } catch {
-            console.append("Failed: \(command.title) (\(error.localizedDescription))")
+            reportFailure("Failed: \(command.title) (\(error.localizedDescription))")
             return
         }
         processes.append(process)

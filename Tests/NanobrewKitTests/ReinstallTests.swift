@@ -138,6 +138,41 @@ let firefoxReason = "this download format does not support staged upgrades yet"
     }
 }
 
+@MainActor @Suite struct ReinstallQuitTests {
+    @Test func betweenTheRemoveAndTheInstallAQuitStillAsks() throws {
+        // The gap: the remove has ended, the install is not queued yet, nothing runs.
+        let model = try FakeNB().model()
+        model.reinstalling = ["firefox"]
+        #expect(model.running == nil && model.waiting.isEmpty)
+        #expect(model.askBeforeQuit)
+    }
+
+    @Test func onceTheInstallRunsTheQuestionSaysNbFinishes() async throws {
+        let nb = try FakeNB()
+        try nb.wait("install", seconds: 1)
+        let model = nb.model()
+        let task = model.reinstall("firefox")
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        #expect(model.askBeforeQuit)
+        #expect(model.quitMessage == "nb keeps running in the background until it ends. You will not see its output.")
+        await task.value
+    }
+}
+
+@MainActor @Suite struct StartFailureTests {
+    @Test func aCommandThatCannotStartShowsItsFailureInTheStatusLine() async throws {
+        let nb = try FakeNB()
+        let model = nb.model()
+        await model.run(.install("jq")).value
+        #expect(model.status?.kind == .success)
+        try FileManager.default.removeItem(atPath: nb.path)
+        await model.run(.install("jq")).value
+        #expect(model.status?.kind == .failure)
+        #expect(model.status?.text == model.console.last)
+        #expect(model.status?.text.hasPrefix("Failed: nb install jq (") == true)
+    }
+}
+
 @MainActor @Suite struct LastRunResetTests {
     @Test func aRunThatCannotStartForgetsTheEarlierSuccess() async throws {
         let nb = try FakeNB()
