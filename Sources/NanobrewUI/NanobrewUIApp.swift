@@ -91,6 +91,8 @@ struct ContentView: View {
     @State private var typed = ""
     /// The top-bar search field; each section that has one reads it, and a section change clears it.
     @State private var query = ""
+    /// The console's height: the mockup's 212px at start, then where the user drags it.
+    @State private var consoleHeight: CGFloat = 212
     /// Counts Return in the top-bar field: Discover searches again for the same text.
     @State private var submits = 0
     @FocusState private var searchFocused: Bool
@@ -148,7 +150,8 @@ struct ContentView: View {
                         .frame(minHeight: 200, maxHeight: .infinity)
                         // The mockup's console: 212px under a 1px edge.
                         if model.consoleShown {
-                            ConsoleView().frame(height: 212).overlay(alignment: .top) { Theme.border.frame(height: 1) }
+                            ResizeEdge(axis: .vertical, size: $consoleHeight, range: 120...600)
+                            ConsoleView().frame(height: consoleHeight)
                         }
                     }
                     if !model.consoleShown { StatusLine() }

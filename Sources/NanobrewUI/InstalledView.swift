@@ -14,6 +14,8 @@ struct InstalledView: View {
     let filter: String
     @Binding var section: Section?
     @State private var casks = false
+    /// The detail pane's width: the mockup's at start, then where the user drags it.
+    @State private var detailWidth: CGFloat = 400
     @State private var selection: PackageRef?
 
     var body: some View {
@@ -63,14 +65,14 @@ struct InstalledView: View {
             }
             .padding(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            Theme.border.frame(width: 1)
+            ResizeEdge(axis: .horizontal, size: $detailWidth, range: 300...440) // the table's columns need the rest at the default window width
             Group {
                 if let selection { PackageDetailView(package: selection) } else {
                     Text("Select a package to see its details.").font(.system(size: 13)).foregroundStyle(Theme.muted)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
-            .frame(width: 400)
+            .frame(width: detailWidth)
         }
         .onChange(of: model.snapshot) { _, snapshot in
             // A removed package leaves the detail pane.

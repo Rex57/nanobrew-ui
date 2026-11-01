@@ -14,6 +14,8 @@ struct DiscoverView: View {
     @State private var results: [SearchResult]?
     @State private var error: String?
     @State private var searched: (query: String, time: Duration)?
+    /// The detail pane's width: the mockup's at start, then where the user drags it.
+    @State private var detailWidth: CGFloat = 420
     @State private var selection: SearchResult?
     @State private var tapName = ""
     @State private var tapCask = false
@@ -40,7 +42,7 @@ struct DiscoverView: View {
             }
             .padding(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            Theme.border.frame(width: 1)
+            ResizeEdge(axis: .horizontal, size: $detailWidth, range: 300...640)
             Group {
                 if let selection {
                     PackageDetailView(package: PackageRef(name: selection.name, cask: selection.isCask),
@@ -57,7 +59,7 @@ struct DiscoverView: View {
                     }
                 }
             }
-            .frame(width: 420)
+            .frame(width: detailWidth)
         }
         .task(id: "\(query)\u{0}\(submits)\u{0}\(commandsEnded)") { await search() }
         .onChange(of: model.inProgress.count) { old, new in if new < old { commandsEnded += 1 } }

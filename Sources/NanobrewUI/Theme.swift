@@ -295,3 +295,35 @@ struct ArrowSelection<Item: Hashable>: ViewModifier {
         return .handled
     }
 }
+
+/// A 1px edge with a 7px drag area that resizes the pane after it (the console) or before it (a detail pane), so the
+/// mockup's sizes are the starting sizes and the parent run's split views keep their drag.
+struct ResizeEdge: View {
+    let axis: Axis
+    @Binding var size: CGFloat
+    let range: ClosedRange<CGFloat>
+    @State private var start: CGFloat?
+
+    var body: some View {
+        Theme.border
+            .frame(width: axis == .horizontal ? 1 : nil, height: axis == .vertical ? 1 : nil)
+            .overlay {
+                Color.clear
+                    .frame(width: axis == .horizontal ? 7 : nil, height: axis == .vertical ? 7 : nil)
+                    .contentShape(Rectangle())
+                    .onHover { inside in
+                        if inside { (axis == .vertical ? NSCursor.resizeUpDown : NSCursor.resizeLeftRight).push() } else { NSCursor.pop() }
+                    }
+                    .gesture(DragGesture(coordinateSpace: .global)
+                        .onChanged { drag in
+                            let from = start ?? size
+                            start = from
+                            // Dragging up or left makes the pane after or before the edge larger.
+                            let delta = axis == .vertical ? -drag.translation.height : -drag.translation.width
+                            size = min(max(from + delta, range.lowerBound), range.upperBound)
+                        }
+                        .onEnded { _ in start = nil })
+            }
+            .accessibilityHidden(true)
+    }
+}
