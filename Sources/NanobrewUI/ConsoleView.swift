@@ -6,29 +6,54 @@ struct ConsoleView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
+        // mockups/Discover.dc.html: a 40px header (dot, what runs, its time, Cancel, Keep open, hide), the output in
+        // 12px SF Mono on the sheet. The status line hides while the console shows.
         VStack(spacing: 0) {
-            HStack {
-                Text(model.inProgress.isEmpty ? "Console" : "Running: " + model.inProgress.map(\.title).joined(separator: ", "))
-                    .font(.headline)
-                if !model.waiting.isEmpty { Text("\(model.waiting.count) waiting").foregroundStyle(.secondary) }
+            HStack(spacing: 8) {
+                if let status = model.status {
+                    Circle().fill(StatusLine.color(status.kind)).frame(width: 8, height: 8).accessibilityHidden(true)
+                }
+                Text(model.inProgress.isEmpty ? model.status?.text ?? "Console"
+                     : "Running: " + model.inProgress.map(\.title).joined(separator: ", "))
+                    .font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
+                    .truncationMode(.middle)
+                if let status = model.status, status.kind == .running {
+                    // The time since the command started, as the status line would show it at the end.
+                    TimelineView(.periodic(from: .now, by: 0.1)) { context in
+                        Text(formatDuration(.seconds(context.date.timeIntervalSince(status.time))))
+                    }
+                    .font(.system(size: 12)).foregroundStyle(Theme.muted).monospacedDigit()
+                } else if let status = model.status {
+                    Text(status.time.formatted(date: .omitted, time: .shortened))
+                        .font(.system(size: 12)).foregroundStyle(Theme.muted)
+                }
+                if !model.waiting.isEmpty {
+                    Text("\(model.waiting.count) waiting").font(.system(size: 12)).foregroundStyle(Theme.muted)
+                }
                 Spacer()
-                Button { model.consolePinned.toggle() } label: {
-                    IconView(icon: .pin, size: 14)
-                        .foregroundStyle(model.consolePinned ? Theme.text : Theme.muted)
-                        .frame(width: 24, height: 24)
-                        .background(model.consolePinned ? Theme.active : .clear, in: RoundedRectangle(cornerRadius: 6))
+                Button("Cancel") { model.cancel() }
+                    .buttonStyle(OutlinedButtonStyle(height: 26)).font(.system(size: 12, weight: .medium))
+                    .disabled(!model.canCancel)
+                Button("Keep open") { model.consolePinned.toggle() }
+                    .buttonStyle(TextButtonStyle(color: model.consolePinned ? Theme.text : Theme.muted))
+                    .font(.system(size: 12, weight: model.consolePinned ? .semibold : .regular))
+                    .padding(.horizontal, 8).frame(height: 26)
+                    .background(model.consolePinned ? Theme.active : .clear, in: RoundedRectangle(cornerRadius: 6))
+                    .help("Keep the console open after a command")
+                    .accessibilityAddTraits(model.consolePinned ? .isSelected : [])
+                Button { model.toggleConsole() } label: {
+                    IconView(icon: .chevronDown).foregroundStyle(Theme.muted).frame(width: 26, height: 26)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .help(model.consolePinned ? "Unpin: close the console after a command" : "Pin: keep the console open after a command")
-                .accessibilityLabel("Pin console")
-                .accessibilityAddTraits(model.consolePinned ? .isSelected : [])
-                Button("Cancel") { model.cancel() }.disabled(!model.canCancel)
+                .help("Hide console (⌘J)")
+                .accessibilityLabel("Hide console")
             }
-            .padding(6)
-            Divider()
+            .padding(.leading, 24).padding(.trailing, 12)
+            .frame(height: 40)
             ConsoleText(lines: model.console)
         }
+        .background(Theme.sheet)
     }
 }
 
@@ -45,7 +70,10 @@ struct ConsoleText: NSViewRepresentable {
         let textView = scrollView.documentView as! NSTextView
         textView.isEditable = false
         textView.isSelectable = true
-        textView.textContainerInset = NSSize(width: 4, height: 6)
+        // On the sheet's colour, 24px from the edge, as in the mockup.
+        scrollView.drawsBackground = false
+        textView.drawsBackground = false
+        textView.textContainerInset = NSSize(width: 19, height: 0)
         return scrollView
     }
 
@@ -54,7 +82,7 @@ struct ConsoleText: NSViewRepresentable {
         guard lines.count > shown, let textView = scrollView.documentView as? NSTextView else { return }
         let text = (shown == 0 ? "" : "\n") + lines[shown...].joined(separator: "\n")
         textView.textStorage?.append(NSAttributedString(string: text, attributes: [
-            .font: NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular),
+            .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular),
             .foregroundColor: NSColor.textColor,
         ]))
         context.coordinator.shown = lines.count
@@ -70,7 +98,7 @@ struct StatusLine: View {
     var body: some View {
         HStack(spacing: 8) {
             if let status = model.status {
-                Circle().fill(color(status.kind)).frame(width: 8, height: 8).accessibilityHidden(true)
+                Circle().fill(Self.color(status.kind)).frame(width: 8, height: 8).accessibilityHidden(true)
                 Text(status.text).foregroundStyle(Theme.text).lineLimit(1).truncationMode(.middle)
                     .textSelection(.enabled)
                 Text("· " + status.time.formatted(date: .omitted, time: .shortened))
@@ -96,7 +124,7 @@ struct StatusLine: View {
         .overlay(alignment: .top) { Theme.border.frame(height: 1) }
     }
 
-    private func color(_ kind: CommandStatus.Kind) -> Color {
+    static func color(_ kind: CommandStatus.Kind) -> Color {
         switch kind {
         case .running: Theme.amber
         case .success: Theme.positive

@@ -149,7 +149,7 @@ struct ContentView: View {
                             ConsoleView().frame(height: 212).overlay(alignment: .top) { Theme.border.frame(height: 1) }
                         }
                     }
-                    StatusLine()
+                    if !model.consoleShown { StatusLine() }
                 }
                 .background(Theme.sheet)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
