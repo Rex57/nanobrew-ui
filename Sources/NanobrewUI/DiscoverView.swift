@@ -27,8 +27,9 @@ struct DiscoverView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     } else {
                         ScrollView {
-                            LazyVStack(spacing: 0) { ForEach(results ?? [], id: \.self, content: row) }
+                            LazyVStack(spacing: 0) { ForEach(results ?? [], id: \.self) { row($0).id($0) } }
                         }
+                        .modifier(ArrowSelection(selection: $selection, items: results ?? []))
                     }
                 }
                 .padding(.top, 16)

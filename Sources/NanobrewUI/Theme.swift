@@ -266,3 +266,32 @@ extension View {
             .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Theme.control))
     }
 }
+
+/// The up and down arrow keys move `selection` through `items` and scroll to it, as the parent run's
+/// List(selection:) did; a click on a row gives the list the keyboard focus. Rows carry `.id(item)`.
+struct ArrowSelection<Item: Hashable>: ViewModifier {
+    @Binding var selection: Item?
+    let items: [Item]
+    @FocusState private var focused: Bool
+
+    func body(content: Content) -> some View {
+        ScrollViewReader { proxy in
+            content
+                .focusable()
+                .focusEffectDisabled()
+                .focused($focused)
+                .onKeyPress(.downArrow) { move(1, proxy) }
+                .onKeyPress(.upArrow) { move(-1, proxy) }
+                .onChange(of: selection) { _, new in if new != nil { focused = true } }
+        }
+    }
+
+    private func move(_ step: Int, _ proxy: ScrollViewProxy) -> KeyPress.Result {
+        guard !items.isEmpty else { return .ignored }
+        let index = selection.flatMap { items.firstIndex(of: $0) }.map { $0 + step } ?? (step > 0 ? 0 : items.count - 1)
+        let next = items[min(max(index, 0), items.count - 1)]
+        selection = next
+        proxy.scrollTo(next)
+        return .handled
+    }
+}

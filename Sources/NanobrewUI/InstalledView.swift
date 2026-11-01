@@ -21,6 +21,8 @@ struct InstalledView: View {
         let match = { (name: String) in filter.isEmpty || name.localizedCaseInsensitiveContains(filter) }
         let formulae = snapshot?.formulae ?? []
         let caskList = snapshot?.casks ?? []
+        let visible = casks ? caskList.filter { match($0.token) }.map { PackageRef(name: $0.token, cask: true) }
+                            : formulae.filter { match($0.name) }.map { PackageRef(name: $0.name, cask: false) }
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
                 ScreenTitle(title: "Installed") {
@@ -57,6 +59,7 @@ struct InstalledView: View {
                         }
                     }
                 }
+                .modifier(ArrowSelection(selection: $selection, items: visible))
             }
             .padding(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -117,6 +120,7 @@ struct InstalledView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selection == ref ? .isSelected : [])
+        .id(ref)
     }
 }
 
