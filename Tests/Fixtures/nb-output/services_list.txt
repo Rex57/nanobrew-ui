@@ -1,0 +1,3 @@
+==> Services:
+  postgresql@17 (postgresql@17) [running]
+  redis (redis) [stopped]

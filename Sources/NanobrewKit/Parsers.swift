@@ -100,3 +100,23 @@ public struct OutdatedPackage: Equatable, Hashable, Sendable {
         }
     }
 }
+
+/// One row of `nb services list` (nanobrew main.zig runServices): `  name (formula) [running|stopped]`.
+public struct Service: Equatable, Hashable, Sendable {
+    public var name: String
+    public var formula: String
+    public var running: Bool
+
+    public init(name: String, formula: String, running: Bool) {
+        self.name = name
+        self.formula = formula
+        self.running = running
+    }
+
+    public static func parse(_ lines: [String]) -> [Service] {
+        lines.compactMap { line in
+            guard let m = line.wholeMatch(of: /\ \ (\S+) \((.*)\) \[(running|stopped)\]/) else { return nil }
+            return Service(name: String(m.1), formula: String(m.2), running: m.3 == "running")
+        }
+    }
+}

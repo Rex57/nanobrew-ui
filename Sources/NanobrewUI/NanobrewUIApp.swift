@@ -58,6 +58,7 @@ enum Section: String, CaseIterable, Identifiable {
     case installed = "Installed"
     case updates = "Updates"
     case discover = "Discover"
+    case services = "Services"
     case maintenance = "Maintenance"
     var id: String { rawValue }
 }
@@ -86,6 +87,7 @@ struct ContentView: View {
                     case .installed, nil: InstalledView()
                     case .updates: UpdatesView()
                     case .discover: DiscoverView()
+                    case .services: ServicesView()
                     case .maintenance: MaintenanceView()
                     }
                 }

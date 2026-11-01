@@ -46,5 +46,10 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public static func upgradeCask(_ token: String) -> NBCommand { NBCommand(args: ["upgrade", "--cask", token], changes: true) }
     public static let upgradeAll = NBCommand(args: ["upgrade"], changes: true)
     public static let upgradeAllCasks = NBCommand(args: ["upgrade", "--cask"], changes: true)
+    public enum ServiceAction: String, Sendable { case start, stop, restart }
+    public static let servicesList = NBCommand(args: ["services", "list"], changes: false)
+    public static func services(_ action: ServiceAction, _ name: String) -> NBCommand {
+        NBCommand(args: ["services", action.rawValue, name], changes: true)
+    }
     public static func depsTree(_ name: String) -> NBCommand { NBCommand(args: ["deps", "--tree", name], changes: false) }
 }
