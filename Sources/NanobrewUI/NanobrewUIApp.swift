@@ -64,9 +64,10 @@ struct NanobrewUIApp: App {
             CommandGroup(after: .toolbar) {
                 Button("Reload") {
                     delegate.model.checkAgain()
-                    Task { await delegate.model.checkOutdated() }
+                    Task { await delegate.model.checkOutdated(report: true) }
                 }
                 .keyboardShortcut("r")
+                Button("Console") { delegate.model.toggleConsole() }.keyboardShortcut("j")
             }
         }
         Window("About Nanobrew UI", id: "about") {
@@ -111,28 +112,31 @@ struct ContentView: View {
                 .padding(.horizontal, 16)
                 .frame(height: 48)
                 // The sheet (DD11): inset 8px from the right and bottom edges, 16px corners, a 1px edge, no shadow.
-                VSplitView {
-                    VStack(spacing: 0) {
-                        if model.restartOffered {
-                            HStack {
-                                Text("Restart to use the new version")
-                                Button("Restart", action: relaunch)
+                VStack(spacing: 0) {
+                    VSplitView {
+                        VStack(spacing: 0) {
+                            if model.restartOffered {
+                                HStack {
+                                    Text("Restart to use the new version")
+                                    Button("Restart", action: relaunch)
+                                }
+                                .padding(8).frame(maxWidth: .infinity, alignment: .leading).background(.yellow.opacity(0.2))
                             }
-                            .padding(8).frame(maxWidth: .infinity, alignment: .leading).background(.yellow.opacity(0.2))
+                            if let error = model.stateError {
+                                Text(error).foregroundStyle(.red).padding(8).frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            if model.notInstalled && section != .settings {
+                                NotInstalledView()
+                            } else if model.notSetUp && section != .settings {
+                                NotSetUpView()
+                            } else {
+                                sectionView
+                            }
                         }
-                        if let error = model.stateError {
-                            Text(error).foregroundStyle(.red).padding(8).frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        if model.notInstalled && section != .settings {
-                            NotInstalledView()
-                        } else if model.notSetUp && section != .settings {
-                            NotSetUpView()
-                        } else {
-                            sectionView
-                        }
+                        .frame(minHeight: 200, maxHeight: .infinity)
+                        if model.consoleShown { ConsoleView().frame(minHeight: 120, idealHeight: 180) }
                     }
-                    .frame(minHeight: 200, maxHeight: .infinity)
-                    ConsoleView().frame(minHeight: 120, idealHeight: 180)
+                    StatusLine()
                 }
                 .background(Theme.sheet)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -142,7 +146,7 @@ struct ContentView: View {
         }
         .background(Theme.frame)
         .ignoresSafeArea()
-        .task { await model.checkOutdated() }
+        .task { await model.checkOutdated(report: true) }
         // After each command: the count on Updates may have changed.
         .onChange(of: model.inProgress) { old, new in
             if new.count < old.count { Task { await model.checkOutdated() } }
@@ -175,7 +179,7 @@ struct ContentView: View {
 
     private func checkAgain() {
         model.checkAgain()
-        Task { await model.checkOutdated() }
+        Task { await model.checkOutdated(report: true) }
     }
 
     @ViewBuilder private var sectionView: some View {

@@ -32,6 +32,14 @@ public final class AppModel {
     /// True when the last run of this command (through `run`) exited 0; false after a failure or a cancel.
     public func lastRunSucceeded(_ command: NBCommand) -> Bool { succeeded.contains(command) }
     private var lastChange: Task<Void, Never>?
+    /// The status line (DD4): the last command's result and how long it took, or the one that runs now.
+    public private(set) var status: CommandStatus?
+    /// The console (DD5): closed at start, open while a command runs, closed when it ends unless pinned.
+    public private(set) var consoleShown = false
+    public var consolePinned = false
+    public func toggleConsole() { consoleShown.toggle() }
+    /// A monotonic clock for the durations; tests inject their own.
+    private let now: @MainActor () -> ContinuousClock.Instant
 
     public var notInstalled: Bool { nbPath == nil }
     public var askBeforeQuit: Bool { running != nil || !waiting.isEmpty }
@@ -40,7 +48,9 @@ public final class AppModel {
     private let locate: (@MainActor () -> String?)?
 
     /// `locate` finds nb again on `checkAgain()`; without it the nb path stays fixed (tests).
-    public init(statePath: String, nbPath: String?, appVersion: String? = nil, locate: (@MainActor () -> String?)? = nil) {
+    public init(statePath: String, nbPath: String?, appVersion: String? = nil, locate: (@MainActor () -> String?)? = nil,
+                now: @escaping @MainActor () -> ContinuousClock.Instant = { ContinuousClock.now }) {
+        self.now = now
         self.statePath = statePath
         self.nbPath = nbPath
         self.appVersion = appVersion
@@ -176,10 +186,15 @@ public final class AppModel {
         return try await OutdatedPackage.parse(formulae).filter { !$0.isCask } + OutdatedPackage.parse(casks)
     }
 
-    /// Sets `updatesCount` (at launch, on Cmd-R and after each command).
-    public func checkOutdated() async {
+    /// Sets `updatesCount` (at launch, on Cmd-R and after each command). `report` puts the check in the status
+    /// line (launch and Cmd-R), so it does not replace the result of the command that just ended.
+    public func checkOutdated(report: Bool = false) async {
+        let start = now()
         let count = (try? await outdated())?.count ?? 0
         updatesCount = count > 0 ? count : nil
+        guard report, let snapshot else { return }
+        status = CommandStatus(kind: .success, text: "Checked \(snapshot.formulae.count + snapshot.casks.count) packages in "
+                               + formatDuration(now() - start))
     }
 
     /// The detail pane of a package: parsed info (or nb's error text) and, for a formula, the dependency tree.
@@ -207,9 +222,15 @@ public final class AppModel {
         }
         processes.append(process)
         inProgress.append(command)
+        consoleShown = true
+        status = CommandStatus(kind: .running, text: "Running: \(command.title)")
+        let start = now()
         for await batch in process.lines { console.append(contentsOf: batch) }
+        status = CommandStatus(command: command, exitCode: process.wasCancelled ? nil : process.exitCode,
+                               cancelled: process.wasCancelled, duration: now() - start)
         processes.removeAll { $0 === process }
         inProgress.remove(at: inProgress.firstIndex(of: command)!)
+        if inProgress.isEmpty, !consolePinned { consoleShown = false }
         if !process.wasCancelled, process.exitCode == 0 { succeeded.insert(command) } else { succeeded.remove(command) }
         if process.wasCancelled {
             console.append("Cancelled: \(command.title)")

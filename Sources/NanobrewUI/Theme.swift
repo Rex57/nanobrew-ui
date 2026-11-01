@@ -128,6 +128,7 @@ struct Sidebar: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(item.rawValue)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
