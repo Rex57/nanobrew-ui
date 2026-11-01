@@ -1,0 +1,22 @@
+#!/bin/bash
+# Fake nb for tests and reviews. Call it through a symlink (or a copy) in a scratch folder D:
+#   D/fake-nb.log      each run appends "START<TAB>arg<TAB>arg..." and, at exit, "END<TAB>..."
+#   D/wait-<arg1>      if present: sleep that many seconds (in a child process) before printing
+#   D/exit-<arg1>      if present: exit with that code
+# Output: nb-output/<args joined by _>.txt next to the real script, else nb-output/<arg1>.txt, else nothing.
+DIR="$(dirname "$0")"
+OUT="$(dirname "$(realpath "$0")")/nb-output"
+LOG="$DIR/fake-nb.log"
+IFS=$'\t'
+printf 'START\t%s\n' "$*" >> "$LOG"
+if [ -f "$DIR/wait-$1" ]; then
+  sleep "$(cat "$DIR/wait-$1")" &
+  printf 'CHILD\t%s\n' "$!" >> "$LOG"
+  wait
+fi
+IFS='_'
+if [ -f "$OUT/$*.txt" ]; then cat "$OUT/$*.txt"; elif [ -f "$OUT/$1.txt" ]; then cat "$OUT/$1.txt"; fi
+IFS=$'\t'
+printf 'END\t%s\n' "$*" >> "$LOG"
+[ -f "$DIR/exit-$1" ] && exit "$(cat "$DIR/exit-$1")"
+exit 0

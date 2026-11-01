@@ -1,0 +1,3 @@
+==> Installing sl...
+[?25l[2K    [32m✓[0m sl
+[?25h==> Installed sl 5.02

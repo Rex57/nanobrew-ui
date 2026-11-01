@@ -1,0 +1,5 @@
+==> Checking nanobrew installation...
+  ✓ /opt/nanobrew is writable
+  ✓ /opt/nb -> /opt/nanobrew/prefix (short-prefix symlink)
+
+==> No issues found. Your nanobrew installation is healthy!
