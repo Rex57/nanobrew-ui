@@ -1,0 +1,2 @@
+    firefox (144.0 -> 145.0.1) [unsupported, skipping: this download format does not support staged upgrades yet]
+==> No packages upgraded (1 unsupported, 0 failed, 0 pinned)

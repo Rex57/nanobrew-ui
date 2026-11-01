@@ -62,10 +62,7 @@ struct NanobrewUIApp: App {
         .commands {
             CommandGroup(replacing: .appInfo) { AboutMenuItem() }
             CommandGroup(after: .toolbar) {
-                Button("Reload") {
-                    delegate.model.checkAgain()
-                    Task { await delegate.model.checkOutdated(report: true) }
-                }
+                Button("Reload") { Task { await delegate.model.refresh() } }
                 .keyboardShortcut("r")
                 Button("Console") { delegate.model.toggleConsole() }.keyboardShortcut("j")
             }
@@ -192,10 +189,7 @@ struct ContentView: View {
         }
     }
 
-    private func checkAgain() {
-        model.checkAgain()
-        Task { await model.checkOutdated(report: true) }
-    }
+    private func checkAgain() { Task { await model.refresh() } }
 
     private func searchField(_ prompt: String) -> some View {
         HStack(spacing: 8) {

@@ -18,7 +18,7 @@ struct UpdatesView: View {
             HStack(alignment: .top, spacing: 16) {
                 ScreenTitle(title: "Updates") { Text(subline) }
                 HStack(spacing: 16) {
-                    Button("Check Again") { Task { await model.checkOutdated(report: true) } }
+                    Button("Check Again") { Task { await model.refresh() } }
                     Button("Upgrade All") { model.request(.upgradeAll) }
                         .help("nb upgrade: every outdated formula and cask that nb can upgrade")
                     Button("Upgrade All Casks") { if let command = model.upgradeAllCasks(rows ?? []) { model.request(command) } }

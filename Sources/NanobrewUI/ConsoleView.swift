@@ -101,7 +101,7 @@ struct StatusLine: View {
         case .running: Theme.amber
         case .success: Theme.positive
         case .failure: Theme.negative
-        case .cancelled: Theme.muted
+        case .cancelled, .skipped: Theme.muted
         }
     }
 }

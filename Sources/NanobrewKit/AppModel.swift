@@ -219,6 +219,12 @@ public final class AppModel {
         return try await OutdatedPackage.parse(formulae).filter { !$0.isCask } + OutdatedPackage.parse(casks)
     }
 
+    /// Cmd-R, the top-bar button and Updates' Check Again: find nb, read state.json, check outdated.
+    public func refresh() async {
+        checkAgain()
+        await checkOutdated(report: true)
+    }
+
     /// Sets `updatesCount` (at launch, on Cmd-R and after each command). `report` puts the check in the status
     /// line (launch and Cmd-R), so it does not replace the result of the command that just ended.
     public func checkOutdated(report: Bool = false) async {
@@ -265,7 +271,9 @@ public final class AppModel {
         processes.append(process)
         inProgress.append(command)
         consoleShown = true
-        status = CommandStatus(kind: .running, text: "Running: \(command.title)")
+        // While a changing command runs, the status line keeps showing it; a parallel read-only one stays out.
+        let quiet = !command.changes && running != nil
+        if !quiet { status = CommandStatus(kind: .running, text: "Running: \(command.title)") }
         let start = now()
         var output: [String] = []
         for await batch in process.lines {
@@ -274,8 +282,10 @@ public final class AppModel {
         }
         let skips = UnsupportedSkip.parse(output)
         record(skips)
-        status = CommandStatus(command: command, exitCode: process.wasCancelled ? nil : process.exitCode,
-                               cancelled: process.wasCancelled, duration: now() - start, skipped: skips.map(\.token))
+        if !quiet || running == nil {
+            status = CommandStatus(command: command, exitCode: process.wasCancelled ? nil : process.exitCode,
+                                   cancelled: process.wasCancelled, duration: now() - start, skipped: skips.map(\.token))
+        }
         processes.removeAll { $0 === process }
         inProgress.remove(at: inProgress.firstIndex(of: command)!)
         if inProgress.isEmpty, !consolePinned { consoleShown = false }

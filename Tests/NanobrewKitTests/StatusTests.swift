@@ -101,3 +101,49 @@ import Testing
         #expect(!model.consoleShown)
     }
 }
+
+@MainActor @Suite struct StatusFinalReviewTests {
+    @Test(arguments: [
+        (Duration.milliseconds(59_960), "Installed jq in 1 m 00 s"),
+        (.milliseconds(9_996), "Installed jq in 10.0 s"),
+        (.milliseconds(60_000), "Installed jq in 1 m 00 s"),
+    ])
+    func theUnitIsChosenAfterRounding(step: Duration, text: String) async throws {
+        let nb = try FakeNB()
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nb.path, now: StepClock(step).now)
+        await model.run(.install("jq")).value
+        #expect(model.status?.text == text)
+    }
+
+    @Test func aReadOnlyResultDoesNotReplaceARunningChange() async throws {
+        let nb = try FakeNB()
+        try nb.wait("install", seconds: 1)
+        let model = nb.model()
+        let install = model.run(.install("jq"))
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        await model.run(.doctor).value
+        #expect(model.status?.kind == .running)
+        #expect(model.status?.text == "Running: nb install jq")
+        await install.value
+        #expect(model.status?.text.hasPrefix("Installed jq in ") == true)
+    }
+
+    @Test func anUpgradeThatSkippedEveryNamedCaskSaysNothingWasUpgraded() async throws {
+        let nb = try FakeNB()
+        let scratch = ScratchDefaults()
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nb.path, defaults: scratch.defaults)
+        await model.run(NBCommand(args: ["upgrade", "--cask", "firefox"], changes: true)).value
+        #expect(model.status?.text == "Nothing upgraded; skipped firefox (can't upgrade in place)")
+        #expect(model.status?.kind == .skipped)
+    }
+
+    @Test func refreshReadsTheStateAndChecksOutdated() async throws {
+        let nb = try FakeNB()
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nb.path, now: StepClock(.milliseconds(7)).now)
+        #expect(model.snapshot == nil)
+        await model.refresh()
+        #expect(model.snapshot?.formulae.count == 7)
+        #expect(model.updatesCount == 4)
+        #expect(model.status?.text == "Checked 10 packages in 7 ms")
+    }
+}
