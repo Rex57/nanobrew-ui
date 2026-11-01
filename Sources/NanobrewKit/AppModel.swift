@@ -106,6 +106,26 @@ public final class AppModel {
 
     public func autoupdateStatus() async -> AutoupdateStatus? { AutoupdateStatus.parse(await capture(.autoupdateStatus).lines) }
 
+    public func telemetryEnabled() async -> Bool? { parseTelemetry(await capture(.telemetryStatus).lines) }
+
+    public struct CommandFailed: Error, LocalizedError {
+        public let text: String
+        public var errorDescription: String? { text }
+    }
+
+    /// Writes the output of `nb bundle dump` to `url`; nothing is written when nb fails.
+    public func bundleDump(to url: URL) async throws {
+        let (lines, code) = await capture(.bundleDump)
+        guard code == 0 else { throw CommandFailed(text: lines.joined(separator: "\n")) }
+        try (lines.joined(separator: "\n") + "\n").write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    /// Saves the nb path of the Settings field (empty clears it) and finds nb again.
+    public func saveNBPath(_ path: String, defaults: UserDefaults = .standard) {
+        if path.isEmpty { defaults.removeObject(forKey: NBLocator.savedPathKey) } else { defaults.set(path, forKey: NBLocator.savedPathKey) }
+        nbPath = NBLocator.locate(defaults: defaults)
+    }
+
     public func services() async -> [Service] { Service.parse(await capture(.servicesList).lines) }
 
     /// Formulae from `nb outdated`, casks from `nb outdated --cask`.

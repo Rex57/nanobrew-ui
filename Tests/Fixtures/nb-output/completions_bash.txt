@@ -1,0 +1,24 @@
+_nb_completions() {
+  local commands="init install remove list leaves info search where upgrade update update-registry autoupdate version doctor cleanup outdated pin unpin rollback switch bundle deps services completions trust telemetry nuke migrate help"
+  if [[ $COMP_CWORD -eq 1 ]]; then
+    COMPREPLY=($(compgen -W "$commands" -- "${COMP_WORDS[COMP_CWORD]}"))
+  else
+    case "${COMP_WORDS[1]}" in
+      remove|uninstall|upgrade|pin|unpin|rollback|link|unlink)
+        local installed="$(nb list --names 2>/dev/null)"
+        COMPREPLY=($(compgen -W "$installed" -- "${COMP_WORDS[COMP_CWORD]}")) ;;
+      install)
+        COMPREPLY=($(compgen -W "--cask --deb --shims" -- "${COMP_WORDS[COMP_CWORD]}")) ;;
+      info)
+        COMPREPLY=($(compgen -W "--cask" -- "${COMP_WORDS[COMP_CWORD]}")) ;;
+      completions)
+        COMPREPLY=($(compgen -W "zsh bash fish" -- "${COMP_WORDS[COMP_CWORD]}")) ;;
+      telemetry)
+        COMPREPLY=($(compgen -W "status on off" -- "${COMP_WORDS[COMP_CWORD]}")) ;;
+      services)
+        COMPREPLY=($(compgen -W "list start stop restart" -- "${COMP_WORDS[COMP_CWORD]}")) ;;
+    esac
+  fi
+}
+
+complete -F _nb_completions nb

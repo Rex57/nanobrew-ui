@@ -66,5 +66,17 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     }
     public static func `where`(_ pattern: String) -> NBCommand { NBCommand(args: ["where", pattern], changes: false) }
     public static func leaves(tree: Bool) -> NBCommand { NBCommand(args: ["leaves"] + (tree ? ["--tree"] : []), changes: false) }
+    public static let bundleDump = NBCommand(args: ["bundle", "dump"], changes: false)
+    public static func bundleInstall(_ file: String) -> NBCommand {
+        NBCommand(args: ["bundle", "install", file], changes: true, confirmation: .ask)
+    }
+    public static let telemetryStatus = NBCommand(args: ["telemetry", "status"], changes: false)
+    public static func telemetry(on: Bool) -> NBCommand { NBCommand(args: ["telemetry", on ? "on" : "off"], changes: true) }
+    public static func completions(_ shell: String) -> NBCommand { NBCommand(args: ["completions", shell], changes: false) }
+    /// Changing: it fetches metadata and may write the output file.
+    public static func trustAttest(_ package: String, cask: Bool, output: String?) -> NBCommand {
+        NBCommand(args: ["trust", "attest", package] + (cask ? ["--cask"] : []) + (output.map { ["--output", $0] } ?? []),
+                  changes: true)
+    }
     public static func depsTree(_ name: String) -> NBCommand { NBCommand(args: ["deps", "--tree", name], changes: false) }
 }

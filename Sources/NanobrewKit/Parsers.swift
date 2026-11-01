@@ -140,3 +140,8 @@ public struct AutoupdateStatus: Equatable, Sendable {
         return nil
     }
 }
+
+/// `nb telemetry status` (nanobrew main.zig:5956): true for "Telemetry is on.", false for "off", nil otherwise.
+public func parseTelemetry(_ lines: [String]) -> Bool? {
+    lines.lazy.compactMap { $0.wholeMatch(of: /Telemetry is (on|off)\./).map { $0.1 == "on" } }.first
+}

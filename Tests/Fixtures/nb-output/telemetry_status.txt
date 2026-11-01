@@ -1,0 +1,4 @@
+Install outcome telemetry: off (requires explicit opt-in)
+Telemetry is on.
+Setting file: /opt/nanobrew/config/telemetry
+Use `nb telemetry off` to opt out or `nb telemetry on` to turn it back on.

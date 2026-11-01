@@ -1,0 +1,79 @@
+#compdef nb
+
+_nb() {
+  local -a commands
+  commands=(
+    'init:Create /opt/nanobrew/ directory tree'
+    'install:Install packages'
+    'remove:Uninstall packages'
+    'reinstall:Reinstall packages'
+    'list:List installed packages'
+    'leaves:List packages with no dependents'
+    'info:Show formula info'
+    'search:Search for packages'
+    'where:Find packages by pattern (installed, files, index)'
+    'upgrade:Upgrade packages'
+    'autoupdate:Manage opt-in daily updates'
+    'version:Print installed version'
+    'update:Self-update nanobrew'
+    'update-registry:Refresh the verified-upstream registry'
+    'doctor:Check installation health'
+    'cleanup:Remove stale caches'
+    'outdated:List outdated packages'
+    'pin:Pin a package'
+    'unpin:Unpin a package'
+    'rollback:Rollback to previous version'
+    'switch:Reactivate a previously-installed version'
+    'link:Link an installed keg into the prefix'
+    'unlink:Remove an installed keg prefix links'
+    'bundle:Export/import package lists'
+    'deps:Show dependency tree'
+    'services:Manage services'
+    'completions:Generate shell completions'
+    'trust:Export install evidence for review'
+    'telemetry:Manage anonymous telemetry'
+    'nuke:Completely uninstall nanobrew'
+    'migrate:Import existing Homebrew packages'
+    'help:Show help'
+  )
+
+  if (( CURRENT == 2 )); then
+    _describe 'command' commands
+    return
+  fi
+
+  case "$words[2]" in
+    install|i)
+      _arguments '--cask[Install a cask]' '--deb[Install a deb package]' '--shims[Use private dependency executable shims]' '*:formula:' ;;
+    remove|uninstall|rm)
+      _arguments '--cask[Remove a cask]' '--deb[Remove a deb package]' '*:installed package:_nb_installed' ;;
+    upgrade)
+      _arguments '--cask[Upgrade casks]' '--deb[Upgrade debs]' '*:installed package:_nb_installed' ;;
+    info)
+      _arguments '--cask[Show cask info]' '*:formula:' ;;
+    pin|unpin|rollback|rb|link|unlink)
+      _arguments '*:installed package:_nb_installed' ;;
+    deps)
+      _arguments '--tree[Show as tree]' '*:formula:' ;;
+    services|service)
+      local -a subcmds
+      subcmds=('list:List services' 'start:Start a service' 'stop:Stop a service' 'restart:Restart a service')
+      _describe 'subcommand' subcmds ;;
+    completions)
+      _arguments '*:shell:(zsh bash fish)' ;;
+    telemetry)
+      _arguments '*:subcommand:(status on off)' ;;
+    bundle)
+      _arguments '*:subcommand:(dump install)' ;;
+    cleanup)
+      _arguments '--dry-run[Show what would be removed]' ;;
+  esac
+}
+
+_nb_installed() {
+  local -a pkgs
+  pkgs=(${(f)"$(nb list --names 2>/dev/null)"})
+  (( ${#pkgs} )) && _describe 'installed package' pkgs
+}
+
+compdef _nb nb
