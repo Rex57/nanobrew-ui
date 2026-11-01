@@ -12,7 +12,6 @@ enum Theme {
     static let border = pair(0xe8eaec, 0x2e2e2e)
     static let rule = pair(0xf0f1f2, 0x1e1e1e)
     static let control = pair(0xcdced1, 0x444444)
-    static let edge = pair(0xd5d8db, 0x3a3a3a)
     static let text = pair(0x131416, 0xffffff)
     static let muted = pair(0x5d5f60, 0xb4b4b4)
     static let amber = pair(0xba8122, 0xf8ac2d)
