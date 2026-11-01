@@ -6,7 +6,7 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let model = AppModel.fromLaunch()
 
-    func applicationDidBecomeActive(_ notification: Notification) { model.reload() }
+    func applicationDidBecomeActive(_ notification: Notification) { model.checkAgain() }
 
     private var quitConfirmed = false
     private var closeGuard: CloseGuard?
@@ -48,7 +48,7 @@ struct NanobrewUIApp: App {
         .defaultSize(width: 1100, height: 760)
         .commands {
             CommandGroup(after: .toolbar) {
-                Button("Reload") { delegate.model.reload() }.keyboardShortcut("r")
+                Button("Reload") { delegate.model.checkAgain() }.keyboardShortcut("r")
             }
         }
     }
@@ -68,6 +68,7 @@ enum Section: String, CaseIterable, Identifiable {
 struct ContentView: View {
     @Environment(AppModel.self) private var model
     @State private var section: Section? = .installed
+    @State private var typed = ""
 
     var body: some View {
         NavigationSplitView {
@@ -85,14 +86,12 @@ struct ContentView: View {
                     if let error = model.stateError {
                         Text(error).foregroundStyle(.red).padding(8).frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    switch section {
-                    case .installed, nil: InstalledView()
-                    case .updates: UpdatesView()
-                    case .discover: DiscoverView()
-                    case .services: ServicesView()
-                    case .maintenance: MaintenanceView()
-                    case .bundle: BundleView()
-                    case .settings: SettingsView()
+                    if model.notInstalled && section != .settings {
+                        NotInstalledView()
+                    } else if model.notSetUp && section != .settings {
+                        NotSetUpView()
+                    } else {
+                        sectionView
                     }
                 }
                 .frame(minHeight: 200, maxHeight: .infinity)
@@ -101,11 +100,63 @@ struct ContentView: View {
         }
         .alert(model.pendingConfirmation.map { "Run \($0.title)?" } ?? "",
                isPresented: Binding(get: { model.pendingConfirmation != nil }, set: { if !$0 { model.decline() } })) {
-            Button("Run", role: .destructive) { model.confirm() }
-            Button("Cancel", role: .cancel) { model.decline() }
+            if model.pendingConfirmation?.confirmation == .typeYes {
+                TextField("Type yes", text: $typed)
+            }
+            Button("Run", role: .destructive) {
+                model.confirm(typed: typed)
+                typed = ""
+            }
+            Button("Cancel", role: .cancel) {
+                model.decline()
+                typed = ""
+            }
         } message: {
-            Text("This changes your system.")
+            Text(model.pendingConfirmation?.confirmation == .typeYes
+                 ? "This removes nanobrew and everything it installed. Type yes to go on."
+                 : "This changes your system.")
         }
+    }
+
+    @ViewBuilder private var sectionView: some View {
+        switch section {
+        case .installed, nil: InstalledView()
+        case .updates: UpdatesView()
+        case .discover: DiscoverView()
+        case .services: ServicesView()
+        case .maintenance: MaintenanceView()
+        case .bundle: BundleView()
+        case .settings: SettingsView()
+        }
+    }
+}
+
+/// D25: the install command as selectable text; Cmd-R checks again.
+struct NotInstalledView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("nanobrew is not installed").font(.title2)
+            Text("Install it in Terminal:")
+            Text(verbatim: "curl -fsSL https://nanobrew.trilok.ai/install | bash")
+                .font(.system(.body, design: .monospaced)).textSelection(.enabled)
+            Text("Then press ⌘R. If nb is in another place, set its path in Settings.").foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct NotSetUpView: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("nanobrew is not set up").font(.title2)
+            Text("Set-up runs nb init as administrator; macOS asks for your password.")
+            Button("Set up nanobrew") {
+                if let nb = model.nbPath { model.request(.initNanobrew(nbPath: nb)) }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

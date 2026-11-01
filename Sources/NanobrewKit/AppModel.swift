@@ -29,16 +29,27 @@ public final class AppModel {
     public var askBeforeQuit: Bool { running != nil || !waiting.isEmpty }
     public var canCancel: Bool { !processes.isEmpty }
 
-    public init(statePath: String, nbPath: String?, appVersion: String? = nil) {
+    private let locate: (@MainActor () -> String?)?
+
+    /// `locate` finds nb again on `checkAgain()`; without it the nb path stays fixed (tests).
+    public init(statePath: String, nbPath: String?, appVersion: String? = nil, locate: (@MainActor () -> String?)? = nil) {
         self.statePath = statePath
         self.nbPath = nbPath
         self.appVersion = appVersion
+        self.locate = locate
+    }
+
+    /// Finds nb and reads state.json again (Cmd-R, app active, after each command).
+    public func checkAgain() {
+        if let locate { nbPath = locate() }
+        reload()
     }
 
     /// The model the app starts with: launch arguments first, then the default places.
     public static func fromLaunch() -> AppModel {
         AppModel(statePath: launchArgument("NBStatePath") ?? StateReader.defaultPath, nbPath: NBLocator.locate(),
-                 appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String)
+                 appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+                 locate: { NBLocator.locate() })
     }
 
     /// Reads state.json again. A broken file keeps the last good snapshot.
@@ -77,11 +88,12 @@ public final class AppModel {
         return run(command)
     }
 
-    /// The user said yes: the pending command runs.
+    /// The user said yes: the pending command runs. A `.typeYes` command runs only when `typed` is exactly "yes".
     @discardableResult
-    public func confirm() -> Task<Void, Never>? {
+    public func confirm(typed: String = "") -> Task<Void, Never>? {
         guard let command = pendingConfirmation else { return nil }
         pendingConfirmation = nil
+        guard command.confirmation != .typeYes || typed == "yes" else { return nil }
         return run(command)
     }
 
@@ -150,10 +162,10 @@ public final class AppModel {
 
     private func execute(_ command: NBCommand) async {
         console.append("$ \(command.title)")
-        guard let nbPath else { console.append("Failed: nb is not installed"); return }
+        guard let path = command.program ?? nbPath else { console.append("Failed: nb is not installed"); return }
         let process: NBProcess
         do {
-            process = try NBProcess(path: nbPath, args: command.args)
+            process = try NBProcess(path: path, args: command.args)
         } catch {
             console.append("Failed: \(command.title) (\(error.localizedDescription))")
             return
@@ -170,7 +182,7 @@ public final class AppModel {
         } else {
             console.append("Failed: \(command.title) (exit code \(process.exitCode.map(String.init) ?? "signal"))")
         }
-        reload()
+        checkAgain()
         if !process.wasCancelled, process.exitCode == 0, replacedSelf(command) { restartOffered = true }
     }
 

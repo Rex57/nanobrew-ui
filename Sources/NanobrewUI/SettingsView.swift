@@ -89,6 +89,12 @@ struct SettingsView: View {
                     .disabled(attestPackage.isEmpty)
                 }
             }
+            SwiftUI.Section("Danger zone") {
+                HStack {
+                    Button("Migrate from Homebrew…") { model.request(.migrate) }
+                    Button("Remove nanobrew (nuke)…") { model.request(.nuke) }
+                }
+            }
             SwiftUI.Section("nb path") {
                 HStack {
                     TextField("Path to nb (empty: default places)", text: $nbPath)

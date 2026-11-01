@@ -13,36 +13,32 @@ struct InstalledView: View {
     @State private var selection: PackageRef?
 
     var body: some View {
-        if model.notSetUp {
-            ContentUnavailableView("nanobrew is not set up", systemImage: "shippingbox")
-        } else {
-            let snapshot = model.snapshot
-            let match = { (name: String) in filter.isEmpty || name.localizedCaseInsensitiveContains(filter) }
-            HSplitView {
-                List(selection: $selection) {
-                    SwiftUI.Section("Formulae") {
-                        ForEach((snapshot?.formulae ?? []).filter { match($0.name) }) { f in
-                            PackageRow(name: f.name, version: f.version, pinned: f.pinned)
-                                .tag(PackageRef(name: f.name, cask: false))
-                        }
-                    }
-                    SwiftUI.Section("Casks") {
-                        ForEach((snapshot?.casks ?? []).filter { match($0.token) }) { c in
-                            PackageRow(name: c.token, version: c.version, pinned: false)
-                                .tag(PackageRef(name: c.token, cask: true))
-                        }
+        let snapshot = model.snapshot
+        let match = { (name: String) in filter.isEmpty || name.localizedCaseInsensitiveContains(filter) }
+        HSplitView {
+            List(selection: $selection) {
+                SwiftUI.Section("Formulae") {
+                    ForEach((snapshot?.formulae ?? []).filter { match($0.name) }) { f in
+                        PackageRow(name: f.name, version: f.version, pinned: f.pinned)
+                            .tag(PackageRef(name: f.name, cask: false))
                     }
                 }
-                .frame(minWidth: 220)
-                Group {
-                    if let selection { PackageDetailView(package: selection) } else {
-                        ContentUnavailableView("Select a package", systemImage: "shippingbox")
+                SwiftUI.Section("Casks") {
+                    ForEach((snapshot?.casks ?? []).filter { match($0.token) }) { c in
+                        PackageRow(name: c.token, version: c.version, pinned: false)
+                            .tag(PackageRef(name: c.token, cask: true))
                     }
                 }
-                .frame(minWidth: 300, maxWidth: .infinity, maxHeight: .infinity)
             }
-            .searchable(text: $filter, prompt: "Filter")
+            .frame(minWidth: 220)
+            Group {
+                if let selection { PackageDetailView(package: selection) } else {
+                    ContentUnavailableView("Select a package", systemImage: "shippingbox")
+                }
+            }
+            .frame(minWidth: 300, maxWidth: .infinity, maxHeight: .infinity)
         }
+        .searchable(text: $filter, prompt: "Filter")
     }
 }
 

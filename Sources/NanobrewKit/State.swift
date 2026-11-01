@@ -63,7 +63,9 @@ public enum NBLocator {
     }
 
     public static func locate(defaults: UserDefaults = .standard) -> String? {
-        locate(argument: launchArgument("NBPath"), saved: defaults.string(forKey: savedPathKey))
+        // Test seam: `-NBDefaultPlaces "a:b"` replaces the default places ("" = none), so a Mac with nb can show "not installed".
+        let places = launchArgument("NBDefaultPlaces").map { $0.split(separator: ":").map(String.init) } ?? defaultPlaces
+        return locate(argument: launchArgument("NBPath"), saved: defaults.string(forKey: savedPathKey), places: places)
     }
 }
 

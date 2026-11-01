@@ -2,19 +2,25 @@
 public struct NBCommand: Equatable, Hashable, Sendable {
     public enum Confirmation: Sendable { case none, ask, typeYes }
 
+    /// The program to start instead of nb (only the admin `nb init`); nil means nb.
+    public let program: String?
     public let args: [String]
     /// True when the command changes the system: it then waits its turn in the serial queue.
     public let changes: Bool
     public let confirmation: Confirmation
+    private let label: String?
 
-    public init(args: [String], changes: Bool, confirmation: Confirmation = .none) {
+    public init(program: String? = nil, args: [String], changes: Bool, confirmation: Confirmation = .none,
+                label: String? = nil) {
+        self.program = program
         self.args = args
         self.changes = changes
         self.confirmation = confirmation
+        self.label = label
     }
 
     /// The command as a person would type it.
-    public var title: String { (["nb"] + args).joined(separator: " ") }
+    public var title: String { label ?? (["nb"] + args).joined(separator: " ") }
 
     public static let doctor = NBCommand(args: ["doctor"], changes: false)
     public static func info(_ name: String) -> NBCommand { NBCommand(args: ["info", name], changes: false) }
@@ -78,5 +84,23 @@ public struct NBCommand: Equatable, Hashable, Sendable {
         NBCommand(args: ["trust", "attest", package] + (cask ? ["--cask"] : []) + (output.map { ["--output", $0] } ?? []),
                   changes: true)
     }
+    public static let migrate = NBCommand(args: ["migrate"], changes: true, confirmation: .ask)
+    /// `--yes`: without it nb waits for "yes" on stdin. The app asks for the typed "yes" itself.
+    public static let nuke = NBCommand(args: ["nuke", "--yes"], changes: true, confirmation: .typeYes)
+
+    /// AppleScript that runs `<nb> init` as root; the nb path comes in as argv, never as script text (D9).
+    public static func initScript(admin: Bool = true) -> String {
+        """
+        on run argv
+            do shell script (quoted form of (item 1 of argv)) & " init"\(admin ? " with administrator privileges" : "")
+        end run
+        """
+    }
+
+    /// `nb init` through the macOS admin password dialog.
+    public static func initNanobrew(nbPath: String) -> NBCommand {
+        NBCommand(program: "/usr/bin/osascript", args: ["-e", initScript(), nbPath], changes: true, label: "sudo nb init")
+    }
+
     public static func depsTree(_ name: String) -> NBCommand { NBCommand(args: ["deps", "--tree", name], changes: false) }
 }
