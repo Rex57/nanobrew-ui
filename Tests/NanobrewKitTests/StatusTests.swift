@@ -128,15 +128,6 @@ import Testing
         #expect(model.status?.text.hasPrefix("Installed jq in ") == true)
     }
 
-    @Test func anUpgradeThatSkippedEveryNamedCaskSaysNothingWasUpgraded() async throws {
-        let nb = try FakeNB()
-        let scratch = ScratchDefaults()
-        let model = AppModel(statePath: fixture("state.json"), nbPath: nb.path, defaults: scratch.defaults)
-        await model.run(NBCommand(args: ["upgrade", "--cask", "firefox"], changes: true)).value
-        #expect(model.status?.text == "Nothing upgraded; skipped firefox (can't upgrade in place)")
-        #expect(model.status?.kind == .skipped)
-    }
-
     @Test func noCheckedStatusWithoutNb() async {
         let model = AppModel(statePath: fixture("state.json"), nbPath: nil)
         await model.refresh()

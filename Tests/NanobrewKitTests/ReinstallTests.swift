@@ -65,6 +65,16 @@ let firefoxReason = "this download format does not support staged upgrades yet"
         #expect(model.status?.text == "Upgraded puremac in 84 ms; skipped firefox (can't upgrade in place)")
     }
 
+    // In this serialized suite: it shares the fixed test preferences domain.
+    @Test func anUpgradeThatSkippedEveryNamedCaskSaysNothingWasUpgraded() async throws {
+        let nb = try FakeNB()
+        let scratch = ScratchDefaults()
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nb.path, defaults: scratch.defaults)
+        await model.run(NBCommand(args: ["upgrade", "--cask", "firefox"], changes: true)).value
+        #expect(model.status?.text == "Nothing upgraded; skipped firefox (can't upgrade in place)")
+        #expect(model.status?.kind == .skipped)
+    }
+
     @Test func upgradeReadyAndUpgradeAllCasksLeaveOutPinnedAndUnsupported() async throws {
         let nb = try FakeNB()
         let scratch = ScratchDefaults()
