@@ -17,6 +17,11 @@ import Testing
         #expect(OutdatedPackage.parse(try recorded("outdated-cask-live")).isEmpty)
     }
 
+    @Test func aTapCaskRowHasItsFullName() {
+        // nb prints the canonical token (nanobrew main.zig:5759-5763).
+        #expect(OutdatedPackage.parse(["Rex57/tap/nanobrew-ui (1.0.0 -> 1.0.1) (cask)"]).map(\.name) == ["Rex57/tap/nanobrew-ui"])
+    }
+
     @Test func catalogueGivesOutdatedAndUpgrade() {
         #expect(NBCommand.outdated == NBCommand(args: ["outdated"], changes: false))
         #expect(NBCommand.outdatedCasks == NBCommand(args: ["outdated", "--cask"], changes: false))
@@ -34,7 +39,7 @@ import Testing
         #expect(Set(nb.argvs) == [["outdated"], ["outdated", "--cask"]])
     }
 
-    /// The state file says nanobrew-ui 1.0.1 once the upgrade is done; the app runs 1.0.0.
+    /// Copies `name` (default: nanobrew-ui 1.0.1) as state.json; the app runs 1.0.0.
     func selfUpgradeModel(_ nb: FakeNB, state name: String = "state-self-upgraded.json") throws -> AppModel {
         let state = nb.dir.appendingPathComponent("state.json").path
         try FileManager.default.copyItem(atPath: fixture(name), toPath: state)
@@ -113,6 +118,38 @@ import Testing
         let model = try selfUpgradeModel(nb, state: "state-self-tap-current.json")
         await model.run(try #require(model.upgradeAllCasks(tapRows))).value
         #expect(!model.restartOffered)
+    }
+
+    func cask(_ token: String, _ version: String, app: String = "Nanobrew UI.app") -> [String: Any] {
+        ["token": token, "canonical_token": token, "version": version, "sha256": "x", "probe_success": true,
+         "probed_at": 0, "probe_schema": 3, "probe_platform": 1, "apps": [app], "binaries": [String]()]
+    }
+
+    /// state-self-tap-upgraded.json with its nanobrew-ui casks replaced by `selfCasks`; the app runs 1.0.0.
+    func model(_ nb: FakeNB, _ selfCasks: [[String: Any]]) throws -> AppModel {
+        let data = try Data(contentsOf: URL(fileURLWithPath: fixture("state-self-tap-upgraded.json")))
+        var json = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let casks = try #require(json["casks"] as? [[String: Any]])
+        json["casks"] = casks.filter { !(($0["token"] as? String) ?? "").hasSuffix("nanobrew-ui") } + selfCasks
+        let state = nb.dir.appendingPathComponent("state.json")
+        try JSONSerialization.data(withJSONObject: json).write(to: state)
+        let model = AppModel(statePath: state.path, nbPath: nb.path, appVersion: "1.0.0")
+        model.reload()
+        return model
+    }
+
+    @Test func restartOfferWhenAnEarlierShortNameRecordStillHoldsTheRunningVersion() async throws {
+        let nb = try FakeNB()
+        let model = try model(nb, [cask("nanobrew-ui", "1.0.0"), cask(tapToken, "1.0.1")])
+        await model.run(.upgradeCask(tapToken)).value
+        #expect(model.restartOffered)
+    }
+
+    @Test func restartOfferWhenAnotherTapRecordComesFirst() async throws {
+        let nb = try FakeNB()
+        let model = try model(nb, [cask("alice/tap/nanobrew-ui", "1.0.0", app: "Alice.app"), cask(tapToken, "1.0.1")])
+        await model.run(.upgradeCask(tapToken)).value
+        #expect(model.restartOffered)
     }
 
     @Test func failedOutdatedThrowsNbErrorText() async throws {

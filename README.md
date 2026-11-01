@@ -48,7 +48,7 @@ Requirements: macOS 14 (Sonoma) or later, and nanobrew. Tested with nb 0.1.214.
 ```sh
 swift build                 # debug build
 swift test                  # tests (NanobrewKit, with a fake nb and fixture state files)
-scripts/bundle.sh           # dist/Nanobrew UI.app, dist/Nanobrew-UI-1.0.0.zip, its sha256, dist/nanobrew-ui.rb
+scripts/bundle.sh           # dist/Nanobrew UI.app, dist/Nanobrew-UI-<version>.zip, its sha256, dist/nanobrew-ui.rb
 ```
 
 A Swift package, no Xcode project and no third-party dependency: the library `NanobrewKit` holds all logic, and

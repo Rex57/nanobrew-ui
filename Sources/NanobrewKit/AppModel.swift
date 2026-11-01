@@ -307,9 +307,9 @@ public final class AppModel {
         let token = "nanobrew-ui"
         // A tap install records the full name, for example Rex57/tap/nanobrew-ui.
         let isSelf = { (name: String) in name == token || name.hasSuffix("/" + token) }
-        guard command.args.first == "upgrade", let appVersion,
-              let installed = snapshot?.casks.first(where: { isSelf($0.token) })?.version else { return false }
+        guard command.args.first == "upgrade", let appVersion, let casks = snapshot?.casks else { return false }
         let names = command.args.dropFirst().filter { !$0.hasPrefix("-") }
-        return (names.isEmpty || names.contains(where: isSelf)) && installed != appVersion
+        // Every matching record counts: a short-name and a tap install can both be in state.json.
+        return casks.contains { isSelf($0.token) && (names.isEmpty || names.contains($0.token)) && $0.version != appVersion }
     }
 }
