@@ -34,21 +34,43 @@ import Testing
         #expect(!command.args.dropLast().joined().contains("My"))
         #expect(command.args.dropLast().joined().contains("quoted form of"))
         #expect(command.args.dropLast().joined().contains("with administrator privileges"))
-        #expect(command.changes && command.title == "sudo nb init")
+        #expect(command.changes && command.title == "sudo \(path) init")
+    }
+
+    /// The app's real admin argv, through the real osascript, with one script edit applied.
+    func runAdminArgs(nbPath: String, replacing old: String, with new: String) async throws -> (lines: [String], code: Int32?) {
+        var args = NBCommand.initNanobrew(nbPath: nbPath).args
+        #expect(args[1].contains(old))
+        args[1] = args[1].replacingOccurrences(of: old, with: new)
+        let process = try NBProcess(path: "/usr/bin/osascript", args: args)
+        var lines: [String] = []
+        for await batch in process.lines { lines += batch }
+        return (lines, process.exitCode)
     }
 
     @Test func theAdminScriptRunsNbWithAPathWithSpacesAndQuotes() async throws {
-        // The same script without the admin clause, through the real osascript.
+        // Only the admin clause is removed, so no password dialog shows.
         let nb = try FakeNB()
         let odd = nb.dir.appendingPathComponent(#"my "odd" nb's dir"#)
         try FileManager.default.createDirectory(at: odd, withIntermediateDirectories: true)
         let link = odd.appendingPathComponent("nb").path
         try FileManager.default.createSymbolicLink(atPath: link, withDestinationPath: fixture("fake-nb"))
-        let process = try NBProcess(path: "/usr/bin/osascript", args: ["-e", NBCommand.initScript(admin: false), link])
-        for await _ in process.lines {}
-        #expect(process.exitCode == 0)
+        let result = try await runAdminArgs(nbPath: link, replacing: " with administrator privileges", with: "")
+        #expect(result.code == 0)
         let log = try String(contentsOf: odd.appendingPathComponent("fake-nb.log"), encoding: .utf8)
         #expect(log.hasPrefix("START\tinit\n"))
+    }
+
+    @Test func dontAllowInTheAdminDialogEndsAsCancelledNotFailed() async throws {
+        // Error -128 is what "Don't Allow" raises; the test raises it in place of the dialog.
+        let nb = try FakeNB()
+        let result = try await runAdminArgs(
+            nbPath: nb.path,
+            replacing: #"do shell script (quoted form of (item 1 of argv)) & " init" with administrator privileges"#,
+            with: "error number -128")
+        #expect(result.code == 0)
+        #expect(result.lines == ["Set-up cancelled"])
+        #expect(nb.argvs.isEmpty)
     }
 
     @Test func modelRunsTheAdminCommandWithItsProgram() async throws {

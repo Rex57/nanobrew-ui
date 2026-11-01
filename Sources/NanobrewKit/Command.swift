@@ -89,17 +89,21 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public static let nuke = NBCommand(args: ["nuke", "--yes"], changes: true, confirmation: .typeYes)
 
     /// AppleScript that runs `<nb> init` as root; the nb path comes in as argv, never as script text (D9).
-    public static func initScript(admin: Bool = true) -> String {
-        """
+    /// "Don't Allow" in the admin dialog (error -128) ends with a plain line, not a failure.
+    static let initScript = """
         on run argv
-            do shell script (quoted form of (item 1 of argv)) & " init"\(admin ? " with administrator privileges" : "")
+            try
+                do shell script (quoted form of (item 1 of argv)) & " init" with administrator privileges
+            on error number -128
+                return "Set-up cancelled"
+            end try
         end run
         """
-    }
 
-    /// `nb init` through the macOS admin password dialog.
+    /// `nb init` through the macOS admin password dialog; the title names the nb file that runs as root.
     public static func initNanobrew(nbPath: String) -> NBCommand {
-        NBCommand(program: "/usr/bin/osascript", args: ["-e", initScript(), nbPath], changes: true, label: "sudo nb init")
+        NBCommand(program: "/usr/bin/osascript", args: ["-e", initScript, nbPath], changes: true,
+                  label: "sudo \(nbPath) init")
     }
 
     public static let version = NBCommand(args: ["version"], changes: false)
