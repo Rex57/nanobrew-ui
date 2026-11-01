@@ -66,9 +66,26 @@ struct PackageDetailView: View {
     let package: PackageRef
     @State private var detail: PackageDetail?
 
+    private var formula: Formula? { package.cask ? nil : model.snapshot?.formulae.first { $0.name == package.name } }
+    private var installed: Bool {
+        package.cask ? model.snapshot?.casks.contains { $0.token == package.name } == true : formula != nil
+    }
+
+    private var actions: some View {
+        HStack {
+            Button("Remove") { model.request(package.cask ? .removeCask(package.name) : .remove(package.name)) }
+            if let formula {
+                Button(formula.pinned ? "Unpin" : "Pin") { model.request(formula.pinned ? .unpin(formula.name) : .pin(formula.name)) }
+                Button("Link") { model.request(.link(formula.name)) }
+                Button("Unlink") { model.request(.unlink(formula.name)) }
+            }
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
+                if installed { actions }
                 if let detail {
                     if let info = detail.info {
                         Text("\(info.name) \(info.version)").font(.title2)

@@ -16,6 +16,8 @@ public final class AppModel {
     public private(set) var waiting: [NBCommand] = []
     /// Every command that runs now, read-only ones too.
     public private(set) var inProgress: [NBCommand] = []
+    /// A command that waits for the user's yes before it runs.
+    public private(set) var pendingConfirmation: NBCommand?
     private var processes: [NBProcess] = []
     private var lastChange: Task<Void, Never>?
 
@@ -61,6 +63,23 @@ public final class AppModel {
         lastChange = task
         return task
     }
+
+    /// The way the views start a command: one that needs a confirmation waits in `pendingConfirmation`.
+    @discardableResult
+    public func request(_ command: NBCommand) -> Task<Void, Never>? {
+        guard command.confirmation == .none else { pendingConfirmation = command; return nil }
+        return run(command)
+    }
+
+    /// The user said yes: the pending command runs.
+    @discardableResult
+    public func confirm() -> Task<Void, Never>? {
+        guard let command = pendingConfirmation else { return nil }
+        pendingConfirmation = nil
+        return run(command)
+    }
+
+    public func decline() { pendingConfirmation = nil }
 
     /// Stops the commands that run now; queued commands then run.
     public func cancel() {

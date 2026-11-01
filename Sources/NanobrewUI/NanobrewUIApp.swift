@@ -8,14 +8,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidBecomeActive(_ notification: Notification) { model.reload() }
 
-    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard model.askBeforeQuit else { return .terminateNow }
+    private var quitConfirmed = false
+    private var closeGuard: CloseGuard?
+
+    /// Asks first while a changing command runs or waits; true when the app may quit.
+    func mayQuit() -> Bool {
+        guard model.askBeforeQuit, !quitConfirmed else { return true }
         let alert = NSAlert()
         alert.messageText = "A command is still running"
         alert.informativeText = "Quit now and nb may stop half done."
         alert.addButton(withTitle: "Keep Running")
         alert.addButton(withTitle: "Quit")
-        return alert.runModal() == .alertSecondButtonReturn ? .terminateNow : .terminateCancel
+        quitConfirmed = alert.runModal() == .alertSecondButtonReturn
+        return quitConfirmed
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        mayQuit() ? .terminateNow : .terminateCancel
+    }
+
+    /// Closing the window quits the app (D29), so the close asks first too.
+    func guardClose(of window: NSWindow) {
+        guard closeGuard?.window !== window else { return }
+        closeGuard = CloseGuard(window: window) { [unowned self] in mayQuit() }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
@@ -28,6 +43,7 @@ struct NanobrewUIApp: App {
     var body: some Scene {
         WindowGroup("Nanobrew UI") {
             ContentView().environment(delegate.model)
+                .background(WindowReader { delegate.guardClose(of: $0) })
         }
         .defaultSize(width: 1100, height: 760)
         .commands {
@@ -65,6 +81,13 @@ struct ContentView: View {
                 .frame(minHeight: 200, maxHeight: .infinity)
                 ConsoleView().frame(minHeight: 120, idealHeight: 180)
             }
+        }
+        .alert(model.pendingConfirmation.map { "Run \($0.title)?" } ?? "",
+               isPresented: Binding(get: { model.pendingConfirmation != nil }, set: { if !$0 { model.decline() } })) {
+            Button("Run", role: .destructive) { model.confirm() }
+            Button("Cancel", role: .cancel) { model.decline() }
+        } message: {
+            Text("This changes your system.")
         }
     }
 }

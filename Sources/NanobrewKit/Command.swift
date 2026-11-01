@@ -19,5 +19,13 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public static let doctor = NBCommand(args: ["doctor"], changes: false)
     public static func info(_ name: String) -> NBCommand { NBCommand(args: ["info", name], changes: false) }
     public static func caskInfo(_ token: String) -> NBCommand { NBCommand(args: ["info", "--cask", token], changes: false) }
+    public static func remove(_ name: String) -> NBCommand { NBCommand(args: ["remove", name], changes: true, confirmation: .ask) }
+    public static func removeCask(_ token: String) -> NBCommand {
+        NBCommand(args: ["remove", "--cask", token], changes: true, confirmation: .ask)
+    }
+    public static func pin(_ name: String) -> NBCommand { NBCommand(args: ["pin", name], changes: true) }
+    public static func unpin(_ name: String) -> NBCommand { NBCommand(args: ["unpin", name], changes: true) }
+    public static func link(_ name: String) -> NBCommand { NBCommand(args: ["link", name], changes: true) }
+    public static func unlink(_ name: String) -> NBCommand { NBCommand(args: ["unlink", name], changes: true) }
     public static func depsTree(_ name: String) -> NBCommand { NBCommand(args: ["deps", "--tree", name], changes: false) }
 }
