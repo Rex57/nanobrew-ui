@@ -93,6 +93,11 @@ struct ContentView: View {
     @State private var query = ""
     /// The console's height: the mockup's 212px at start, then where the user drags it.
     @State private var consoleHeight: CGFloat = 212
+    /// The sheet's real height: the console never takes more than what is left after the content's 200pt and the
+    /// 1pt edge, so the top bar and the sheet's edges stay in the window at every window size.
+    @State private var windowHeight: CGFloat = 0
+    /// The window less the 48pt top bar, the 8pt bottom inset, the content's 200pt and the 1pt edge.
+    private var consoleRoom: CGFloat { max(0, windowHeight - 48 - 8 - 200 - 1) }
     /// Counts Return in the top-bar field: Discover searches again for the same text.
     @State private var submits = 0
     @FocusState private var searchFocused: Bool
@@ -100,6 +105,8 @@ struct ContentView: View {
     @State private var reinstalling: OutdatedPackage?
 
     var body: some View {
+        // The window's real height, read where no child can make it larger (the console's limit).
+        GeometryReader { window in
         HStack(spacing: 0) {
             Sidebar(section: $section).frame(width: 228)
             VStack(spacing: 0) {
@@ -150,8 +157,8 @@ struct ContentView: View {
                         .frame(minHeight: 200, maxHeight: .infinity)
                         // The mockup's console: 212px under a 1px edge.
                         if model.consoleShown {
-                            ResizeEdge(axis: .vertical, size: $consoleHeight, range: 120...600)
-                            ConsoleView().frame(height: consoleHeight)
+                            ResizeEdge(axis: .vertical, size: $consoleHeight, range: 120...max(120, min(600, consoleRoom)))
+                            ConsoleView().frame(height: min(consoleHeight, consoleRoom))
                         }
                     }
                     if !model.consoleShown { StatusLine() }
@@ -161,6 +168,9 @@ struct ContentView: View {
                 .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Theme.border))
                 .padding(.trailing, 8).padding(.bottom, 8)
             }
+        }
+        .frame(width: window.size.width, height: window.size.height)
+        .onChange(of: window.size.height, initial: true) { _, height in windowHeight = height }
         }
         .background(Theme.frame)
         .overlay { if let reinstalling { ReinstallDialog(row: reinstalling) { self.reinstalling = nil } } }
