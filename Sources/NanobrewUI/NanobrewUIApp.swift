@@ -91,6 +91,8 @@ struct ContentView: View {
     @State private var typed = ""
     /// The top-bar search field; each section that has one reads it, and a section change clears it.
     @State private var query = ""
+    /// Counts Return in the top-bar field: Discover searches again for the same text.
+    @State private var submits = 0
     @FocusState private var searchFocused: Bool
     /// The Updates row whose Reinstall dialog is open: it covers the whole window, as in Reinstall.dc.html.
     @State private var reinstalling: OutdatedPackage?
@@ -199,6 +201,7 @@ struct ContentView: View {
             IconView(icon: .search, size: 14)
             TextField(prompt, text: $query).textFieldStyle(.plain).font(.system(size: 13))
                 .foregroundStyle(Theme.text).focused($searchFocused)
+                .onSubmit { submits += 1 }
             Text("⌘F").font(.system(size: 12))
         }
         .foregroundStyle(Theme.muted)
@@ -212,7 +215,7 @@ struct ContentView: View {
         switch section {
         case .installed, nil: InstalledView(filter: query, section: $section)
         case .updates: UpdatesView(filter: query, reinstalling: $reinstalling)
-        case .discover: DiscoverView(query: query)
+        case .discover: DiscoverView(query: query, submits: submits)
         case .services: ServicesView()
         case .maintenance: MaintenanceView()
         case .bundle: BundleView()
