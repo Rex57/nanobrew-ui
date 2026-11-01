@@ -27,5 +27,11 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public static func unpin(_ name: String) -> NBCommand { NBCommand(args: ["unpin", name], changes: true) }
     public static func link(_ name: String) -> NBCommand { NBCommand(args: ["link", name], changes: true) }
     public static func unlink(_ name: String) -> NBCommand { NBCommand(args: ["unlink", name], changes: true) }
+    public static func rollback(_ name: String) -> NBCommand {
+        NBCommand(args: ["rollback", name], changes: true, confirmation: .ask)
+    }
+    public static func switchVersion(_ name: String, to version: String) -> NBCommand {
+        NBCommand(args: ["switch", "\(name)@\(version)"], changes: true)
+    }
     public static func depsTree(_ name: String) -> NBCommand { NBCommand(args: ["deps", "--tree", name], changes: false) }
 }

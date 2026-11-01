@@ -28,6 +28,12 @@ public struct StateSnapshot: Decodable, Equatable, Sendable {
     public let history: [String: [HistoryEntry]]
 
     enum CodingKeys: String, CodingKey { case formulae = "kegs", casks, history }
+
+    /// The versions of a formula in the history, without the installed one, oldest first.
+    public func earlierVersions(of name: String) -> [String] {
+        let current = formulae.first { $0.name == name }?.version
+        return (history[name] ?? []).map(\.version).filter { $0 != current }
+    }
 }
 
 public enum StateReader {

@@ -82,10 +82,24 @@ struct PackageDetailView: View {
         }
     }
 
+    @ViewBuilder private var versions: some View {
+        if let formula, let earlier = model.snapshot?.earlierVersions(of: formula.name), !earlier.isEmpty {
+            Text("Earlier versions").font(.headline)
+            Button("Rollback") { model.request(.rollback(formula.name)) }
+            ForEach(earlier, id: \.self) { version in
+                HStack {
+                    Text(version)
+                    Button("Switch") { model.request(.switchVersion(formula.name, to: version)) }
+                }
+            }
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
                 if installed { actions }
+                versions
                 if let detail {
                     if let info = detail.info {
                         Text("\(info.name) \(info.version)").font(.title2)
