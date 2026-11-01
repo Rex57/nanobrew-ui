@@ -42,6 +42,14 @@ public final class AppModel {
     public func toggleConsole() { consoleShown.toggle() }
     /// A monotonic clock for the durations; tests inject their own.
     private let now: @MainActor () -> ContinuousClock.Instant
+    /// The app's own preferences: the Reinstall verdicts (DD15).
+    let defaults: UserDefaults
+
+    /// A line in the console and a failure in the status line that is not a command's own result.
+    func reportFailure(_ text: String) {
+        console.append(text)
+        status = CommandStatus(kind: .failure, text: text)
+    }
 
     public var notInstalled: Bool { nbPath == nil }
     public var askBeforeQuit: Bool { running != nil || !waiting.isEmpty }
@@ -51,8 +59,10 @@ public final class AppModel {
 
     /// `locate` finds nb again on `checkAgain()`; without it the nb path stays fixed (tests).
     public init(statePath: String, nbPath: String?, appVersion: String? = nil, locate: (@MainActor () -> String?)? = nil,
-                now: @escaping @MainActor () -> ContinuousClock.Instant = { ContinuousClock.now }) {
+                now: @escaping @MainActor () -> ContinuousClock.Instant = { ContinuousClock.now },
+                defaults: UserDefaults = .standard) {
         self.now = now
+        self.defaults = defaults
         self.statePath = statePath
         self.nbPath = nbPath
         self.appVersion = appVersion
@@ -227,7 +237,12 @@ public final class AppModel {
         consoleShown = true
         status = CommandStatus(kind: .running, text: "Running: \(command.title)")
         let start = now()
-        for await batch in process.lines { console.append(contentsOf: batch) }
+        var output: [String] = []
+        for await batch in process.lines {
+            console.append(contentsOf: batch)
+            if command.args.first == "upgrade" { output += batch }
+        }
+        record(UnsupportedSkip.parse(output))
         status = CommandStatus(command: command, exitCode: process.wasCancelled ? nil : process.exitCode,
                                cancelled: process.wasCancelled, duration: now() - start)
         processes.removeAll { $0 === process }

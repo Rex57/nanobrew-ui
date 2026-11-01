@@ -3,7 +3,7 @@ import AppKit
 /// The Lucide icons the app draws (lucide-static 1.66.0, ISC), bundled in Resources/Icons with stroke-width 1.5.
 public enum Icon: String, CaseIterable, Sendable {
     case package, search, server, wrench, archive, settings, terminal, pin
-    case circleArrowUp = "circle-arrow-up", rotateCW = "rotate-cw", externalLink = "external-link"
+    case circleArrowUp = "circle-arrow-up", rotateCW = "rotate-cw", externalLink = "external-link", triangleAlert = "triangle-alert"
 
     /// A template image: it takes the colour of the text around it.
     public var image: NSImage? {

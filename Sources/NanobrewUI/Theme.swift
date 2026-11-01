@@ -55,6 +55,7 @@ extension Section {
     var searchPrompt: String? {
         switch self {
         case .installed: "Search installed packages"
+        case .updates: "Search updates"
         default: nil
         }
     }
@@ -197,4 +198,23 @@ struct ScreenTitle<Subline: View>: View {
 /// An ISO date (2026-06-30) from a state.json time stamp.
 func isoDate(_ seconds: Int) -> String {
     Date(timeIntervalSince1970: TimeInterval(seconds)).formatted(.iso8601.year().month().day())
+}
+
+/// The outlined secondary button (28px), or the outlined negative one of a destructive choice.
+struct OutlinedButtonStyle: ButtonStyle {
+    var color = Theme.text
+    var border = Theme.control
+    var height: CGFloat = 28
+    @Environment(\.isEnabled) private var enabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 13, weight: .medium))
+            .foregroundStyle(color)
+            .padding(.horizontal, 12).frame(height: height)
+            .background(Theme.sheet, in: RoundedRectangle(cornerRadius: 6))
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(border))
+            .opacity(enabled ? (configuration.isPressed ? 0.7 : 1) : 0.4)
+            .contentShape(Rectangle())
+    }
 }

@@ -208,7 +208,7 @@ struct ContentView: View {
     @ViewBuilder private var sectionView: some View {
         switch section {
         case .installed, nil: InstalledView(filter: query, section: $section)
-        case .updates: UpdatesView()
+        case .updates: UpdatesView(filter: query)
         case .discover: DiscoverView()
         case .services: ServicesView()
         case .maintenance: MaintenanceView()
