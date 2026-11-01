@@ -6,6 +6,22 @@ console. nb does all the work; the app only shows what nb has and prints.
 
 **Unofficial. Not made by the nanobrew maintainer.** Please report problems with the app here, not to nanobrew.
 
+## What it does
+
+- **Installed, Updates, Discover, Services, Maintenance, Bundle, Settings**: every nb command for macOS
+  (all but `--deb` and `help`), with a confirmation before anything that removes or resets, and a typed "yes"
+  before `nb nuke`.
+- **A status line** shows what the last command did and how long it took. The console opens by itself while a
+  command runs; ⌘J opens and closes it, and you can pin it open.
+- **One command at a time.** Changing commands wait in a queue, because nb locks while it works. If you quit
+  while one runs, nb finishes it in the background.
+- **Light and dark**, following your Mac's setting. Amber marks only what needs your attention.
+- **Casks nb can't upgrade in place.** nb upgrades zip and tar casks in place. For a cask it skips (a disk image,
+  for example), the row shows "Can't upgrade in place" and a **Reinstall…** button. Reinstall removes the app
+  first and installs the new version only when the remove succeeded; if that install then fails (for example
+  with no network), the app stays removed until you install it again from Discover. The app warns you before
+  it starts, and Reinstall is never part of "Upgrade All Casks".
+
 ## Install
 
 ```sh
@@ -32,6 +48,17 @@ scripts/bundle.sh           # dist/Nanobrew UI.app, dist/Nanobrew-UI-1.0.0.zip, 
 
 A Swift package, no Xcode project and no third-party dependency: the library `NanobrewKit` holds all logic, and
 the `NanobrewUI` target holds the SwiftUI views. `scripts/make-icon.swift` makes the icon from nanobrew's logo.
+
+To try the app without touching your real nanobrew, point it at the test fake and a fixture state file. A given
+`-NBPath` is the only place the app looks for nb, so a wrong path shows "nb not installed" and never reaches your
+real nb:
+
+```sh
+mkdir -p /tmp/nbfake && ln -sf "$PWD/Tests/Fixtures/fake-nb" /tmp/nbfake/nb && cp Tests/Fixtures/state.json /tmp/nbfake/
+open -n "dist/Nanobrew UI.app" --args -NBPath /tmp/nbfake/nb -NBStatePath /tmp/nbfake/state.json -NBAppearance dark
+```
+
+The fake nb logs every command it gets to `/tmp/nbfake/fake-nb.log`. `-NBAppearance light|dark` is for tests only.
 
 ## Future ideas
 
