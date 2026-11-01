@@ -21,6 +21,10 @@ struct FakeNB {
         try "\(code)".write(to: dir.appendingPathComponent("exit-\(command)"), atomically: true, encoding: .utf8)
     }
 
+    func stderr(_ command: String, text: String) throws {
+        try text.write(to: dir.appendingPathComponent("stderr-\(command)"), atomically: true, encoding: .utf8)
+    }
+
     /// Log lines split at tabs: ["START", "arg1", ...].
     var log: [[String]] {
         let text = (try? String(contentsOf: dir.appendingPathComponent("fake-nb.log"), encoding: .utf8)) ?? ""

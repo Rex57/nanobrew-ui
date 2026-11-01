@@ -39,10 +39,12 @@ import Testing
         let second = model.run(NBCommand(args: ["unlink", "a"], changes: true))
         await eventually { nb.log.contains { $0.first == "CHILD" } }
         let child = try #require(nb.log.first { $0.first == "CHILD" }.flatMap { Int32($0[1]) })
+        #expect(nb.argvs == [["link", "a"]], "the second command waits in the queue")
         model.cancel()
+        await eventually { kill(child, 0) != 0 }
+        #expect(kill(child, 0) != 0, "the sleep child must be gone well before its 30 s end")
         await first.value
         await second.value
-        #expect(kill(child, 0) != 0, "the sleep child must be gone")
         #expect(model.console.contains("Cancelled: nb link a"))
         #expect(nb.argvs == [["link", "a"], ["unlink", "a"]])
         #expect(!nb.log.contains(["END", "link", "a"]))
@@ -51,9 +53,29 @@ import Testing
     @Test func consoleLinesHaveNoAnsiCodes() async throws {
         let nb = try FakeNB()
         let model = nb.model()
-        await model.run(NBCommand(args: ["install", "sl"], changes: true)).value
+        // nb-output/ansi-sample.txt: escape codes as nanobrew main.zig:1388-1414 writes them.
+        await model.run(NBCommand(args: ["ansi-sample"], changes: false)).value
         #expect(model.console.contains("    ✓ sl"))
         #expect(!model.console.contains { $0.contains("\u{1B}") })
+    }
+
+    @Test func stderrLinesReachTheConsole() async throws {
+        let nb = try FakeNB()
+        try nb.stderr("doctor", text: "Error: cannot open /opt/nanobrew/db/state.json\n")
+        let model = nb.model()
+        await model.run(.doctor).value
+        #expect(model.console.contains("Error: cannot open /opt/nanobrew/db/state.json"))
+    }
+
+    @Test func inProgressListsReadOnlyCommandsToo() async throws {
+        let nb = try FakeNB()
+        try nb.wait("doctor", seconds: 1)
+        let model = nb.model()
+        let task = model.run(.doctor)
+        await eventually { !model.inProgress.isEmpty }
+        #expect(model.inProgress == [.doctor])
+        await task.value
+        #expect(model.inProgress.isEmpty)
     }
 
     @Test func nonZeroExitIsReportedAsFailureWithItsCode() async throws {
