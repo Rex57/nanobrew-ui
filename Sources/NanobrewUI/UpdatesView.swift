@@ -83,7 +83,7 @@ struct UpdatesView: View {
             } else if let reason {
                 HStack(spacing: 6) {
                     IconView(icon: .triangleAlert, size: 14)
-                    Text("Can't upgrade in place: \(UnsupportedSkip.plain(reason))").lineLimit(1)
+                    Text("Can't upgrade in place" + (UnsupportedSkip.plain(reason).map { ": \($0)" } ?? "")).lineLimit(1)
                 }
                 .font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.amberText)
                 .padding(.horizontal, 8).frame(height: 22)
@@ -150,6 +150,14 @@ struct ReinstallDialog: View {
     let row: OutdatedPackage
     let close: () -> Void
 
+    /// The mockup's words for a disk image; nb's own reason otherwise.
+    private var why: String {
+        let reason = model.verdict(for: row) ?? "unsupported"
+        return UnsupportedSkip.plain(reason) == "disk image"
+            ? "nb can't upgrade \(row.name) in place, because it comes as a disk image."
+            : "nb can't upgrade \(row.name) in place: \(reason)."
+    }
+
     var body: some View {
         ZStack(alignment: .top) {
             // The mockup's scrim: #131416 at 28% on light, black at 50% on dark.
@@ -159,8 +167,7 @@ struct ReinstallDialog: View {
                     IconView(icon: .triangleAlert, size: 20).foregroundStyle(Theme.amber)
                     Text("Reinstall \(row.name)?").font(.system(size: 16, weight: .semibold))
                 }
-                Text("nb can't upgrade \(row.name) in place: \(model.verdict(for: row) ?? "unsupported"). Reinstall removes "
-                     + "\(row.name) \(row.installed) first, then installs \(row.latest).")
+                Text(why + " Reinstall removes \(row.name) \(row.installed) first, then installs \(row.latest).")
                 Text("If the install fails, for example with no network, \(row.name) stays removed until you install it "
                      + "again. Your settings in ~/Library stay.")
                 Text("Quit \(row.name) before you continue.").fontWeight(.semibold)

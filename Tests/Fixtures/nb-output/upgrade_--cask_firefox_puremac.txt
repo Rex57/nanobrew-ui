@@ -1,6 +1,5 @@
-==> Checking for outdated casks...
     firefox (144.0 -> 145.0.1) [unsupported, skipping: this download format does not support staged upgrades yet]
 ==> Upgrading 1 package(s):
-    puremac (3.2.0 -> 3.3.0)
+    puremac (3.2.0 -> 3.3.0) (cask)
 ==> Upgraded puremac (3.2.0 -> 3.3.0)
 ==> Upgraded 1; skipped 1 unsupported, 0 pinned; failed 0. Done in 812.4ms

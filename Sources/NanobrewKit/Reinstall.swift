@@ -4,25 +4,26 @@ import Foundation
 /// `    <token> (<old> -> <new>) [unsupported, skipping: <reason>]`.
 public struct UnsupportedSkip: Equatable, Sendable {
     public var token: String
-    public var installed: String
     public var latest: String
     public var reason: String
 
     public static func parse(_ lines: [String]) -> [UnsupportedSkip] {
         lines.compactMap { line in
             guard let m = line.trimmingCharacters(in: .whitespaces)
-                .wholeMatch(of: /(\S+) \((.+) -> (.+?)\) \[unsupported, skipping: (.+)\]/) else { return nil }
-            return UnsupportedSkip(token: String(m.1), installed: String(m.2), latest: String(m.3), reason: String(m.4))
+                .wholeMatch(of: /(\S+) \(.+ -> (.+?)\) \[unsupported, skipping: (.+)\]/) else { return nil }
+            return UnsupportedSkip(token: String(m.1), latest: String(m.2), reason: String(m.3))
         }
     }
 
-    /// nb's reason in plain words for the badge (nanobrew src/cask/upgrade.zig unsupportedReason).
-    public static func plain(_ reason: String) -> String {
+    /// nb's reason in plain words for the badge (nanobrew src/cask/upgrade.zig unsupportedReason); nil when it has
+    /// none, and the badge then says only "Can't upgrade in place". nb gives the download-format reason only for
+    /// .dmg and .unknown downloads, and installs .unknown as a disk image (src/api/cask.zig, src/cask/install.zig).
+    public static func plain(_ reason: String) -> String? {
         switch reason {
-        case "this download format does not support staged upgrades yet": "download format"
+        case "this download format does not support staged upgrades yet": "disk image"
         case "external installers cannot be rolled back": "external installer"
         case "package installer receipts cannot be rolled back": "installer receipts"
-        default: reason
+        default: nil
         }
     }
 }
@@ -37,14 +38,11 @@ extension AppModel {
         }
     }
 
-    /// nb's reason when it skipped this cask version as unsupported; a verdict for another version is dropped.
+    /// nb's reason when it skipped this cask version as unsupported; none for another version. A read never
+    /// deletes: the next skip of the token overwrites its verdict.
     public func verdict(for row: OutdatedPackage) -> String? {
-        guard row.isCask, let saved = defaults.dictionary(forKey: Self.verdictKey(row.name)) as? [String: String]
-        else { return nil }
-        guard saved["version"] == row.latest else {
-            defaults.removeObject(forKey: Self.verdictKey(row.name))
-            return nil
-        }
+        guard row.isCask, let saved = defaults.dictionary(forKey: Self.verdictKey(row.name)) as? [String: String],
+              saved["version"] == row.latest else { return nil }
         return saved["reason"]
     }
 

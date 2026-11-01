@@ -2,12 +2,14 @@ import Foundation
 import Testing
 @testable import NanobrewKit
 
-/// A fresh preferences domain per test, so a verdict never reaches the test runner's own defaults.
-func scratchDefaults() -> UserDefaults {
-    let name = "nanobrew-ui-tests-\(UUID().uuidString)"
-    let defaults = UserDefaults(suiteName: name)!
-    defaults.removePersistentDomain(forName: name)
-    return defaults
+/// One fixed preferences domain for the verdict tests (so a verdict never reaches the test runner's own
+/// defaults), emptied before and after each test; the tests that use it run one at a time.
+final class ScratchDefaults {
+    static let name = "nanobrew-ui-tests"
+    let defaults = UserDefaults(suiteName: ScratchDefaults.name)!
+
+    init() { defaults.removePersistentDomain(forName: Self.name) }
+    deinit { defaults.removePersistentDomain(forName: Self.name) }
 }
 
 let firefoxReason = "this download format does not support staged upgrades yet"
@@ -15,23 +17,26 @@ let firefoxReason = "this download format does not support staged upgrades yet"
 @Suite struct UnsupportedSkipTests {
     @Test func parsesTheUnsupportedLineOfRecordedUpgradeOutput() throws {
         #expect(UnsupportedSkip.parse(try recorded("upgrade_--cask_firefox_puremac")) == [
-            UnsupportedSkip(token: "firefox", installed: "144.0", latest: "145.0.1", reason: firefoxReason),
+            UnsupportedSkip(token: "firefox", latest: "145.0.1", reason: firefoxReason),
         ])
     }
 
     @Test func plainWordsForTheReason() {
-        #expect(UnsupportedSkip.plain(firefoxReason) == "download format")
+        // nb gives this reason only for .dmg and .unknown downloads, and installs .unknown as a disk image.
+        #expect(UnsupportedSkip.plain(firefoxReason) == "disk image")
         #expect(UnsupportedSkip.plain("external installers cannot be rolled back") == "external installer")
-        #expect(UnsupportedSkip.plain("unsafe app path") == "unsafe app path")
+        // No plain words: the badge says only "Can't upgrade in place".
+        #expect(UnsupportedSkip.plain("artifact requires side effects without rollback support") == nil)
     }
 }
 
-@MainActor @Suite struct VerdictTests {
+@MainActor @Suite(.serialized) struct VerdictTests {
     let firefox = OutdatedPackage(name: "firefox", installed: "144.0", latest: "145.0.1", isCask: true, pinned: false)
 
     @Test func anUpgradeThatSkipsACaskGivesAVerdictForThatVersion() async throws {
         let nb = try FakeNB()
-        let defaults = scratchDefaults()
+        let scratch = ScratchDefaults()
+        let defaults = scratch.defaults
         let model = AppModel(statePath: fixture("state.json"), nbPath: nb.path, defaults: defaults)
         #expect(model.verdict(for: firefox) == nil)
         await model.run(NBCommand(args: ["upgrade", "--cask", "firefox", "puremac"], changes: true)).value
@@ -39,16 +44,17 @@ let firefoxReason = "this download format does not support staged upgrades yet"
         // After a restart: a new model on the same preferences.
         let again = AppModel(statePath: fixture("state.json"), nbPath: nb.path, defaults: defaults)
         #expect(again.verdict(for: firefox) == firefoxReason)
-        // A new version of the same cask has no verdict.
+        // A new version of the same cask has no verdict; reading it with stale rows does not delete the verdict.
         var newer = firefox
         newer.latest = "146.0"
         #expect(again.verdict(for: newer) == nil)
-        #expect(again.verdict(for: firefox) == nil)
+        #expect(again.verdict(for: firefox) == firefoxReason)
     }
 
     @Test func upgradeReadyAndUpgradeAllCasksLeaveOutPinnedAndUnsupported() async throws {
         let nb = try FakeNB()
-        let defaults = scratchDefaults()
+        let scratch = ScratchDefaults()
+        let defaults = scratch.defaults
         let model = AppModel(statePath: fixture("state.json"), nbPath: nb.path, defaults: defaults)
         await model.run(NBCommand(args: ["upgrade", "--cask", "firefox", "puremac"], changes: true)).value
         let rows = [
@@ -68,9 +74,8 @@ let firefoxReason = "this download format does not support staged upgrades yet"
 }
 
 @MainActor @Suite struct ReinstallTests {
-    func model(_ nb: FakeNB) -> AppModel {
-        AppModel(statePath: fixture("state.json"), nbPath: nb.path, defaults: scratchDefaults())
-    }
+    /// A reinstall writes no preferences (no upgrade runs).
+    func model(_ nb: FakeNB) -> AppModel { nb.model() }
 
     @Test func aGoodReinstallRunsRemoveThenInstall() async throws {
         let nb = try FakeNB()
