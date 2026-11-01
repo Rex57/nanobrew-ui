@@ -33,7 +33,15 @@ func scratchDir() throws -> URL {
         #expect(snapshot.formulae.isEmpty && snapshot.casks.isEmpty)
     }
 
-    @MainActor @Test func missingFileGivesNotSetUp() {
+    @MainActor @Test func missingFileInAnExistingFolderIsAnEmptySnapshot() throws {
+        // nb init makes /opt/nanobrew/db but writes state.json only later (nanobrew main.zig runInit:355).
+        let model = AppModel(statePath: try scratchDir().appendingPathComponent("state.json").path, nbPath: nil)
+        model.reload()
+        #expect(!model.notSetUp)
+        #expect(model.snapshot?.formulae == [] && model.snapshot?.casks == [])
+    }
+
+    @MainActor @Test func missingFolderGivesNotSetUp() {
         let model = AppModel(statePath: "/nonexistent/state.json", nbPath: nil)
         model.reload()
         #expect(model.notSetUp)

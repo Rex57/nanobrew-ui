@@ -39,9 +39,13 @@ public struct StateSnapshot: Decodable, Equatable, Sendable {
 public enum StateReader {
     public static let defaultPath = "/opt/nanobrew/db/state.json"
 
-    /// nil when the file does not exist (nanobrew is not set up). Never writes.
+    /// nil when the file's folder does not exist (nanobrew is not set up, D9). A missing file in an existing
+    /// folder is an empty snapshot: nb init makes the folder, and nb writes the file only later. Never writes.
     public static func read(path: String) throws -> StateSnapshot? {
-        guard FileManager.default.fileExists(atPath: path) else { return nil }
+        guard FileManager.default.fileExists(atPath: path) else {
+            let folder = (path as NSString).deletingLastPathComponent
+            return FileManager.default.fileExists(atPath: folder) ? StateSnapshot(formulae: [], casks: [], history: [:]) : nil
+        }
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return try decoder.decode(StateSnapshot.self, from: Data(contentsOf: URL(fileURLWithPath: path)))
