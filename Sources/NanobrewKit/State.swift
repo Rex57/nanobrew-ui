@@ -57,9 +57,10 @@ public enum NBLocator {
     public static let savedPathKey = "SavedNBPath"
     public static let defaultPlaces = ["/opt/nanobrew/prefix/bin/nb", NSHomeDirectory() + "/.local/bin/nb"]
 
-    /// The first candidate that is an executable file, in the order of D24.
+    /// A given NBPath argument is the only candidate (D30); else the first executable file of the saved path
+    /// and the default places, in the order of D24.
     public static func locate(argument: String?, saved: String?, places: [String] = defaultPlaces) -> String? {
-        ([argument, saved].compactMap { $0 } + places).first {
+        (argument.map { [$0] } ?? [saved].compactMap { $0 } + places).first {
             var isDir: ObjCBool = false
             return FileManager.default.fileExists(atPath: $0, isDirectory: &isDir) && !isDir.boolValue
                 && FileManager.default.isExecutableFile(atPath: $0)
@@ -67,9 +68,7 @@ public enum NBLocator {
     }
 
     public static func locate(defaults: UserDefaults = .standard) -> String? {
-        // Test seam: `-NBDefaultPlaces "a:b"` replaces the default places ("" = none), so a Mac with nb can show "not installed".
-        let places = launchArgument("NBDefaultPlaces").map { $0.split(separator: ":").map(String.init) } ?? defaultPlaces
-        return locate(argument: launchArgument("NBPath"), saved: defaults.string(forKey: savedPathKey), places: places)
+        locate(argument: launchArgument("NBPath"), saved: defaults.string(forKey: savedPathKey))
     }
 }
 

@@ -81,10 +81,23 @@ func scratchDir() throws -> URL {
         let plain = try makeFile(dir, "plain", executable: false)
         let missing = dir.appendingPathComponent("missing").path
         #expect(NBLocator.locate(argument: arg, saved: saved, places: [opt, local]) == arg)
-        #expect(NBLocator.locate(argument: plain, saved: saved, places: [opt, local]) == saved)
+        // Without the NBPath argument: D24 order, skipping what is not an executable file.
+        #expect(NBLocator.locate(argument: nil, saved: saved, places: [opt, local]) == saved)
         #expect(NBLocator.locate(argument: nil, saved: missing, places: [opt, local]) == opt)
-        #expect(NBLocator.locate(argument: nil, saved: nil, places: [plain, local]) == local)
-        #expect(NBLocator.locate(argument: missing, saved: plain, places: [missing, dir.path]) == nil)
+        #expect(NBLocator.locate(argument: nil, saved: plain, places: [plain, local]) == local)
+        #expect(NBLocator.locate(argument: nil, saved: nil, places: [missing, dir.path]) == nil)
+    }
+
+    @Test func aGivenNbPathArgumentIsTheOnlyPlaceLookedAt() throws {
+        // D30: a wrong test path never falls back to the saved path or the default places.
+        let dir = try scratchDir()
+        let saved = try makeFile(dir, "saved", executable: true)
+        let opt = try makeFile(dir, "opt", executable: true)
+        let plain = try makeFile(dir, "plain", executable: false)
+        let missing = dir.appendingPathComponent("missing").path
+        #expect(NBLocator.locate(argument: missing, saved: saved, places: [opt]) == nil)
+        #expect(NBLocator.locate(argument: plain, saved: saved, places: [opt]) == nil)
+        #expect(NBLocator.locate(argument: dir.path, saved: saved, places: [opt]) == nil)
     }
 
     @Test func defaultPlacesAreOptThenLocalBin() {
