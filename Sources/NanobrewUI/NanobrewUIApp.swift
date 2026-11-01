@@ -23,8 +23,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func mayQuit() -> Bool {
         guard model.askBeforeQuit else { return true }
         let alert = NSAlert()
-        alert.messageText = "A command is still running"
-        alert.informativeText = "nb keeps running in the background until it ends. You will not see its output."
+        alert.messageText = model.reinstalling.isEmpty ? "A command is still running" : "A reinstall is not finished"
+        alert.informativeText = model.quitMessage
         alert.addButton(withTitle: "Keep Running")
         alert.addButton(withTitle: "Quit")
         return alert.runModal() == .alertSecondButtonReturn

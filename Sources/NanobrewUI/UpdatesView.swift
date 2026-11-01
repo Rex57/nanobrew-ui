@@ -98,6 +98,7 @@ struct UpdatesView: View {
                     .buttonStyle(TextButtonStyle())
             } else if reason != nil {
                 Button("Reinstall…") { reinstalling = row }.buttonStyle(OutlinedButtonStyle())
+                    .disabled(model.reinstalling.contains(row.name))
             } else {
                 Button("Upgrade") { model.request(row.isCask ? .upgradeCask(row.name) : .upgrade(row.name)) }
                     .buttonStyle(OutlinedButtonStyle())

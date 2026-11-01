@@ -52,7 +52,20 @@ public final class AppModel {
     }
 
     public var notInstalled: Bool { nbPath == nil }
-    public var askBeforeQuit: Bool { running != nil || !waiting.isEmpty }
+    public var askBeforeQuit: Bool { running != nil || !waiting.isEmpty || !reinstalling.isEmpty }
+    /// The casks whose Reinstall has started and whose install step has not ended (F1: a quit asks first).
+    public internal(set) var reinstalling: Set<String> = []
+
+    /// The text of the quit and close question.
+    public var quitMessage: String {
+        guard !reinstalling.isEmpty else {
+            return "nb keeps running in the background until it ends. You will not see its output."
+        }
+        let names = reinstalling.sorted()
+        return "\(names.joined(separator: ", ")) \(names.count == 1 ? "is" : "are") removed, or being removed, and "
+            + "\(names.count == 1 ? "is" : "are") not installed yet. If you quit, \(names.count == 1 ? "it stays" : "they stay") "
+            + "removed until you install \(names.count == 1 ? "it" : "them") again from Discover."
+    }
     public var canCancel: Bool { !processes.isEmpty }
 
     private let locate: (@MainActor () -> String?)?

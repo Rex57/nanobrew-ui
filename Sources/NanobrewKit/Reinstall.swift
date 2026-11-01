@@ -70,7 +70,9 @@ extension AppModel {
     /// is gone, in the console and the status line.
     @discardableResult
     public func reinstall(_ token: String) -> Task<Void, Never> {
-        Task {
+        reinstalling.insert(token)
+        return Task {
+            defer { reinstalling.remove(token) }
             let remove = NBCommand.removeCask(token)
             await run(remove).value
             guard lastRunSucceeded(remove) else { return }

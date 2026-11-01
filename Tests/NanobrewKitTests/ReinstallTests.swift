@@ -88,8 +88,27 @@ let firefoxReason = "this download format does not support staged upgrades yet"
 
     @Test func aGoodReinstallRunsRemoveThenInstall() async throws {
         let nb = try FakeNB()
-        await model(nb).reinstall("firefox").value
+        let model = model(nb)
+        await model.reinstall("firefox").value
         #expect(nb.argvs == [["remove", "--cask", "firefox"], ["install", "--cask", "firefox"]])
+        #expect(model.status?.kind == .success)
+        #expect(!model.console.contains { $0.contains("was removed") })
+    }
+
+    @Test func aQuitDuringAReinstallAsksAndSaysTheCaskStaysRemoved() async throws {
+        let nb = try FakeNB()
+        try nb.wait("remove", seconds: 1)
+        let model = model(nb)
+        #expect(!model.askBeforeQuit)
+        let task = model.reinstall("firefox")
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        #expect(model.reinstalling == ["firefox"])
+        #expect(model.askBeforeQuit)
+        #expect(model.quitMessage == "firefox is removed, or being removed, and is not installed yet. If you quit, it "
+                + "stays removed until you install it again from Discover.")
+        await task.value
+        #expect(model.reinstalling.isEmpty)
+        #expect(!model.askBeforeQuit)
     }
 
     @Test func aFailedRemoveNeverStartsTheInstall() async throws {
