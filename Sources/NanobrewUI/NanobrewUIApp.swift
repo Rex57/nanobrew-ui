@@ -175,7 +175,8 @@ struct ContentView: View {
         .background(Theme.frame)
         .overlay { if let reinstalling { ReinstallDialog(row: reinstalling) { self.reinstalling = nil } } }
         .ignoresSafeArea()
-        .task { await model.checkOutdated(report: true) }
+        // Launch: the same path as an activation, so the first activation does not start a second check.
+        .task { model.becameActive() }
         .onChange(of: section) { query = "" }
         // After a command (nuke, init) left nb or the state folder gone, show the screen that says so.
         // Not on a Settings path change: the user stays there to fix a typo.

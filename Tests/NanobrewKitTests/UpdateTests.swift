@@ -86,6 +86,39 @@ import Testing
         #expect(model.commandsEnded == 0, "no command ended")
     }
 
+    func pairs(_ nb: FakeNB) -> Int { nb.allArgvs.filter { $0 == ["outdated", "--cask"] }.count }
+    func allEnded(_ nb: FakeNB) -> Bool {
+        nb.log.filter { $0.first == "END" && $0[1] == "outdated" }.count == nb.allArgvs.filter { $0.first == "outdated" }.count
+    }
+
+    @Test func launchWithAnActivationAtOnceStartsOneCheck() async throws {
+        let nb = try FakeNB()
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nb.path, now: StepClock(.milliseconds(81)).now)
+        // The window's first task and the app's first activation come together at launch.
+        model.becameActive()
+        model.becameActive()
+        await eventually { model.outdatedChecked && allEnded(nb) }
+        #expect(nb.allArgvs.filter { $0.first == "outdated" }.sorted { $0.count < $1.count } == [["outdated"], ["outdated", "--cask"]])
+        #expect(model.status?.text == "Checked 10 packages in 81 ms", "the launch check keeps its status line")
+        // An activation after that check ended starts one more pair.
+        model.becameActive()
+        await eventually { pairs(nb) == 2 && allEnded(nb) }
+        #expect(nb.allArgvs.filter { $0 == ["outdated"] }.count == 2)
+        #expect(pairs(nb) == 2)
+    }
+
+    @Test func aChangingCommandDuringAnActivationCheckGetsItsOwnCheck() async throws {
+        let nb = try FakeNB()
+        try nb.wait("outdated", seconds: 1)
+        let model = nb.model()
+        model.becameActive()
+        await eventually { pairs(nb) == 1 }
+        await model.run(.pin("a")).value
+        await eventually { pairs(nb) == 2 && allEnded(nb) && model.outdatedChecked }
+        #expect(pairs(nb) == 2)
+        #expect(nb.allArgvs.filter { $0 == ["outdated"] }.count == 2)
+    }
+
     @Test func aCancelledOutdatedCheckKeepsThePreviousList() async throws {
         let nb = try FakeNB()
         let model = nb.model()

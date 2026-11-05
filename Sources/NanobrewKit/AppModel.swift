@@ -110,14 +110,24 @@ public final class AppModel {
     }
 
     /// D11: the app came to the front: find nb, read state.json and check outdated (not awaited).
+    /// The window calls it at launch too; the launch and the first activation come together, so one check serves
+    /// both (row 6), and the first check of the session puts its result in the status line.
     public func becameActive() {
         checkAgain()
-        startOutdatedCheck()
+        guard backgroundChecks == 0 else { return }
+        startOutdatedCheck(report: !outdatedChecked)
     }
 
-    private func startOutdatedCheck() {
+    /// Background checks that started and did not end yet.
+    private var backgroundChecks = 0
+
+    private func startOutdatedCheck(report: Bool = false) {
         backgroundCheck?.cancel()
-        backgroundCheck = Task { await checkOutdated() }
+        backgroundChecks += 1
+        backgroundCheck = Task {
+            await checkOutdated(report: report)
+            backgroundChecks -= 1
+        }
     }
 
     /// The model the app starts with: launch arguments first, then the default places.
@@ -249,8 +259,8 @@ public final class AppModel {
         await checkOutdated(report: true)
     }
 
-    /// Sets `updatesCount` (at launch, on Cmd-R, when Updates opens and after a changing command). `report` puts the check in the status
-    /// line (launch and Cmd-R), so it does not replace the result of the command that just ended. A cancelled check
+    /// Sets `updatesCount` (at launch, on activation, on Cmd-R, when Updates opens and after a changing command).
+    /// `report` puts the check in the status line (launch and Cmd-R), so it does not replace the result of the command that just ended. A cancelled check
     /// (the user left Updates) changes nothing.
     public func checkOutdated(report: Bool = false) async {
         let start = now()

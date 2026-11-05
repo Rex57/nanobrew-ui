@@ -274,8 +274,7 @@ There is no file watcher. The app reads again at these moments:
 
 | When | What runs |
 |---|---|
-| The app becomes active (also at launch) | `becameActive()`: `checkAgain()` (find nb, read `state.json`), then `checkOutdated()`, not awaited; a newer one cancels the one before |
-| Launch | `checkOutdated(report: true)` |
+| Launch, and the app becomes active | `becameActive()` (the window's first task and the app delegate): `checkAgain()` (find nb, read `state.json`), then `checkOutdated()`, not awaited, unless one of these background checks still runs. So launch starts one check; the session's first check reports in the status line |
 | ⌘R, the top-bar button, Updates > Check Again | `refresh()`: `checkAgain()`, then `checkOutdated(report: true)` |
 | After every command | `checkAgain()` in the run, then `commandsEnded` goes up by one |
 | After a changing command | `checkOutdated()`, started by the run. A newer check replaces the one before: the older one's result is dropped, while its nb runs end by themselves. A read-only command (Doctor, Where, Leaves, a dry run) starts no check |
