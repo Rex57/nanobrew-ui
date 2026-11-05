@@ -90,6 +90,23 @@ public final class AppModel {
     /// The console: closed at start; only the user opens and closes it (D1, which changed DD5).
     public private(set) var consoleShown = false
     public func toggleConsole() { consoleShown.toggle() }
+
+    /// D3: the result of the last console command that ended while the console was closed; a newer end replaces it.
+    public struct Toast: Identifiable, Equatable, Sendable {
+        public let id = UUID()
+        public let kind: CommandStatus.Kind
+        /// The status text without " in <duration>", for example "Installed jq".
+        public let text: String
+        /// "<command title> · <duration>".
+        public let detail: String
+    }
+    public private(set) var toast: Toast?
+    public func dismissToast() { toast = nil }
+    /// The toast's View: the console opens and the toast goes.
+    public func viewToast() {
+        toast = nil
+        consoleShown = true
+    }
     /// A monotonic clock for the durations; tests inject their own.
     private let now: @MainActor () -> ContinuousClock.Instant
     /// The app's own preferences: the Reinstall verdicts (DD15).
@@ -411,10 +428,15 @@ public final class AppModel {
         let outcome = UpgradeOutcome(command: command, output: output, exitCode: exitCode, casks: snapshot?.casks,
                                      appVersion: appVersion)
         record(outcome.skips)
+        let duration = now() - start
+        let result = CommandStatus(command: command, exitCode: exitCode, cancelled: process.wasCancelled,
+                                   duration: duration, skipped: outcome.skips.map(\.token), summary: summary)
         // Decided at the end: a read-only command that started before a change must not hide it either.
-        if command.changes || running == nil {
-            status = CommandStatus(command: command, exitCode: exitCode, cancelled: process.wasCancelled,
-                                   duration: now() - start, skipped: outcome.skips.map(\.token), summary: summary)
+        if command.changes || running == nil { status = result }
+        if !consoleShown {
+            let took = formatDuration(duration)
+            toast = Toast(kind: result.kind, text: result.text.replacingOccurrences(of: " in \(took)", with: ""),
+                          detail: "\(command.title) · \(took)")
         }
         processes.removeAll { $0 === process }
         inProgress.remove(at: inProgress.firstIndex(of: command)!)

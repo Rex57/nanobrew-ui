@@ -170,6 +170,10 @@ struct ContentView: View {
                     }
                     if !model.consoleShown { StatusLine() }
                 }
+                // D3: bottom-right, 12 px above the 36 px status line, over the screen.
+                .overlay(alignment: .bottomTrailing) {
+                    if let toast = model.toast { ToastView(toast: toast).padding(.trailing, 16).padding(.bottom, 48) }
+                }
                 .background(Theme.sheet)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Theme.border))

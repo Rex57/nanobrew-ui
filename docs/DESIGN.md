@@ -172,6 +172,20 @@ Durations read "84 ms", "0.84 s", "12.3 s" and "1 m 05 s". The status line hides
   chevron that hides the console.
 - The output is 12 px SF Mono on the sheet, 24 px from the edge. A drag selects across lines.
 
+### The toast
+
+When a command that the user started (through the run path) ends while the console is closed, a toast says what
+happened (D3, 2026-11-05). Background checks never make one, and a newer end replaces the older toast.
+
+- It floats in the bottom-right corner of the sheet, 16 px from the right and 12 px above the status line, over
+  the screen: 380 px wide, `sheet` with a 1 px `border` edge, 10 px corners and a soft shadow (only what floats
+  has a shadow).
+- The status dot (green, red, grey or amber); the result without its duration ("Installed sl", "Dry run: can free
+  41.4 MB"), 13 medium; one detail line, "<command> · <duration>", 12 grey.
+- "View" (outlined, 26 px) opens the console and closes the toast. "Dismiss (n)" (grey text) closes it; n counts
+  down from 10 once a second, the toast goes at 0, and the count pauses while the pointer is over the toast.
+- The status line keeps the result as well.
+
 ### Pills and badges
 
 - **Neutral pill:** `pillInk` on `pillBg`, 12 medium, 20 px high (22 in Updates), 4 px corners. "Pinned",
