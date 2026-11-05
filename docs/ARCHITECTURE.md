@@ -29,7 +29,7 @@ Why two targets: the tests link the library, not the app target. So every rule t
 | `Sources/NanobrewKit/State.swift` | `StateSnapshot`, `StateReader`, `NBLocator`, `launchArgument` |
 | `Sources/NanobrewKit/Parsers.swift` | `PackageInfo`, `Trust`, `SearchResult`, `OutdatedPackage`, `Service`, `AutoupdateStatus`, `parseTelemetry`, `parseNBVersion`, `testedNBVersion` |
 | `Sources/NanobrewKit/Status.swift` | `CommandStatus`, `formatDuration` |
-| `Sources/NanobrewKit/Reinstall.swift` | `UnsupportedSkip`; the verdicts, `readyUpdates`, `upgradeReady`, `upgradeAllCasks` and `reinstall` on `AppModel` |
+| `Sources/NanobrewKit/Reinstall.swift` | `UnsupportedSkip`, `UpgradeOutcome`; the verdicts, `readyUpdates`, `upgradeReady`, `upgradeAllCasks` and `reinstall` on `AppModel` |
 | `Sources/NanobrewKit/Icons.swift` | `Icon`, `nanobrewLogo` |
 | `Sources/NanobrewUI/NanobrewUIApp.swift` | `NanobrewUIApp`, `AppDelegate`, `ContentView`, `NotInstalledView`, `NotSetUpView`, `relaunch` |
 | `Sources/NanobrewUI/WindowSupport.swift` | `WindowReader`, `CloseGuard` |
@@ -283,7 +283,8 @@ replace the command's result.
 
 ### Self-upgrade
 
-After an upgrade exits 0, the model looks at `state.json`. The upgrade must name `nanobrew-ui` (or a tap path
+`UpgradeOutcome` (`Reinstall.swift`) decides it from the command, its output, its exit code and `state.json` read
+after the run; `execute` only asks it. After an upgrade exits 0, the outcome looks at `state.json`. The upgrade must name `nanobrew-ui` (or a tap path
 that ends in `/nanobrew-ui`), or name nothing. If `state.json` then holds another version of `nanobrew-ui` than the
 running app, `restartOffered` turns true. The window shows "Restart to use the new version" and a Restart button.
 `relaunch()` opens the app bundle again as a new copy (`open -n`) and quits this one.
@@ -329,7 +330,7 @@ other cask, `nb upgrade` skips it and prints:
 
 The app does not guess which casks nb will skip. It uses nb's own verdict:
 
-1. **Record.** `execute` collects the output of every command whose first argument is `upgrade`.
+1. **Record.** `execute` gives each ended command's output to `UpgradeOutcome`; for an `upgrade`,
    `UnsupportedSkip.parse` finds the skip lines. `record` saves the installed (old) version and nb's reason in
    the app's preferences under `ReinstallVerdict.<token>`.
 2. **Read.** `verdict(for:)` returns the reason only for a cask whose saved installed version equals the

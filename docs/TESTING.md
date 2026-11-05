@@ -29,7 +29,7 @@ swift build -c release && swift test && scripts/bundle.sh        # the full chec
 | `StateTests.swift` | `StateReader` (full, empty, missing and broken files, missing folder) and `NBLocator` (order, non-executables, the exclusive `-NBPath`, nothing found). Also holds the helpers `fixture(_:)` and `scratchDir()`. |
 | `RunnerTests.swift` | argv kept whole, the serial queue, read-only commands in parallel, Cancel of the process group, ANSI removal, stderr in the console, a non-zero exit, `askBeforeQuit`, the reload after a command |
 | `StatusTests.swift` | The status texts and durations, the launch check, the console's open, closed and pinned states, read-only results that must not replace a running change, `refresh()` |
-| `ReinstallTests.swift` | The skip-line parse, the plain words, the verdict per installed version, the status after skips, the ready rows, the Reinstall sequence (good, failed remove, failed install, quit during it), runs that cannot start |
+| `ReinstallTests.swift` | The skip-line parse, the plain words, the verdict per installed version, the status after skips, the upgrade outcome from the recorded output, the ready rows, the Reinstall sequence (good, failed remove, failed install, quit during it), runs that cannot start |
 | `UpdateTests.swift` | The outdated parse, formulae and casks from their two commands, the restart offer after a self-upgrade (and when there must be none) |
 | `ActionTests.swift` | The Installed actions, confirmation and decline |
 | `InfoTests.swift` | `PackageInfo` for formulae and casks, the detail pane with and without a tree, nb's error text (also when nb exits 0) |

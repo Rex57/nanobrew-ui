@@ -75,6 +75,18 @@ import Testing
         #expect(!model.restartOffered)
     }
 
+    @Test func noRestartOfferAfterACancel() async throws {
+        let nb = try FakeNB()
+        try nb.wait("upgrade", seconds: 30)
+        let model = try selfUpgradeModel(nb)
+        let task = model.run(.upgradeCask("nanobrew-ui"))
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        model.cancel()
+        await task.value
+        #expect(model.status?.kind == .cancelled)
+        #expect(!model.restartOffered)
+    }
+
     @Test func noRestartOfferForOtherPackages() async throws {
         let nb = try FakeNB()
         let model = try selfUpgradeModel(nb)

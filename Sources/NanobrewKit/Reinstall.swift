@@ -29,6 +29,32 @@ public struct UnsupportedSkip: Equatable, Sendable {
     }
 }
 
+/// What an ended upgrade did (D14): the casks nb skipped as unsupported, and whether it replaced Nanobrew UI itself
+/// (D20). Any other command has no outcome.
+public struct UpgradeOutcome: Equatable, Sendable {
+    public var skips: [UnsupportedSkip]
+    public var replacedSelf: Bool
+
+    public init(skips: [UnsupportedSkip], replacedSelf: Bool) {
+        self.skips = skips
+        self.replacedSelf = replacedSelf
+    }
+
+    /// `exitCode` nil: cancelled or ended by a signal. `casks`: state.json read after the run; `appVersion`: the
+    /// running app's. Skips come from the output whatever the exit code; only a success offers the restart.
+    public init(command: NBCommand, output: [String], exitCode: Int32?, casks: [Cask]?, appVersion: String?) {
+        guard command.verb == "upgrade" else { self.init(skips: [], replacedSelf: false); return }
+        let token = "nanobrew-ui"
+        // A tap install records the full name, for example Rex57/tap/nanobrew-ui.
+        let isSelf = { (name: String) in name == token || name.hasSuffix("/" + token) }
+        // Every matching record counts: a short-name and a tap install can both be in state.json.
+        let replaced = exitCode == 0 && appVersion != nil && (casks ?? []).contains {
+            isSelf($0.token) && (command.names.isEmpty || command.names.contains($0.token)) && $0.version != appVersion
+        }
+        self.init(skips: UnsupportedSkip.parse(output), replacedSelf: replaced)
+    }
+}
+
 extension AppModel {
     private static func verdictKey(_ token: String) -> String { "ReinstallVerdict.\(token)" }
 

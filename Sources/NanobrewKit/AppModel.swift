@@ -278,14 +278,17 @@ public final class AppModel {
         var output: [String] = []
         for await batch in process.lines {
             console.append(contentsOf: batch)
-            if command.verb == "upgrade" { output += batch }
+            output += batch
         }
-        let skips = UnsupportedSkip.parse(output)
-        record(skips)
+        checkAgain()
+        let exitCode = process.wasCancelled ? nil : process.exitCode
+        let outcome = UpgradeOutcome(command: command, output: output, exitCode: exitCode, casks: snapshot?.casks,
+                                     appVersion: appVersion)
+        record(outcome.skips)
         // Decided at the end: a read-only command that started before a change must not hide it either.
         if command.changes || running == nil {
-            status = CommandStatus(command: command, exitCode: process.wasCancelled ? nil : process.exitCode,
-                                   cancelled: process.wasCancelled, duration: now() - start, skipped: skips.map(\.token))
+            status = CommandStatus(command: command, exitCode: exitCode, cancelled: process.wasCancelled,
+                                   duration: now() - start, skipped: outcome.skips.map(\.token))
         }
         processes.removeAll { $0 === process }
         inProgress.remove(at: inProgress.firstIndex(of: command)!)
@@ -298,17 +301,6 @@ public final class AppModel {
         } else {
             console.append("Failed: \(command.title) (exit code \(process.exitCode.map(String.init) ?? "signal"))")
         }
-        checkAgain()
-        if !process.wasCancelled, process.exitCode == 0, replacedSelf(command) { restartOffered = true }
-    }
-
-    /// An upgrade of nanobrew-ui (or of everything) after which state.json holds another version than this app.
-    private func replacedSelf(_ command: NBCommand) -> Bool {
-        let token = "nanobrew-ui"
-        // A tap install records the full name, for example Rex57/tap/nanobrew-ui.
-        let isSelf = { (name: String) in name == token || name.hasSuffix("/" + token) }
-        guard command.verb == "upgrade", let appVersion, let casks = snapshot?.casks else { return false }
-        // Every matching record counts: a short-name and a tap install can both be in state.json.
-        return casks.contains { isSelf($0.token) && (command.names.isEmpty || command.names.contains($0.token)) && $0.version != appVersion }
+        if outcome.replacedSelf { restartOffered = true }
     }
 }

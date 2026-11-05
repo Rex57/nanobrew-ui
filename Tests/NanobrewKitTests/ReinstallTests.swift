@@ -195,3 +195,39 @@ let firefoxReason = "this download format does not support staged upgrades yet"
         #expect(!model.lastRunSucceeded(remove))
     }
 }
+
+/// D14: the outcome of an ended upgrade from its command, output and exit code, with no nb process.
+@Suite struct UpgradeOutcomeTests {
+    func casks(_ name: String) throws -> [Cask] { try #require(try StateReader.read(path: fixture(name))).casks }
+    let firefoxSkip = UnsupportedSkip(token: "firefox", installed: "144.0", reason: firefoxReason)
+
+    @Test func aSkippedCaskIsReportedAndOffersNoRestart() throws {
+        let outcome = UpgradeOutcome(command: .upgradeCask("firefox"), output: try recorded("upgrade_--cask_firefox"),
+                                     exitCode: 0, casks: try casks("state.json"), appVersion: "1.0.0")
+        #expect(outcome == UpgradeOutcome(skips: [firefoxSkip], replacedSelf: false))
+    }
+
+    @Test func aMixedUpgradeReportsOnlyTheSkippedCask() throws {
+        let outcome = UpgradeOutcome(command: NBCommand(args: ["upgrade", "--cask", "firefox", "puremac"], changes: true),
+                                     output: try recorded("upgrade_--cask_firefox_puremac"), exitCode: 0,
+                                     casks: try casks("state.json"), appVersion: "1.0.0")
+        #expect(outcome == UpgradeOutcome(skips: [firefoxSkip], replacedSelf: false))
+    }
+
+    @Test func aTapSelfUpgradeOffersTheRestartOnlyAfterASuccess() throws {
+        let casks = try casks("state-self-tap-upgraded.json")
+        let command = NBCommand.upgradeCask("Rex57/tap/nanobrew-ui")
+        #expect(UpgradeOutcome(command: command, output: [], exitCode: 0, casks: casks, appVersion: "1.0.0").replacedSelf)
+        // A failure, and a cancel or a signal (no exit code), offer no restart.
+        #expect(!UpgradeOutcome(command: command, output: [], exitCode: 1, casks: casks, appVersion: "1.0.0").replacedSelf)
+        #expect(!UpgradeOutcome(command: command, output: [], exitCode: nil, casks: casks, appVersion: "1.0.0").replacedSelf)
+        // The running app already has the installed version.
+        #expect(!UpgradeOutcome(command: command, output: [], exitCode: 0, casks: casks, appVersion: "1.0.1").replacedSelf)
+    }
+
+    @Test func aCommandThatIsNoUpgradeHasNoOutcome() throws {
+        let outcome = UpgradeOutcome(command: .install("firefox", cask: true), output: try recorded("upgrade_--cask_firefox"),
+                                     exitCode: 0, casks: try casks("state-self-upgraded.json"), appVersion: "1.0.0")
+        #expect(outcome == UpgradeOutcome(skips: [], replacedSelf: false))
+    }
+}
