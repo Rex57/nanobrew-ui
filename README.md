@@ -61,6 +61,8 @@ To try the app without touching your real nanobrew, run it against the test fake
 
 ## Docs
 
+Start at the [docs map](docs/README.md): it sends every question to the page that answers it. The main pages:
+
 - [Architecture](docs/ARCHITECTURE.md): how the app is built and how it runs nb.
 - [Design language](docs/DESIGN.md): the look, the colours and what they mean, the components.
 - [Decisions](docs/DECISIONS.md): the main choices and their reasons.
