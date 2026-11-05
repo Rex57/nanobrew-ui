@@ -1,6 +1,6 @@
 # Design language
 
-> Status: current · Owner: Rex57 · Reviewed: 2026-11-01
+> Status: current · Owner: Rex57 · Reviewed: 2026-11-05
 
 Nanobrew UI uses one style, the framed sheet, in a light and a dark version. The app follows the Mac's light or
 dark setting. All colours live in one place: `Theme` in `Sources/NanobrewUI/Theme.swift`. The approved mockups
@@ -37,7 +37,7 @@ this table in the same commit.
 | `control` | `#cdced1` | `#444444` | The edge of fields, outlined buttons and the Check again button |
 | `text` | `#131416` | `#ffffff` | Main text |
 | `muted` | `#5d5f60` | `#b4b4b4` | Secondary text, table headers, flags, icons at rest |
-| `amber` | `#ba8122` | `#f8ac2d` | Amber marks: the selected tab's underline, the running dot, the "needs attention" dot, the icon in the Reinstall dialog |
+| `amber` | `#ba8122` | `#f8ac2d` | Amber marks: the selected tab's underline, the running bar, the "needs attention" dot, the icon in the Reinstall dialog |
 | `amberText` | `#8b6019` | `#f8ac2d` | Amber text: new versions, the Updates count, "updates waiting", the "Can't upgrade in place" badge, the restart bar |
 | `amberBg` | `#fbf4e6` | `#2a2112` | Behind the Updates count, the badge and the restart bar |
 | `positive` | `#1e7b4f` | `#3fc07a` | The success dot; the text of a "Running" service pill |
@@ -89,7 +89,7 @@ darker `#8b6019` (5.55:1 on white, 4.72:1 on the selected-row grey). An earlier 
 ## The sidebar
 
 - At the top: the nanobrew logo on a white 28 px tile with 7 px corners, "Nanobrew UI" (14 semibold), and a grey
-  scope line with the installed nb version, for example "nb 0.1.214 · /opt/nanobrew" (or "nb not found").
+  scope line with the installed nb version, for example "nb 0.1.215 · /opt/nanobrew" (or "nb not found").
 - Two groups: Packages (Installed, Updates, Discover) and System (Services, Maintenance, Bundle). Settings sits
   at the bottom.
 - Each row is 32 px high, with a 16 px Lucide icon and the name at 14. Icons are grey; the selected row's icon
@@ -219,8 +219,8 @@ installed. Type yes to go on."
 
 The dialog covers the whole window, over the `scrim`.
 
-- A 460 px card on the `sheet`, 12 px corners, a `border` edge, 132 px from the top. It is the only element with a
-  shadow: a dialog may float.
+- A 460 px card on the `sheet`, 12 px corners, a `border` edge, 132 px from the top. It floats, so it has a shadow,
+  as the toast does.
 - The title "Reinstall <name>?" (16 semibold), after an amber triangle-alert icon (20 px).
 - The text says why nb can't upgrade the cask in place, that Reinstall removes the installed version first and
   then installs the new one, that the cask stays removed if the install fails (for example with no network), and
@@ -278,7 +278,7 @@ not probed yet". Button labels name the action: "Update nanobrew", "Update Regis
 
 ## Icons
 
-- Icons come from [Lucide](https://lucide.dev): lucide-static 1.66.0, ISC License. The 13 SVG files live in
+- Icons come from [Lucide](https://lucide.dev): lucide-static 1.66.0, ISC License. The 14 SVG files live in
   `Sources/NanobrewKit/Resources/Icons`, at stroke width 1.5.
 - `NSImage` loads them, and `IconView` draws them as template images, so they take the colour of the text around
   them. Icons are grey at rest.
@@ -286,7 +286,7 @@ not probed yet". Button labels name the action: "Update nanobrew", "Update Regis
   the external-link mark; 20 px in the Reinstall dialog.
 - The set: package, circle-arrow-up, search, server, wrench, archive, settings (the sidebar); rotate-cw (Check
   again); terminal (Console); chevron-down (hide the console); triangle-alert (badge and dialog); external-link
-  (homepage). `pin` is in the set too, but no screen draws it in 1.0.0.
+  (homepage); circle-question-mark (the ? of a Maintenance row). `pin` is in the set too, but no screen draws it in 1.0.0.
 - README and About credit Lucide. The nanobrew logo (Copyright 2026 Rach Pradhan, Apache-2.0) appears on a white
   rounded tile: 28 px in the sidebar, 72 px in About.
 - The app icon is the same logo on a white macOS rounded square, with no grid lines (`scripts/make-icon.swift`):
@@ -336,7 +336,7 @@ The light `amber` mark (3.36:1 on white) carries no text.
 - In the Reinstall dialog, Return and Escape both cancel.
 
 **Real controls.** Sidebar rows, tabs, table rows and search results are real buttons. The selected one carries
-the selected trait. Icon-only buttons have labels ("Check again", "Show console", "Hide console"). The Updates count
+the selected trait. Icon-only buttons have labels ("Check again", "Show console", "Hide console", "About <row title>"). The Updates count
 reads "<n> updates". Icons and status dots are hidden from VoiceOver, because the text next to them says the same.
 Status texts, errors and package details are selectable.
 
@@ -344,7 +344,7 @@ Status texts, errors and package details are selectable.
 
 - Gradients.
 - Glass: translucent or blurred materials.
-- Shadows at rest. Only a dialog may float.
+- Shadows at rest. Only what floats has one: a dialog, the toast, a popover.
 - Emoji.
 - Tinted squares behind icons.
 - Amber on buttons, and colour on more than 3 % of the screen.

@@ -4,7 +4,7 @@
 
 # Nanobrew UI
 
-> Status: current · Owner: Rex57 · Reviewed: 2026-11-01
+> Status: current · Owner: Rex57 · Reviewed: 2026-11-05
 
 A native macOS app for [nanobrew](https://github.com/justrach/nanobrew) (`nb`). It shows what nb has installed,
 what is out of date and which services run, and it runs every nb command from a window, with the live output in a
@@ -17,8 +17,9 @@ console. nb does all the work; the app only shows what nb has and prints.
 - **Installed, Updates, Discover, Services, Maintenance, Bundle, Settings**: every nb command for macOS
   (all but `--deb` and `help`), with a confirmation before anything that removes or resets, and a typed "yes"
   before `nb nuke`.
-- **A status line** shows what the last command did and how long it took. The console opens by itself while a
-  command runs; ⌘J opens and closes it, and you can pin it open.
+- **A status line** shows what the last command did and how long it took. While a command runs, it shows a
+  spinner, the time and a Cancel button; when the command ends, a small note in the corner says what happened,
+  with View and a Dismiss that counts down. The console opens only when you ask: ⌘J, the Console button or View.
 - **One command at a time.** Changing commands wait in a queue, because nb locks while it works. If you quit
   while one runs, nb finishes it in the background.
 - **Light and dark**, following your Mac's setting. Amber marks only what needs your attention.
