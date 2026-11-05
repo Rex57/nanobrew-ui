@@ -6,12 +6,22 @@ struct ServicesView: View {
     @Environment(AppModel.self) private var model
     @State private var error: String?
     @State private var rows: [Service]?
+    /// Retry bumps it: a new load starts.
+    @State private var retries = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ScreenTitle(title: "Services") { Text(subline) }
-            if let error {
-                Text(error).foregroundStyle(Theme.negative).textSelection(.enabled).padding(.top, 20)
+            if rows == nil, let running = model.running {
+                // D5: nb's lock holds a read behind the app's own command; the list loads when it ends.
+                Text("Waiting for \(running.title) to end").font(.system(size: 13)).foregroundStyle(Theme.muted)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let error {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    Text(error).foregroundStyle(Theme.negative).textSelection(.enabled)
+                    Button("Retry") { self.error = nil; retries += 1 }.buttonStyle(TextButtonStyle())
+                }
+                .padding(.top, 20)
                 Spacer()
             } else if let rows {
                 if rows.isEmpty {
@@ -45,7 +55,11 @@ struct ServicesView: View {
         }
         .padding(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .task(id: model.commandsEnded) { await load() }
+        // No load while the app's own changing command runs (D5); its end changes `commandsEnded`.
+        .task(id: model.running == nil ? [model.commandsEnded, retries] : []) {
+            guard model.running == nil else { return }
+            await load()
+        }
     }
 
     private var subline: String {

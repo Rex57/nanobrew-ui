@@ -305,6 +305,10 @@ The views with their own fetched data key a `.task(id:)` on `commandsEnded`, so 
 command: the detail pane (`nb info`), Discover's results, the services list, the auto-update status and the
 telemetry status.
 
+Services starts no read while the app's own changing command runs (`running`): nb's lock would hold the read
+behind it. Until its first list it shows "Waiting for <title> to end", and it loads when that command ends. A load
+error (nb's text or the read limit's) shows in the Services block with a Retry text button.
+
 ### The outdated list
 
 `outdated()` runs `nb outdated` and `nb outdated --cask` in parallel. It takes the formulae from the first and the
