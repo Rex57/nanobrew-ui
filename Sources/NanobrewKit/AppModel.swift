@@ -30,6 +30,10 @@ public final class AppModel {
     public private(set) var waiting: [NBCommand] = []
     /// Every command that runs now, read-only ones too.
     public private(set) var inProgress: [NBCommand] = []
+    /// Changes once each time a command ends, read-only or changing: views with their own fetched data re-load on it.
+    public private(set) var commandsEnded = 0
+    /// The outdated check after the last changing command; a newer one replaces it.
+    private var checkAfterChange: Task<Void, Never>?
     /// A command that waits for the user's yes before it runs.
     public private(set) var pendingConfirmation: NBCommand?
     private var processes: [NBProcess] = []
@@ -90,7 +94,7 @@ public final class AppModel {
         self.locate = locate
     }
 
-    /// Finds nb and reads state.json again (Cmd-R, app active, after each command).
+    /// Finds nb and reads state.json again (Cmd-R, app active, after every command).
     public func checkAgain() {
         if let locate { nbPath = locate() }
         reload()
@@ -225,7 +229,7 @@ public final class AppModel {
         await checkOutdated(report: true)
     }
 
-    /// Sets `updatesCount` (at launch, on Cmd-R and after each command). `report` puts the check in the status
+    /// Sets `updatesCount` (at launch, on Cmd-R, when Updates opens and after a changing command). `report` puts the check in the status
     /// line (launch and Cmd-R), so it does not replace the result of the command that just ended. A cancelled check
     /// (the user left Updates) changes nothing.
     public func checkOutdated(report: Bool = false) async {
@@ -306,5 +310,11 @@ public final class AppModel {
             console.append("Failed: \(command.title) (exit code \(process.exitCode.map(String.init) ?? "signal"))")
         }
         if outcome.replacedSelf { restartOffered = true }
+        // D11: only a changing command can change what is outdated.
+        if command.changes {
+            checkAfterChange?.cancel()
+            checkAfterChange = Task { await checkOutdated() }
+        }
+        commandsEnded += 1
     }
 }

@@ -66,10 +66,7 @@ struct MaintenanceView: View {
             }
             .padding(24)
         }
-        .task { autoupdate = await model.autoupdateStatus() }
-        .onChange(of: model.running) { _, running in
-            if running == nil { Task { autoupdate = await model.autoupdateStatus() } }
-        }
+        .task(id: model.commandsEnded) { autoupdate = await model.autoupdateStatus() }
     }
 
     private var subline: String {

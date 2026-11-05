@@ -27,7 +27,7 @@ import Testing
         await doctor.value
         await first.value
         await second.value
-        let events = nb.log.filter { $0.first != "CHILD" }.map { $0.joined(separator: " ") }
+        let events = nb.log.filter { $0.first != "CHILD" && $0[1] != "outdated" }.map { $0.joined(separator: " ") }
         #expect(events == ["START pin a", "START doctor", "END doctor", "END pin a", "START pin b", "END pin b"])
     }
 

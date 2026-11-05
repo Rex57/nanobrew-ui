@@ -31,8 +31,10 @@ struct FakeNB {
         return text.split(separator: "\n").map { $0.split(separator: "\t", omittingEmptySubsequences: false).map(String.init) }
     }
 
-    /// The argv of every run, in start order.
-    var argvs: [[String]] { log.filter { $0.first == "START" }.map { Array($0.dropFirst()) } }
+    /// The argv of every run, in start order, the outdated checks too.
+    var allArgvs: [[String]] { log.filter { $0.first == "START" }.map { Array($0.dropFirst()) } }
+    /// The argv of every run but the outdated checks (the model starts one after each changing command).
+    var argvs: [[String]] { allArgvs.filter { $0.first != "outdated" } }
 
     /// Ends the sleep children of `wait` that no cancel stopped.
     func killChildren() {

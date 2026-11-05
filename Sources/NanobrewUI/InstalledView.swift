@@ -166,6 +166,8 @@ struct PackageDetailView: View {
     /// Discover's install options and button, after the info.
     var footer: AnyView?
     @State private var detail: PackageDetail?
+    /// The package whose detail shows; a re-load of the same package keeps it until the new one arrives.
+    @State private var loaded: PackageRef?
 
     private var formula: Formula? { package.cask ? nil : model.snapshot?.formulae.first { $0.name == package.name } }
     private var installed: Bool {
@@ -309,16 +311,14 @@ struct PackageDetailView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
-        .task(id: package) {
-            detail = nil
+        // Again after each command: a probe, a link or an upgrade changes what nb info says.
+        .task(id: "\(package.name)\u{0}\(package.cask)\u{0}\(model.commandsEnded)") {
+            if loaded != package { detail = nil }
             let fetched = await model.detail(name: package.name, cask: package.cask)
             // A newer selection cancelled this fetch: its result is not this package's.
-            if !Task.isCancelled { detail = fetched }
-        }
-        // A probe, a link or an upgrade changes what nb info says.
-        .onChange(of: model.inProgress.count) { old, new in
-            guard new < old else { return }
-            Task { detail = await model.detail(name: package.name, cask: package.cask) }
+            guard !Task.isCancelled else { return }
+            detail = fetched
+            loaded = package
         }
     }
 }

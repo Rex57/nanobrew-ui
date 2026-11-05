@@ -9,8 +9,6 @@ struct DiscoverView: View {
     let query: String
     /// Return in the top-bar field: search again.
     let submits: Int
-    /// Bumped when a command ends: an install or a remove changes the Installed marks.
-    @State private var commandsEnded = 0
     @State private var results: [SearchResult]?
     @State private var error: String?
     @State private var searched: (query: String, time: Duration)?
@@ -61,8 +59,7 @@ struct DiscoverView: View {
             }
             .frame(width: detailWidth)
         }
-        .task(id: "\(query)\u{0}\(submits)\u{0}\(commandsEnded)") { await search() }
-        .onChange(of: model.inProgress.count) { old, new in if new < old { commandsEnded += 1 } }
+        .task(id: "\(query)\u{0}\(submits)\u{0}\(model.commandsEnded)") { await search() }
     }
 
     private var subline: String {

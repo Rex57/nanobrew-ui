@@ -231,6 +231,7 @@ it. `AppModel.fromLaunch()` makes the app's model from the launch arguments.
 | `nbPath`, `notInstalled` | The nb that the locator found, or none |
 | `console`, `consoleShown`, `consolePinned` | The console lines and whether the console shows |
 | `running`, `waiting`, `inProgress` | The queue |
+| `commandsEnded` | Goes up by one each time a command ends |
 | `pendingConfirmation` | A command that waits for the user's yes |
 | `status` | The status line: a `CommandStatus` |
 | `outdatedPackages`, `outdatedError`, `outdatedChecked`, `updatesCount` | The last outdated check |
@@ -272,8 +273,13 @@ There is no file watcher. The app reads again at these moments:
 | The app becomes active (also at launch) | `checkAgain()`: find nb, read `state.json` |
 | Launch | `checkOutdated(report: true)` |
 | ⌘R, the top-bar button, Updates > Check Again | `refresh()`: `checkAgain()`, then `checkOutdated(report: true)` |
-| After each command | `checkAgain()` in the run; `checkOutdated()` when `inProgress` gets shorter |
+| After every command | `checkAgain()` in the run, then `commandsEnded` goes up by one |
+| After a changing command | `checkOutdated()`, started by the run; a newer one cancels the one before. A read-only command (Doctor, Where, Leaves, a dry run) starts no check |
 | Updates opens | `checkOutdated()` |
+
+The views with their own fetched data key a `.task(id:)` on `commandsEnded`, so they load again after each
+command: the detail pane (`nb info`), Discover's results, the services list, the auto-update status and the
+telemetry status.
 
 ### The outdated list
 

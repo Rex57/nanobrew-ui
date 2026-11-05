@@ -36,7 +36,35 @@ import Testing
         let nb = try FakeNB()
         let rows = try await nb.model().outdated()
         #expect(rows.map(\.name) == ["node", "libffi", "puremac", "nanobrew-ui"])
-        #expect(Set(nb.argvs) == [["outdated"], ["outdated", "--cask"]])
+        #expect(Set(nb.allArgvs) == [["outdated"], ["outdated", "--cask"]])
+    }
+
+    @Test func onlyAChangingCommandChecksOutdatedAfterIt() async throws {
+        let nb = try FakeNB()
+        let model = nb.model()
+        for command in [NBCommand.doctor, .where("jq"), .leaves(tree: false), .cleanupDryRun(pruneKegs: false)] {
+            await model.run(command).value
+        }
+        #expect(model.commandsEnded == 4, "the signal changes once per ended read-only command")
+        #expect(!model.outdatedChecked)
+        try nb.exit("pin", code: 1)
+        await model.run(.pin("a")).value
+        await model.run(.unpin("a")).value
+        #expect(model.commandsEnded == 6, "and once per ended changing command, failed or not")
+        await eventually { model.outdatedChecked && nb.log.filter { $0.first == "END" && $0[1] == "outdated" }.count == 2 }
+        // Two changing commands: the second check replaces the first, which may not have started nb yet.
+        let checks = nb.allArgvs.filter { $0.first == "outdated" }
+        #expect(checks.contains(["outdated"]) && checks.contains(["outdated", "--cask"]))
+        #expect(checks.count <= 4)
+    }
+
+    @Test func aChangingCommandStartsExactlyOneOutdatedCheck() async throws {
+        let nb = try FakeNB()
+        let model = nb.model()
+        await model.run(.pin("a")).value
+        await eventually { model.outdatedChecked }
+        #expect(model.updatesCount == 4)
+        #expect(nb.allArgvs.filter { $0.first == "outdated" }.sorted { $0.count < $1.count } == [["outdated"], ["outdated", "--cask"]])
     }
 
     @Test func aCancelledOutdatedCheckKeepsThePreviousList() async throws {

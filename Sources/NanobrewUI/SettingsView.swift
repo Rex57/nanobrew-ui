@@ -127,10 +127,7 @@ struct SettingsView: View {
             }
             .padding(24)
         }
-        .task { telemetry = await model.telemetryEnabled() }
+        .task(id: model.commandsEnded) { telemetry = await model.telemetryEnabled() }
         .task(id: shell) { completions = await model.completions(shell) ?? "" }
-        .onChange(of: model.running) { _, running in
-            if running == nil { Task { telemetry = await model.telemetryEnabled() } }
-        }
     }
 }

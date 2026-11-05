@@ -30,7 +30,7 @@ swift build -c release && swift test && scripts/bundle.sh        # the full chec
 | `RunnerTests.swift` | argv kept whole, the serial queue, read-only commands in parallel, Cancel of the process group, ANSI removal, stderr in the console, a non-zero exit, `askBeforeQuit`, the reload after a command, no exit code before the reap |
 | `StatusTests.swift` | The status texts and durations, the launch check, the console's open, closed and pinned states, read-only results that must not replace a running change, `refresh()` |
 | `ReinstallTests.swift` | The skip-line parse, the plain words, the verdict per installed version, the status after skips, the upgrade outcome from the recorded output, the ready rows, the Reinstall sequence (good, failed remove, failed install, quit during it), runs that cannot start |
-| `UpdateTests.swift` | The outdated parse, formulae and casks from their two commands, the restart offer after a self-upgrade (and when there must be none), a cancelled check that keeps the list |
+| `UpdateTests.swift` | The outdated parse, formulae and casks from their two commands, the restart offer after a self-upgrade (and when there must be none), a cancelled check that keeps the list, the check after a changing command only, the `commandsEnded` signal |
 | `ActionTests.swift` | The Installed actions, confirmation and decline |
 | `InfoTests.swift` | `PackageInfo` for formulae and casks, the detail pane with and without a tree, nb's error text (also when nb exits 0), a cancelled fetch |
 | `SearchTests.swift` | Search rows, the installed tag, no results, every install form |
@@ -68,7 +68,8 @@ that could change anything. Link it as `nb` in a scratch folder (call it D); the
 `nb-output/<arg1>.txt`, else nothing. For example, `nb info --cask iterm2` prints `info_--cask_iterm2.txt`.
 
 **The helper.** `FakeNB` gives `wait(_:seconds:)`, `exit(_:code:)` and `stderr(_:text:)` to write the control
-files, `log` and `argvs` to read the log, and `model(statePath:)` to make an `AppModel` that uses the fake.
+files, `log`, `argvs` (without the outdated checks) and `allArgvs` to read the log, `killChildren()` to end
+leftover sleeps, and `model(statePath:)` to make an `AppModel` that uses the fake.
 `eventually(_:)` waits up to 10 seconds for a condition.
 
 **Other seams in the model.** `AppModel` takes a clock (`now:`), a `UserDefaults` (`defaults:`) and a locator

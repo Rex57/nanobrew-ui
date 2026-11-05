@@ -45,8 +45,7 @@ struct ServicesView: View {
         }
         .padding(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .task { await load() }
-        .onChange(of: model.running) { _, running in if running == nil { Task { await load() } } }
+        .task(id: model.commandsEnded) { await load() }
     }
 
     private var subline: String {

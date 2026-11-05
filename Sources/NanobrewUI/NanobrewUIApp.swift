@@ -177,10 +177,6 @@ struct ContentView: View {
         .ignoresSafeArea()
         .task { await model.checkOutdated(report: true) }
         .onChange(of: section) { query = "" }
-        // After each command: the count on Updates may have changed.
-        .onChange(of: model.inProgress) { old, new in
-            if new.count < old.count { Task { await model.checkOutdated() } }
-        }
         // After a command (nuke, init) left nb or the state folder gone, show the screen that says so.
         // Not on a Settings path change: the user stays there to fix a typo.
         .onChange(of: model.running) { old, new in
