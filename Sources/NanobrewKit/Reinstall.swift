@@ -56,6 +56,19 @@ public struct UpgradeOutcome: Equatable, Sendable {
 }
 
 extension AppModel {
+    /// D7: Restart asks the quit question first (`mayQuit`); it opens the new copy only after a yes, and quits only
+    /// when the new copy opened. A failed open shows a failure in the status line, and this copy keeps running.
+    public func restart(mayQuit: () -> Bool, open: () throws -> Void, quit: () -> Void) {
+        guard mayQuit() else { return }
+        do {
+            try open()
+        } catch {
+            reportFailure("Restart failed: the new copy did not open (\(error.localizedDescription))")
+            return
+        }
+        quit()
+    }
+
     private static func verdictKey(_ token: String) -> String { "ReinstallVerdict.\(token)" }
 
     /// DD15, DD24: remembers nb's verdict per cask and installed version in the app's own preferences. The skip

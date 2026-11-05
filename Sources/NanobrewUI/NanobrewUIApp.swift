@@ -18,6 +18,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private var closeGuard: CloseGuard?
+    /// The user already said yes (Restart asks before it opens the new copy): the quit does not ask again.
+    var quitConfirmed = false
 
     /// Asks first while a changing command runs or waits; true when the app may quit.
     func mayQuit() -> Bool {
@@ -31,7 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        mayQuit() ? .terminateNow : .terminateCancel
+        quitConfirmed || mayQuit() ? .terminateNow : .terminateCancel
     }
 
     /// Closing the one main window quits the app (D29): the close becomes a quit, which asks first while a
@@ -54,7 +56,7 @@ struct NanobrewUIApp: App {
     var body: some Scene {
         // One main window (D29): a Window scene has no File > New Window.
         Window("Nanobrew UI", id: "main") {
-            ContentView().environment(delegate.model)
+            ContentView(delegate: delegate).environment(delegate.model)
                 .background(WindowReader { delegate.guardClose(of: $0) })
         }
         .windowStyle(.hiddenTitleBar)
@@ -87,6 +89,8 @@ enum Section: String, CaseIterable, Identifiable {
 
 struct ContentView: View {
     @Environment(AppModel.self) private var model
+    /// Restart asks its quit question and quits through it.
+    let delegate: AppDelegate
     @State private var section: Section? = .installed
     @State private var typed = ""
     /// The top-bar search field; each section that has one reads it, and a section change clears it.
@@ -136,7 +140,7 @@ struct ContentView: View {
                             if model.restartOffered {
                                 HStack(spacing: 12) {
                                     Text("Restart to use the new version").foregroundStyle(Theme.amberText)
-                                    Button("Restart", action: relaunch).buttonStyle(OutlinedButtonStyle())
+                                    Button("Restart") { relaunch(delegate) }.buttonStyle(OutlinedButtonStyle())
                                 }
                                 .font(.system(size: 13, weight: .medium))
                                 .padding(.horizontal, 24).padding(.vertical, 8)
@@ -269,12 +273,22 @@ struct NotSetUpView: View {
     }
 }
 
-/// Opens the app bundle again as a new copy (the upgraded one nb put in place) and quits this one.
-@MainActor func relaunch() {
-    let open = Process()
-    open.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-    open.arguments = ["-n", Bundle.main.bundlePath]
-    try? open.run()
-    open.waitUntilExit()
-    NSApp.terminate(nil)
+/// Opens the app bundle again as a new copy (the upgraded one nb put in place) and quits this one; asks first (D7).
+@MainActor func relaunch(_ delegate: AppDelegate) {
+    delegate.model.restart(mayQuit: delegate.mayQuit, open: {
+        let open = Process()
+        open.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+        open.arguments = ["-n", Bundle.main.bundlePath]
+        try open.run()
+        open.waitUntilExit()
+        guard open.terminationStatus == 0 else { throw OpenFailed(code: open.terminationStatus) }
+    }, quit: {
+        delegate.quitConfirmed = true
+        NSApp.terminate(nil)
+    })
+}
+
+private struct OpenFailed: LocalizedError {
+    let code: Int32
+    var errorDescription: String? { "open exited with code \(code)" }
 }

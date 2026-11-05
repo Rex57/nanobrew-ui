@@ -299,7 +299,10 @@ replace the command's result.
 after the run; `execute` only asks it. After an upgrade exits 0, the outcome looks at `state.json`. The upgrade must name `nanobrew-ui` (or a tap path
 that ends in `/nanobrew-ui`), or name nothing. If `state.json` then holds another version of `nanobrew-ui` than the
 running app, `restartOffered` turns true. The window shows "Restart to use the new version" and a Restart button.
-`relaunch()` opens the app bundle again as a new copy (`open -n`) and quits this one.
+`relaunch` calls `AppModel.restart(mayQuit:open:quit:)` (D7): it asks the quit question first (only while a
+changing command runs or waits), opens the app bundle again as a new copy (`open -n`) only after a yes, and then
+quits this one without a second question. When `open` fails, the status line says "Restart failed: …" and this
+copy keeps running.
 
 ### Quit rules
 

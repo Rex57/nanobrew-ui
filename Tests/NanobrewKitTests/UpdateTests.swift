@@ -267,3 +267,31 @@ import Testing
         await #expect(throws: AppModel.CommandFailed(text: "nb: could not open database")) { try await nb.model().outdated() }
     }
 }
+
+/// D7: Restart asks the quit question first and opens the new copy only after a yes.
+@MainActor @Suite struct RestartTests {
+    struct OpenFailed: Error, LocalizedError { var errorDescription: String? { "open exited with code 1" } }
+
+    @Test func keepRunningOpensNoSecondCopy() {
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nil)
+        var steps: [String] = []
+        model.restart(mayQuit: { steps.append("ask"); return false }, open: { steps.append("open") }, quit: { steps.append("quit") })
+        #expect(steps == ["ask"])
+    }
+
+    @Test func aYesOpensTheNewCopyThenQuits() {
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nil)
+        var steps: [String] = []
+        model.restart(mayQuit: { steps.append("ask"); return true }, open: { steps.append("open") }, quit: { steps.append("quit") })
+        #expect(steps == ["ask", "open", "quit"])
+    }
+
+    @Test func aFailedOpenShowsAFailureAndTheAppKeepsRunning() {
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nil)
+        var quit = false
+        model.restart(mayQuit: { true }, open: { throw OpenFailed() }, quit: { quit = true })
+        #expect(!quit)
+        #expect(model.status?.kind == .failure)
+        #expect(model.status?.text == "Restart failed: the new copy did not open (open exited with code 1)")
+    }
+}
