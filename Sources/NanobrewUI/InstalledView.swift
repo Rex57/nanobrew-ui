@@ -174,10 +174,8 @@ struct PackageDetailView: View {
         package.cask ? model.snapshot?.casks.contains { $0.token == package.name } == true : formula != nil
     }
     private var update: OutdatedPackage? {
-        // No Upgrade primary for a cask nb skips as unsupported (its Reinstall is on Updates).
-        model.outdatedPackages.first {
-            $0.name == package.name && $0.isCask == package.cask && !$0.pinned && model.verdict(for: $0) == nil
-        }
+        // The ready rule of Updates: no Upgrade primary for a pinned row or a cask nb skips as unsupported.
+        model.readyUpdates(model.outdatedPackages).first { $0.name == package.name && $0.isCask == package.cask }
     }
 
     @ViewBuilder private var actions: some View {
@@ -203,16 +201,15 @@ struct PackageDetailView: View {
     }
 
     @ViewBuilder private var versions: some View {
-        if let formula, let earlier = model.snapshot?.earlierVersions(of: formula.name), let last = earlier.last {
+        if let formula, let earlier = model.snapshot?.earlierVersions(of: formula.name), let last = earlier.first {
             HStack(alignment: .firstTextBaseline) {
                 Text("Earlier versions").font(.system(size: 14, weight: .semibold))
                 Spacer()
-                Button("Roll back to \(last)") { model.request(.rollback(formula.name)) }
+                Button("Roll back to \(last.version)") { model.request(.rollback(formula.name)) }
             }
             .padding(.top, 6)
             VStack(spacing: 0) {
-                let entries = (model.snapshot?.history[formula.name] ?? []).filter { $0.version != formula.version }
-                ForEach(Array(entries.reversed().enumerated()), id: \.offset) { _, entry in
+                ForEach(Array(earlier.enumerated()), id: \.offset) { _, entry in
                     HStack(spacing: 12) {
                         Text(entry.version).frame(maxWidth: .infinity, alignment: .leading)
                         Text(isoDate(entry.installedAt)).foregroundStyle(Theme.muted).frame(width: 90, alignment: .trailing)

@@ -29,10 +29,10 @@ public struct StateSnapshot: Decodable, Equatable, Sendable {
 
     enum CodingKeys: String, CodingKey { case formulae = "kegs", casks, history }
 
-    /// The versions of a formula in the history, without the installed one, oldest first.
-    public func earlierVersions(of name: String) -> [String] {
+    /// The history entries of a formula without the installed version, newest first (nb appends to the history).
+    public func earlierVersions(of name: String) -> [HistoryEntry] {
         let current = formulae.first { $0.name == name }?.version
-        return (history[name] ?? []).map(\.version).filter { $0 != current }
+        return (history[name] ?? []).filter { $0.version != current }.reversed()
     }
 }
 

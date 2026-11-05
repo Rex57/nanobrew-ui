@@ -69,7 +69,8 @@ The app has two sources of data. It never asks a Homebrew API.
 ### state.json, read only
 
 `StateReader.read(path:)` reads nanobrew's `state.json` into a `StateSnapshot`: the formulae (name, version,
-pinned, install time), the casks (token, version, apps, binaries) and the history (earlier versions per formula).
+pinned, install time), the casks (token, version, apps, binaries) and the history (earlier versions per formula;
+`earlierVersions(of:)` gives the entries without the installed version, newest first, with their install times).
 
 - The path is `/opt/nanobrew/db/state.json`, or the `-NBStatePath` launch argument.
 - The JSON key `kegs` holds the formulae. Unknown fields are ignored.
@@ -358,7 +359,8 @@ The app does not guess which casks nb will skip. It uses nb's own verdict:
    image", "external installer" and "installer receipts". For any other reason the badge says only "Can't upgrade
    in place", and the tooltip shows nb's text.
 5. **Upgrade buttons.** `readyUpdates` leaves out pinned rows and rows with a verdict. "Upgrade <n>" and "Upgrade
-   All Casks" name only the ready rows, so a cask with a verdict is never part of them. "Upgrade All" runs plain
+   All Casks" name only the ready rows, so a cask with a verdict is never part of them. The detail pane in
+   Installed shows "Upgrade to <version>" by the same rule. "Upgrade All" runs plain
    `nb upgrade`, and nb skips what it cannot upgrade.
 6. **Reinstall.** `reinstall(_:)` runs `nb remove --cask <token>`. Only when that exits 0 does it run
    `nb install --cask <token>`. When the install fails, the console and the status line say:
