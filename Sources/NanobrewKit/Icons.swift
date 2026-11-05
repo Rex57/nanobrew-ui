@@ -4,6 +4,7 @@ import AppKit
 public enum Icon: String, CaseIterable, Sendable {
     case package, search, server, wrench, archive, settings, terminal, pin
     case circleArrowUp = "circle-arrow-up", rotateCW = "rotate-cw", externalLink = "external-link", triangleAlert = "triangle-alert", chevronDown = "chevron-down"
+    case circleQuestionMark = "circle-question-mark"
 
     /// A template image: it takes the colour of the text around it.
     public var image: NSImage? { Self.images[self] }

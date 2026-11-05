@@ -57,6 +57,12 @@ public final class AppModel {
     private var cleanupDryRunFor: Bool?
     /// Counts the times Maintenance went away: a dry run that ends after that counts no more.
     private var cleanupDryRunsForgotten = 0
+    /// D4: the result of the dry run that allows Clean Up, beside its button; it goes with that permission.
+    public private(set) var cleanupDryRunResult: CommandStatus?
+    /// The result of the last run of each command this session (Maintenance shows Doctor's).
+    private var results: [NBCommand: CommandStatus] = [:]
+    public func lastResult(_ command: NBCommand) -> CommandStatus? { results[command] }
+
     /// Clean Up runs only after a successful dry run with the same --prune-kegs setting.
     public func canCleanUp(pruneKegs: Bool) -> Bool { cleanupDryRunFor == pruneKegs }
 
@@ -70,18 +76,21 @@ public final class AppModel {
             await task.value
             guard forgotten == cleanupDryRunsForgotten else { return }
             cleanupDryRunFor = lastRunSucceeded(dryRun) ? pruneKegs : nil
+            cleanupDryRunResult = lastRunSucceeded(dryRun) ? lastResult(dryRun) : nil
         }
     }
 
     /// Maintenance calls it when it goes away: the next visit needs a new dry run, as before C-7.
     public func forgetCleanupDryRun() {
         cleanupDryRunFor = nil
+        cleanupDryRunResult = nil
         cleanupDryRunsForgotten += 1
     }
 
     /// Asks before the cleanup; the next Clean Up needs a new dry run.
     public func cleanUp(pruneKegs: Bool) {
         cleanupDryRunFor = nil
+        cleanupDryRunResult = nil
         request(.cleanup(pruneKegs: pruneKegs))
     }
     private var lastChange: Task<Void, Never>?
@@ -433,6 +442,7 @@ public final class AppModel {
                                    duration: duration, skipped: outcome.skips.map(\.token), summary: summary)
         // Decided at the end: a read-only command that started before a change must not hide it either.
         if command.changes || running == nil { status = result }
+        results[command] = result
         if !consoleShown {
             let took = formatDuration(duration)
             toast = Toast(kind: result.kind, text: result.text.replacingOccurrences(of: " in \(took)", with: ""),

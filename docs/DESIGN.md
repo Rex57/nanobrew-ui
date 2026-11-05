@@ -234,6 +234,13 @@ the controls on the right, 14 px above and below, and a `rule` line under it. Th
 control does in words, and names the nb command when that helps ("Writes the list of what nanobrew has installed
 (nb bundle dump) to a file you choose.").
 
+Maintenance rows (D10, 2026-11-05) carry one short line of six words or fewer, and a ? icon button after the title
+(accessible name "About <title>") that opens a popover with the full text (13 px, 280 px wide). A row shows what
+its action produced beside its controls, in 12 px with the time (D4): Doctor's last answer for the session ("No
+problems found · 14:32" green, "Found 2 problems · 14:32" in `amberText`, a failure red); Cleanup's "Dry run first"
+(grey) until a dry run ends well, then its answer ("Can free 41.4 MB · 14:32"), which goes when Maintenance goes,
+together with the dry run's permission.
+
 ### The danger zone
 
 The Settings screen ends with "Danger zone" (16 semibold). It has two rows: "Migrate from Homebrew" and "Remove

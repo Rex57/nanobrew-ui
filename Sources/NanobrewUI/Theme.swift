@@ -229,12 +229,29 @@ struct OutlinedButtonStyle: ButtonStyle {
 struct SettingsRow<Controls: View>: View {
     let title: String
     let description: String
+    /// D10: the full text, in a popover behind a ? after the title.
+    var help: String? = nil
     @ViewBuilder let controls: Controls
+    @State private var helpShown = false
 
     var body: some View {
         HStack(alignment: .center, spacing: 24) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.system(size: 14, weight: .medium)).foregroundStyle(Theme.text)
+                HStack(spacing: 6) {
+                    Text(title).font(.system(size: 14, weight: .medium)).foregroundStyle(Theme.text)
+                    if let help {
+                        Button { helpShown.toggle() } label: {
+                            IconView(icon: .circleQuestionMark, size: 14).foregroundStyle(Theme.muted).contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("About \(title)")
+                        .popover(isPresented: $helpShown, arrowEdge: .bottom) {
+                            Text(help).font(.system(size: 13)).foregroundStyle(Theme.text)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .frame(width: 280, alignment: .leading).padding(14)
+                        }
+                    }
+                }
                 Text(description).font(.system(size: 13)).foregroundStyle(Theme.muted)
                     .fixedSize(horizontal: false, vertical: true)
             }

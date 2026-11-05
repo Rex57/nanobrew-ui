@@ -138,4 +138,51 @@ import Testing
         #expect(!model.canCleanUp(pruneKegs: false))
         #expect(!model.canCleanUp(pruneKegs: true))
     }
+
+    /// P-8 (D4): the dry run's answer stays beside Clean Up with the permission, and goes with it.
+    @Test func aDryRunKeepsItsAnswerUntilItIsForgotten() async throws {
+        let nb = try FakeNB()
+        let model = nb.model()
+        #expect(model.cleanupDryRunResult == nil)
+        await model.dryRunCleanup(pruneKegs: false).value
+        let result = try #require(model.cleanupDryRunResult)
+        #expect(result.answer == "can free 41.4 MB")
+        #expect(abs(result.time.timeIntervalSinceNow) < 10)
+        model.forgetCleanupDryRun()
+        #expect(model.cleanupDryRunResult == nil)
+    }
+
+    @Test func aDryRunThatEndsAfterTheForgetSetsNoAnswer() async throws {
+        let nb = try FakeNB()
+        try nb.wait("cleanup", seconds: 3)
+        let model = nb.model()
+        let task = model.dryRunCleanup(pruneKegs: false)
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        model.forgetCleanupDryRun()
+        await task.value
+        #expect(model.cleanupDryRunResult == nil)
+    }
+
+    @Test func aFailedDryRunSetsNoAnswer() async throws {
+        let nb = try FakeNB()
+        try nb.exit("cleanup", code: 1)
+        let model = nb.model()
+        await model.dryRunCleanup(pruneKegs: false).value
+        #expect(model.cleanupDryRunResult == nil)
+    }
+
+    @Test func theDoctorAnswerLastsTheSession() async throws {
+        let nb = try FakeNB()
+        try nb.output("doctor", recorded: "doctor-issues")
+        let model = nb.model()
+        #expect(model.lastResult(.doctor) == nil)
+        await model.run(.doctor).value
+        #expect(model.lastResult(.doctor)?.kind == .attention)
+        #expect(model.lastResult(.doctor)?.answer == "found 2 problems")
+        model.forgetCleanupDryRun()
+        #expect(model.lastResult(.doctor)?.answer == "found 2 problems")
+        try nb.exit("doctor", code: 1)
+        await model.run(.doctor).value
+        #expect(model.lastResult(.doctor)?.kind == .failure)
+    }
 }

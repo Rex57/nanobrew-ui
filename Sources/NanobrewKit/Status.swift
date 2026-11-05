@@ -8,11 +8,14 @@ public struct CommandStatus: Equatable, Sendable {
     public let kind: Kind
     public let text: String
     public let time: Date
+    /// nb's answer read from its summary line ("can free 41.4 MB", "found 2 problems"); nil for other results.
+    public let answer: String?
 
-    public init(kind: Kind, text: String, time: Date = Date()) {
+    public init(kind: Kind, text: String, time: Date = Date(), answer: String? = nil) {
         self.kind = kind
         self.text = text
         self.time = time
+        self.answer = answer
     }
 
     /// The verbs of the commands that say what they did ("Installed jq in 0.84 s").
@@ -61,7 +64,7 @@ public struct CommandStatus: Equatable, Sendable {
         } else if exitCode != 0 {
             self.init(kind: .failure, text: "Failed: \(command.title) (exit code \(exitCode.map(String.init) ?? "signal"))")
         } else if let summary, let found = Self.summary(of: command, line: summary), let label = Self.summaryLabel(command) {
-            self.init(kind: found.kind, text: "\(label): \(found.phrase) in \(formatDuration(duration))")
+            self.init(kind: found.kind, text: "\(label): \(found.phrase) in \(formatDuration(duration))", answer: found.phrase)
         } else {
             let named = command.names
             let names = named.filter { !skipped.contains($0) }
