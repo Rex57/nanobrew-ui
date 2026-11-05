@@ -43,7 +43,7 @@ installs, so the app opens when nb installs it. A copy from `brew install --cask
 the quarantine flag, and Gatekeeper blocks it. macOS can ask again for the App Management permission after an
 update.
 
-Requirements: macOS 14 (Sonoma) or later, and nanobrew. Tested with nb 0.1.214.
+Requirements: macOS 14 (Sonoma) or later, and nanobrew. Tested with nb 0.1.215.
 
 ## Build
 

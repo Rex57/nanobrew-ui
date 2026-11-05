@@ -97,7 +97,7 @@ codesign --verify --deep --strict "/Applications/Nanobrew UI.app"
 ```
 
 - The app opens with no Gatekeeper prompt.
-- About shows the new version, "Tested with nb 0.1.214" and "Unofficial. Not made by the nanobrew maintainer."
+- About shows the new version, "Tested with nb 0.1.215" and "Unofficial. Not made by the nanobrew maintainer."
 - `codesign --verify` passes.
 
 This is the one real cask test on a real nanobrew.

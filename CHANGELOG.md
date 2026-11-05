@@ -8,7 +8,7 @@ Each release of Nanobrew UI, newest first. Old entries keep their words. The rel
 
 ## 1.0.2, not released yet
 
-A clean-up release: the same screens and commands, with these fixes.
+A clean-up release: the same screens and commands, with these fixes. Tested with nb 0.1.215.
 
 - **Fixed:** leaving Updates during an update check no longer clears the Updates count and the "Update" marks.
 - **Fixed:** a fast change of the selected package no longer shows "nb info failed (exit code 0)".
@@ -21,6 +21,8 @@ A clean-up release: the same screens and commands, with these fixes.
   Icons and the logo are read once.
 - **Safer:** Cancel sends SIGKILL when nb ignores the first signal for 5 seconds. The console keeps the last
   20,000 lines. A list that reloads after a command keeps what it shows until the new data arrives.
+- **Changed:** nb 0.1.215's rollback exits 1 when it fails, so a failed rollback now shows Failed in the status
+  line (with nb 0.1.214 it said Rolled back).
 - **Inside:** each rule (the ready rule, the earlier versions, the cleanup rule, the refresh after a command, the
   upgrade outcome, a command's verb and package names) has one home in NanobrewKit, with a test.
 

@@ -175,7 +175,7 @@ public func parseTelemetry(_ lines: [String]) -> Bool? {
 }
 
 /// The nb version this app was tested with (D18).
-public let testedNBVersion = "0.1.214"
+public let testedNBVersion = "0.1.215"
 
 /// `nb version` prints the bare version, for example `0.1.214`.
 public func parseNBVersion(_ lines: [String]) -> String? {

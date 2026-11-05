@@ -85,7 +85,8 @@ removes the admin clause, or replaces the whole command with error -128, so no p
 - **State files** in `Tests/Fixtures`: `state.json` (a trimmed real file), `state-empty.json`, `state-broken.json`,
   and `state-self-current.json`, `state-self-upgraded.json`, `state-self-tap-current.json` and `state-self-tap-upgraded.json` (for the restart offer after a self-upgrade, with the short name and with the tap name).
 - **nb output** in `Tests/Fixtures/nb-output`: recorded text of real nb 0.1.214. It comes from read-only commands on
-  a real install. Outputs that a real install could not show (for example `nb outdated` with outdated packages, or
+  a real install. It was checked unchanged against nb 0.1.215 (2026-11-05: the parsed commands' output did not
+  change). Outputs that a real install could not show (for example `nb outdated` with outdated packages, or
   an upgrade skip line) follow the text in nanobrew's source.
 
 ## The three test seams
