@@ -60,7 +60,8 @@ struct SettingsView: View {
     @State private var completions = ""
     @State private var attestPackage = ""
     @State private var attestCask = false
-    @State private var attestOutput = ""
+    /// The absolute path chosen in the save panel; nil: no --output.
+    @State private var attestOutput: String?
     @State private var nbPath = UserDefaults.standard.string(forKey: NBLocator.savedPathKey) ?? ""
 
     var body: some View {
@@ -99,10 +100,11 @@ struct SettingsView: View {
                 SettingsRow(title: "Trust attest", description: "Runs the package's probe and writes an attestation for maintainers to review and sign.") {
                     TextField("Package", text: $attestPackage).themedField(width: 140)
                     Toggle(isOn: $attestCask) { flagLabel("It is a cask", "--cask") }
-                    TextField("Output file (optional)", text: $attestOutput).themedField(width: 180)
-                    Button("Attest") {
-                        model.request(.trustAttest(attestPackage, cask: attestCask, output: attestOutput.isEmpty ? nil : attestOutput))
-                    }
+                    Text(attestOutput.map { ($0 as NSString).lastPathComponent } ?? "No output file")
+                        .font(.system(size: 13)).foregroundStyle(Theme.muted).lineLimit(1).truncationMode(.middle)
+                        .frame(maxWidth: 140, alignment: .trailing).help(attestOutput ?? "")
+                    Button("Choose…", action: chooseAttestOutput)
+                    Button("Attest") { model.request(.trustAttest(attestPackage, cask: attestCask, output: attestOutput)) }
                     .disabled(attestPackage.isEmpty)
                 }
                 Text("Danger zone").font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.text)
@@ -129,5 +131,13 @@ struct SettingsView: View {
         }
         .task(id: model.commandsEnded) { telemetry = await model.telemetryEnabled() }
         .task(id: shell) { completions = await model.completions(shell) ?? "" }
+    }
+
+    /// D5: the output file comes from a save panel, as Bundle's export does; Cancel keeps the previous choice.
+    private func chooseAttestOutput() {
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = "attestation.json"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        attestOutput = url.path
     }
 }
