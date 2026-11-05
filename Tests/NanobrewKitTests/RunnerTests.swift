@@ -116,6 +116,16 @@ import Testing
         #expect(!model.console.contains { $0.contains("\u{1B}") })
     }
 
+    @Test func theConsoleKeepsTheLast20000Lines() async throws {
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nil)
+        // 20,500 output lines "1"…"20500", with the header and the end line: 20,502 lines.
+        await model.run(NBCommand(program: "/usr/bin/seq", args: ["20500"], changes: false, label: "seq 20500")).value
+        #expect(model.console.count == 20_000)
+        #expect(model.consoleDropped == 502)
+        #expect(model.console.first == "502")
+        #expect(model.console.suffix(2) == ["20500", "Done: seq 20500"])
+    }
+
     @Test func stderrLinesReachTheConsole() async throws {
         let nb = try FakeNB()
         try nb.stderr("doctor", text: "Error: cannot open /opt/nanobrew/db/state.json\n")

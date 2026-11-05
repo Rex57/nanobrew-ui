@@ -51,17 +51,21 @@ struct ConsoleView: View {
             }
             .padding(.leading, 24).padding(.trailing, 12)
             .frame(height: 40)
-            ConsoleText(lines: model.console)
+            ConsoleText(lines: model.console, dropped: model.consoleDropped)
         }
         .background(Theme.sheet)
     }
 }
 
-/// An NSTextView that only appends the new lines: long output stays fast and a drag selects across lines.
+/// An NSTextView that only appends the new lines and removes the ones that dropped off the model's top: long output
+/// stays fast and a drag selects across lines.
 struct ConsoleText: NSViewRepresentable {
     let lines: [String]
+    /// The lines that dropped off before `lines.first`: line numbers below count from the session's first line.
+    let dropped: Int
 
-    final class Coordinator { var shown = 0 }
+    /// The text holds the session's lines `first..<shown`.
+    final class Coordinator { var first = 0, shown = 0 }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -78,14 +82,29 @@ struct ConsoleText: NSViewRepresentable {
     }
 
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
-        let shown = context.coordinator.shown
-        guard lines.count > shown, let textView = scrollView.documentView as? NSTextView else { return }
-        let text = (shown == 0 ? "" : "\n") + lines[shown...].joined(separator: "\n")
-        textView.textStorage?.append(NSAttributedString(string: text, attributes: [
+        let c = context.coordinator
+        guard dropped + lines.count > c.shown, let textView = scrollView.documentView as? NSTextView,
+              let storage = textView.textStorage else { return }
+        // Behind by more than the model keeps (or new): show the kept lines from the start.
+        if c.shown <= dropped || c.shown == 0 {
+            storage.setAttributedString(NSAttributedString())
+            c.first = dropped
+            c.shown = dropped
+        }
+        let text = (c.shown == c.first ? "" : "\n") + lines[(c.shown - dropped)...].joined(separator: "\n")
+        storage.append(NSAttributedString(string: text, attributes: [
             .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular),
             .foregroundColor: NSColor.textColor,
         ]))
-        context.coordinator.shown = lines.count
+        // Remove the lines that dropped off the model's top since the last update, with their newlines.
+        let string = storage.string as NSString
+        var end = 0
+        for _ in c.first..<dropped {
+            end = string.range(of: "\n", range: NSRange(location: end, length: string.length - end)).upperBound
+        }
+        storage.deleteCharacters(in: NSRange(location: 0, length: end))
+        c.first = dropped
+        c.shown = dropped + lines.count
         textView.scrollToEndOfDocument(nil)
     }
 }

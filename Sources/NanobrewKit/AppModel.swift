@@ -21,10 +21,19 @@ public final class AppModel {
     public private(set) var outdatedError: String?
     /// False until the first outdated check has ended.
     public private(set) var outdatedChecked = false
-    /// The console: one line per output line, with a header and an end line per command.
-    // shortcut: every line of the session is kept (a few MB at the expected load); cap it if sessions
-    // reach tens of MB of output (for example a long-running command left open for days).
-    public private(set) var console: [String] = []
+    /// The console: one line per output line, with a header and an end line per command; the last
+    /// `consoleLimit` lines (D3), older lines drop off the top.
+    public private(set) var console: [String] = [] {
+        didSet {
+            let extra = console.count - Self.consoleLimit
+            guard extra > 0 else { return }
+            console.removeFirst(extra)
+            consoleDropped += extra
+        }
+    }
+    public static let consoleLimit = 20_000
+    /// How many lines dropped off the top of the console this session: the console view trims the same lines.
+    public private(set) var consoleDropped = 0
     /// The changing command that runs now, and the changing commands that wait for their turn.
     public private(set) var running: NBCommand?
     public private(set) var waiting: [NBCommand] = []

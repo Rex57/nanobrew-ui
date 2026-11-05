@@ -160,8 +160,10 @@ commands in order, so they do not compete for that lock.
 ### The console
 
 Each run adds a line `$ <command>`, then nb's output lines, then one end line: `Done: <command>`,
-`Failed: <command> (exit code <n>)` or `Cancelled: <command>`. The console keeps every line of the session; the
-code marks the missing cap as a known limit.
+`Failed: <command> (exit code <n>)` or `Cancelled: <command>`. The console keeps the last 20,000 lines
+(`consoleLimit`, D3); older lines drop off the top, and `consoleDropped` counts them. `ConsoleText` appends only the
+new lines and removes the dropped ones from the top of its text, so it shows the same lines; after a hide and show
+it starts again from the kept lines.
 
 ## The command catalogue
 
