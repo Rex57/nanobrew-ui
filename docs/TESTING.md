@@ -1,6 +1,6 @@
 # Testing
 
-> Status: current · Owner: Rex57 · Reviewed: 2026-11-01
+> Status: current · Owner: Rex57 · Reviewed: 2026-11-05
 
 ## The tests
 
@@ -29,8 +29,8 @@ swift build -c release && swift test && scripts/bundle.sh        # the full chec
 | `StateTests.swift` | `StateReader` (full, empty, missing and broken files, missing folder) and `NBLocator` (order, non-executables, the exclusive `-NBPath`, nothing found). Also holds the helpers `fixture(_:)` and `scratchDir()`. |
 | `RunnerTests.swift` | argv kept whole, the serial queue, read-only commands in parallel, Cancel of the process group, the `SIGKILL` 5 s after a `SIGTERM` that nb ignored (and none for a run that ended), ANSI removal, stderr in the console, the last 20,000 console lines, a non-zero exit, `askBeforeQuit`, the reload after a command, no exit code before the reap |
 | `StatusTests.swift` | The status texts and durations, the launch check, the console's open, closed and pinned states, read-only results that must not replace a running change, `refresh()` |
-| `ReinstallTests.swift` | The skip-line parse, the plain words, the verdict per installed version, the status after skips, the upgrade outcome from the recorded output, the ready rows, the Reinstall sequence (good, failed remove, failed install, quit during it), runs that cannot start |
-| `UpdateTests.swift` | The outdated parse, formulae and casks from their two commands, the restart offer after a self-upgrade (and when there must be none), a cancelled check that keeps the list, Restart's order (ask, open, quit) and a failed open, the check after a changing command only, the `commandsEnded` signal |
+| `ReinstallTests.swift` | The skip-line parse, the plain words, the verdict per installed version, the status after skips, the upgrade outcome (`UpgradeOutcome`: the skipped casks, and the restart offer for the short name and the tap name), the ready rows, the Reinstall sequence (good, failed remove, failed install, quit during it), runs that cannot start |
+| `UpdateTests.swift` | The outdated parse, formulae and casks from their two commands, the restart offer after a self-upgrade (and when there must be none), a cancelled check that keeps the list, Restart's order (ask, open, quit) and a failed open, the check after a changing command only, the `commandsEnded` signal, the checks at launch and when the app becomes active (one check for both) |
 | `ActionTests.swift` | The Installed actions, confirmation and decline |
 | `InfoTests.swift` | `PackageInfo` for formulae and casks, the detail pane with and without a tree, nb's error text (also when nb exits 0), a cancelled fetch |
 | `SearchTests.swift` | Search rows, the installed tag, no results, every install form |
@@ -39,7 +39,7 @@ swift build -c release && swift test && scripts/bundle.sh        # the full chec
 | `SettingsTests.swift` | Bundle and Settings commands, telemetry, the saved nb path, bundle dump to a file (stdout only, nothing written on failure), completions |
 | `SetupTests.swift` | Nuke's typed "yes", migrate, the `nb init` admin script, locating nb again after nuke |
 | `TrustTests.swift` | The trust line in plain words |
-| `ThemeTests.swift` | Every icon loads as a template image, the logo loads, the Updates count |
+| `ThemeTests.swift` | Every icon loads as a template image, the logo loads, icons and the logo load once, the Updates count, the error text of a failed outdated check |
 | `VersionTests.swift` | Earlier versions from the history, rollback and switch |
 | `AboutTests.swift` | The nb version and the tested version |
 | `DocsGateTests.swift` | The docs gate: `tools/check_docs.py` passes on the repo, and its selftest passes |
@@ -83,7 +83,7 @@ removes the admin clause, or replaces the whole command with error -128, so no p
 ## Fixtures
 
 - **State files** in `Tests/Fixtures`: `state.json` (a trimmed real file), `state-empty.json`, `state-broken.json`,
-  and `state-self-current.json` and `state-self-upgraded.json` (for the restart offer after a self-upgrade).
+  and `state-self-current.json`, `state-self-upgraded.json`, `state-self-tap-current.json` and `state-self-tap-upgraded.json` (for the restart offer after a self-upgrade, with the short name and with the tap name).
 - **nb output** in `Tests/Fixtures/nb-output`: recorded text of real nb 0.1.214. It comes from read-only commands on
   a real install. Outputs that a real install could not show (for example `nb outdated` with outdated packages, or
   an upgrade skip line) follow the text in nanobrew's source.
@@ -122,7 +122,7 @@ echo 30 > /tmp/nbfake/wait-upgrade                    # upgrades take 30 s: the 
 echo 1 > /tmp/nbfake/exit-install                     # installs fail with exit code 1
 echo "nb: test error" > /tmp/nbfake/stderr-doctor     # doctor prints an error line
 tail -f /tmp/nbfake/fake-nb.log                       # watch which commands ran
-rm -f /tmp/nbfake/wait-* /tmp/nbfake/exit-* /tmp/nbfake/stderr-*   # back to normal
+rm -f /tmp/nbfake/wait-* /tmp/nbfake/exit-* /tmp/nbfake/stderr-* /tmp/nbfake/ignore-term-*   # back to normal
 ```
 
 Do not press "Set up nanobrew" in a test copy. It runs `osascript` with administrator privileges, and macOS opens

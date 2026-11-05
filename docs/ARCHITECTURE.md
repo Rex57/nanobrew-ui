@@ -1,6 +1,6 @@
 # Architecture
 
-> Status: current · Owner: Rex57 · Reviewed: 2026-11-01
+> Status: current · Owner: Rex57 · Reviewed: 2026-11-05
 
 Nanobrew UI is a thin layer over nanobrew (`nb`). nb does all the work. The app reads what nb has installed, runs
 nb commands, and shows what nb prints.
@@ -23,13 +23,13 @@ Why two targets: the tests link the library, not the app target. So every rule t
 
 | File | Main types |
 |---|---|
-| `Sources/NanobrewKit/AppModel.swift` | `AppModel`: the app's state, the queue, the refresh, the status line |
+| `Sources/NanobrewKit/AppModel.swift` | `AppModel`: the app's state, the queue, the refresh, the background outdated check, the Clean Up rule, the status line |
 | `Sources/NanobrewKit/Runner.swift` | `NBProcess`: one nb run; `stripANSI` |
 | `Sources/NanobrewKit/Command.swift` | `NBCommand`: the command catalogue |
 | `Sources/NanobrewKit/State.swift` | `StateSnapshot`, `StateReader`, `NBLocator`, `launchArgument` |
 | `Sources/NanobrewKit/Parsers.swift` | `PackageInfo`, `Trust`, `SearchResult`, `OutdatedPackage`, `Service`, `AutoupdateStatus`, `parseTelemetry`, `parseNBVersion`, `testedNBVersion` |
 | `Sources/NanobrewKit/Status.swift` | `CommandStatus`, `formatDuration` |
-| `Sources/NanobrewKit/Reinstall.swift` | `UnsupportedSkip`, `UpgradeOutcome`; the verdicts, `readyUpdates`, `upgradeReady`, `upgradeAllCasks` and `reinstall` on `AppModel` |
+| `Sources/NanobrewKit/Reinstall.swift` | `UnsupportedSkip`, `UpgradeOutcome`; the verdicts, `readyUpdates`, `upgradeReady`, `upgradeAllCasks`, `reinstall` and `restart` on `AppModel` |
 | `Sources/NanobrewKit/Icons.swift` | `Icon`, `nanobrewLogo` |
 | `Sources/NanobrewUI/NanobrewUIApp.swift` | `NanobrewUIApp`, `AppDelegate`, `ContentView`, `NotInstalledView`, `NotSetUpView`, `relaunch` |
 | `Sources/NanobrewUI/WindowSupport.swift` | `WindowReader`, `CloseGuard` |
@@ -234,7 +234,7 @@ it. `AppModel.fromLaunch()` makes the app's model from the launch arguments.
 |---|---|
 | `snapshot`, `notSetUp`, `stateError` | The last good `state.json`, whether nanobrew is set up, and the read error |
 | `nbPath`, `notInstalled` | The nb that the locator found, or none |
-| `console`, `consoleShown`, `consolePinned` | The console lines and whether the console shows |
+| `console`, `consoleDropped`, `consoleShown`, `consolePinned` | The last 20,000 console lines (`consoleLimit`), how many lines dropped off the top, and whether the console shows |
 | `running`, `waiting`, `inProgress` | The queue |
 | `commandsEnded` | Goes up by one each time a command ends |
 | `pendingConfirmation` | A command that waits for the user's yes |
