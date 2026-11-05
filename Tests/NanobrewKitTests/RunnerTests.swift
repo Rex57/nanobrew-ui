@@ -18,7 +18,8 @@ import Testing
 
     @Test func changingCommandsRunOneAfterTheOtherAndReadOnlyRunsAtOnce() async throws {
         let nb = try FakeNB()
-        try nb.wait("pin", seconds: 1)
+        // Long enough for doctor to end first while the parallel suites load the machine.
+        try nb.wait("pin", seconds: 3)
         let model = nb.model()
         let first = model.run(NBCommand(args: ["pin", "a"], changes: true))
         let second = model.run(NBCommand(args: ["pin", "b"], changes: true))
