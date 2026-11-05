@@ -102,6 +102,11 @@ codesign --verify --deep --strict "/Applications/Nanobrew UI.app"
 
 This is the one real cask test on a real nanobrew.
 
+## 6. Record the release
+
+- Add the release's entry on top of the [changelog](../CHANGELOG.md): the version, the date, what changed.
+- Update "Now" in the [roadmap](../ROADMAP.md), and move each item the release did out of "Next".
+
 ## What an upgrade needs
 
 nb can upgrade an installed copy in place only when both are true:
