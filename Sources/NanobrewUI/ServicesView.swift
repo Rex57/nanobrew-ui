@@ -55,6 +55,8 @@ struct ServicesView: View {
         }
         .padding(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        // D6(5): the loaded rows fade in instead of popping.
+        .animation(Motion.fade, value: rows == nil)
         // No load while the app's own changing command runs (D5); its end changes `commandsEnded`.
         .task(id: model.running == nil ? [model.commandsEnded, retries] : []) {
             guard model.running == nil else { return }

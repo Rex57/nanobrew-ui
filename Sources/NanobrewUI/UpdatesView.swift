@@ -59,6 +59,8 @@ struct UpdatesView: View {
         }
         .padding(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        // D6(5): the loaded rows fade in instead of popping.
+        .animation(Motion.fade, value: rows == nil)
         // Each visit checks again (or joins the running check, D5); the model's one list keeps the sidebar count the same.
         .task { await model.sharedOutdatedCheck() }
     }

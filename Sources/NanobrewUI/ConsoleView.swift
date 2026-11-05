@@ -107,11 +107,13 @@ struct ConsoleText: NSViewRepresentable {
 /// a thin amber bar on the top edge.
 struct StatusLine: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.reduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(spacing: 8) {
             if !model.inProgress.isEmpty {
-                ProgressView().controlSize(.mini).frame(width: 8, height: 8).accessibilityHidden(true)
+                // The spinner keeps turning through its fade out (D6(3)).
+                ProgressView().controlSize(.mini).frame(width: 8, height: 8).accessibilityHidden(true).transition(.opacity)
                 Text("Running: " + model.inProgress.map(\.title).joined(separator: ", "))
                     .foregroundStyle(Theme.text).lineLimit(1).truncationMode(.middle)
                 if let status = model.status, status.kind == .running {
@@ -125,8 +127,10 @@ struct StatusLine: View {
                     .disabled(!model.canCancel)
             } else if let status = model.status {
                 Circle().fill(Self.color(status.kind)).frame(width: 8, height: 8).accessibilityHidden(true)
+                // D6(3): the result text rolls in (fades only with Reduce Motion).
                 Text(status.text).foregroundStyle(Theme.text).lineLimit(1).truncationMode(.middle)
                     .textSelection(.enabled)
+                    .id(status.text).transition(reduceMotion ? .opacity : .push(from: .bottom))
                 Text("· " + status.time.formatted(date: .omitted, time: .shortened))
             }
             Spacer()
@@ -147,8 +151,12 @@ struct StatusLine: View {
         .foregroundStyle(Theme.muted)
         .padding(.leading, 24).padding(.trailing, 12)
         .frame(height: 36)
+        .clipped()
+        // D6(3): the text and the dot colour change over about 200 ms, never in one frame.
+        .animation(Motion.fade, value: model.status)
+        .animation(Motion.fade, value: model.inProgress.isEmpty)
         .overlay(alignment: .top) {
-            if model.inProgress.isEmpty { Theme.border.frame(height: 1) } else { RunningBar() }
+            if model.inProgress.isEmpty { Theme.border.frame(height: 1) } else { RunningBar(still: reduceMotion) }
         }
     }
 
@@ -164,7 +172,18 @@ struct StatusLine: View {
 
 /// D2: a thin indeterminate amber bar: a segment that runs along the status line's top edge while a command runs.
 struct RunningBar: View {
+    /// Reduce Motion: a still amber line, nothing travels.
+    let still: Bool
+
     var body: some View {
+        if still {
+            Theme.amber.frame(height: 2).accessibilityHidden(true)
+        } else {
+            moving
+        }
+    }
+
+    private var moving: some View {
         TimelineView(.animation) { context in
             GeometryReader { bar in
                 let phase = context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.4) / 1.4

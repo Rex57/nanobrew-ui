@@ -307,6 +307,8 @@ struct PackageDetailView: View {
             .textSelection(.enabled)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
+            // D6(5): the loaded detail fades in instead of popping.
+            .animation(Motion.fade, value: detail == nil)
         }
         // Again after each command: a probe, a link or an upgrade changes what nb info says.
         .task(id: "\(package.name)\u{0}\(package.cask)\u{0}\(model.commandsEnded)") {

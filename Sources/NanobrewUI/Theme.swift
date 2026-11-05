@@ -78,10 +78,28 @@ extension Section {
 }
 
 /// DD12: the mark, the name and the scope line; the groups Packages and System; Settings at the bottom.
+/// D6: motion is feedback only, as quick as a native app.
+enum Motion {
+    static let console = Animation.easeOut(duration: 0.2)
+    static let toast = Animation.easeOut(duration: 0.22)
+    static let fade = Animation.easeOut(duration: 0.2)
+    /// The toast rises this far as it fades in.
+    static let toastRise: CGFloat = 8
+}
+
+extension EnvironmentValues {
+    /// D6(6): nothing travels, fades only. ContentView sets it from the Mac's Reduce Motion setting, or from the
+    /// test-only launch argument `-NBReduceMotion YES` (the Mac's own setting is never changed).
+    @Entry var reduceMotion = false
+}
+
 struct Sidebar: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.reduceMotion) private var reduceMotion
     @Binding var section: Section?
     @State private var nbVersion: String?
+    /// The selected row's highlight slides between rows (D6).
+    @Namespace private var highlight
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -113,6 +131,9 @@ struct Sidebar: View {
         }
         .padding(EdgeInsets(top: 34, leading: 10, bottom: 12, trailing: 10))
         .foregroundStyle(Theme.text)
+        // Only the sidebar animates the change: the screen switch itself has no fade.
+        .animation(reduceMotion ? nil : Motion.fade, value: section)
+        .animation(reduceMotion ? nil : Motion.fade, value: model.updatesCount)
         .task(id: model.nbPath) { nbVersion = await model.nbVersion() }
     }
 
@@ -129,6 +150,7 @@ struct Sidebar: View {
                 Text(item.rawValue).font(.system(size: 14)).frame(maxWidth: .infinity, alignment: .leading)
                 if item == .updates, let count = model.updatesCount {
                     Text("\(count)").font(.system(size: 12, weight: .semibold)).monospacedDigit()
+                        .contentTransition(reduceMotion ? .opacity : .numericText(value: Double(count)))
                         .foregroundStyle(Theme.amberText)
                         .padding(.horizontal, 6).frame(minWidth: 20, minHeight: 18)
                         .background(Theme.amberBg, in: Capsule())
@@ -137,7 +159,11 @@ struct Sidebar: View {
             }
             .padding(.horizontal, 8)
             .frame(height: 32)
-            .background(selected ? Theme.active : .clear, in: RoundedRectangle(cornerRadius: 8))
+            .background {
+                if selected {
+                    RoundedRectangle(cornerRadius: 8).fill(Theme.active).matchedGeometryEffect(id: "selected", in: highlight)
+                }
+            }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

@@ -6,6 +6,7 @@ import SwiftUI
 /// pointer is over the toast; at 0 the toast goes. It floats, so it has a shadow (taste: only what floats).
 struct ToastView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.reduceMotion) private var reduceMotion
     let toast: AppModel.Toast
     @State private var left = 10
     @State private var hovering = false
@@ -22,7 +23,10 @@ struct ToastView: View {
             Button("View") { model.viewToast() }
                 .buttonStyle(OutlinedButtonStyle(height: 26)).font(.system(size: 12, weight: .medium))
                 .accessibilityLabel("View in the console")
-            Button("Dismiss (\(left))") { model.dismissToast() }
+            Button { model.dismissToast() } label: {
+                // D6(2): the countdown number rolls.
+                Text("Dismiss (\(left))").contentTransition(reduceMotion ? .opacity : .numericText(countsDown: true))
+            }
                 .buttonStyle(TextButtonStyle(color: Theme.muted)).font(.system(size: 12)).monospacedDigit()
                 .accessibilityLabel("Dismiss")
         }
@@ -37,7 +41,7 @@ struct ToastView: View {
             while left > 0 {
                 try? await Task.sleep(for: .seconds(1))
                 guard !Task.isCancelled else { return }
-                if !hovering { left -= 1 }
+                if !hovering { withAnimation(Motion.fade) { left -= 1 } }
             }
             model.dismissToast()
         }

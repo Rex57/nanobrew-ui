@@ -92,6 +92,8 @@ enum Section: String, CaseIterable, Identifiable {
 
 struct ContentView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { systemReduceMotion || launchArgument("NBReduceMotion") == "YES" }
     /// Restart asks its quit question and quits through it.
     let delegate: AppDelegate
     @State private var section: Section? = .installed
@@ -164,15 +166,30 @@ struct ContentView: View {
                         .frame(minHeight: 200, maxHeight: .infinity)
                         // The mockup's console: 212px under a 1px edge.
                         if model.consoleShown {
-                            ResizeEdge(axis: .vertical, size: $consoleHeight, range: 120...max(120, min(600, consoleRoom)))
-                            ConsoleView().frame(height: min(consoleHeight, consoleRoom))
+                            VStack(spacing: 0) {
+                                ResizeEdge(axis: .vertical, size: $consoleHeight, range: 120...max(120, min(600, consoleRoom)))
+                                ConsoleView().frame(height: min(consoleHeight, consoleRoom))
+                            }
+                            .transition(.move(edge: .bottom))
                         }
                     }
-                    if !model.consoleShown { StatusLine() }
+                    if !model.consoleShown { StatusLine().transition(.opacity) }
                 }
+                // D6(1): the console slides open and shut; only this change animates here. With Reduce Motion the
+                // layout jumps: a fade would still move the content's edge.
+                .animation(reduceMotion ? nil : Motion.console, value: model.consoleShown)
                 // D3: bottom-right, 12 px above the 36 px status line, over the screen.
                 .overlay(alignment: .bottomTrailing) {
-                    if let toast = model.toast { ToastView(toast: toast).padding(.trailing, 16).padding(.bottom, 48) }
+                    ZStack {
+                        if let toast = model.toast {
+                            ToastView(toast: toast).padding(.trailing, 16).padding(.bottom, 48)
+                                .transition(.asymmetric(
+                                    insertion: reduceMotion ? .opacity : .opacity.combined(with: .offset(y: Motion.toastRise)),
+                                    removal: .opacity))
+                        }
+                    }
+                    // D6(2): the toast rises 8 px and fades in, and fades out.
+                    .animation(Motion.toast, value: model.toast?.id)
                 }
                 .background(Theme.sheet)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -183,6 +200,7 @@ struct ContentView: View {
         .frame(width: window.size.width, height: window.size.height)
         .onChange(of: window.size.height, initial: true) { _, height in windowHeight = height }
         }
+        .environment(\.reduceMotion, reduceMotion)
         .background(Theme.frame)
         .overlay { if let reinstalling { ReinstallDialog(row: reinstalling) { self.reinstalling = nil } } }
         .ignoresSafeArea()

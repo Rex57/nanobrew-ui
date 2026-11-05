@@ -292,6 +292,21 @@ not probed yet". Button labels name the action: "Update nanobrew", "Update Regis
 
   <img src="images/nanobrew-ui-icon.jpg" alt="The Nanobrew UI app icon in the macOS Dock" width="320">
 
+## Motion
+
+Motion is feedback only (D6, 2026-11-05), as quick as a native app: it shows that something changed, and nothing
+performs an entrance. The values live in `Motion` (Theme.swift).
+
+- The console slides open and shut (200 ms, ease-out).
+- The toast rises 8 px and fades in (220 ms), and fades out when it goes; its countdown number rolls.
+- The status line's result text rolls in, the dot's colour fades (200 ms), and the spinner keeps turning while it
+  fades out. The running bar's segment runs along the top edge.
+- The sidebar highlight slides to the clicked row; the Updates count rolls.
+- Loaded content fades in instead of popping: Services rows, Updates rows, the detail pane.
+- A screen switch has no fade.
+- With Reduce Motion on (or the test-only launch argument `-NBReduceMotion YES`), nothing travels: the console and
+  the sidebar highlight jump, the toast and texts only fade, and the running bar is a still amber line.
+
 ## Accessibility
 
 **Contrast.** All text is at 4.5:1 or more on its own surface, in both themes:

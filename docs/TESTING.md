@@ -114,6 +114,7 @@ open -n "dist/Nanobrew UI.app" --args -NBPath /tmp/nbfake/nb -NBStatePath /tmp/n
 | `-NBPath <file>` | The only place the app looks for nb. A wrong path shows "nanobrew is not installed" and never reaches a real nb. |
 | `-NBStatePath <file>` | The `state.json` to read. A path in a missing folder shows "nanobrew is not set up". `Tests/Fixtures/state-broken.json` shows the red "Cannot read …" line. |
 | `-NBAppearance light\|dark` | For tests only: forces light or dark for this launch. macOS ignores `-AppleInterfaceStyle` for this app. It never changes the Mac's own setting. |
+| `-NBReduceMotion YES` | For tests only: the app moves as with Reduce Motion on (fades only, nothing travels). It never changes the Mac's own accessibility setting. |
 
 These are user-defaults launch arguments: they last for that launch only.
 
