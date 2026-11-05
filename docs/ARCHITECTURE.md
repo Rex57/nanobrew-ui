@@ -408,7 +408,7 @@ end run
 
 ```ruby
 cask "nanobrew-ui" do
-  version "1.0.0"
+  version "<version>"
   sha256 "<sha256 of the zip>"
 
   url "https://github.com/Rex57/nanobrew-ui/releases/download/v#{version}/Nanobrew-UI-#{version}.zip"

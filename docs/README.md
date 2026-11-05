@@ -9,11 +9,17 @@ The map of the docs. It holds no facts of its own: it sends each question to the
 | Question | Page |
 |---|---|
 | What is Nanobrew UI, and how do I install or upgrade it? | [README](../README.md#install) |
+| Which macOS does it need? | [README: Install](../README.md#install) (the requirements line) |
+| Which version is current? | [Changelog](../CHANGELOG.md) (the top entry) |
 | How do I build it and run the tests? | [README: Build](../README.md#build), [Testing: Run them](TESTING.md#run-them) |
 | How do I try the app without touching my real nanobrew? | [Testing: Manual checks with launch arguments](TESTING.md#manual-checks-with-launch-arguments) |
 | How do I drive the running app by AppleScript safely? | [Testing: Driving the app by AppleScript safely](TESTING.md#driving-the-app-by-applescript-safely) |
 | How is the app built, and how does it run nb? | [Architecture](ARCHITECTURE.md) |
 | Where does a piece of the code live? | [Architecture: Files](ARCHITECTURE.md#files) |
+| Where does the app look for nb? | [Architecture: Locating nb](ARCHITECTURE.md#locating-nb) |
+| How do commands queue, and how does Cancel stop one? | [Architecture: The queue](ARCHITECTURE.md#the-queue), [The process model](ARCHITECTURE.md#the-process-model) |
+| How does Reinstall work for a cask nb cannot upgrade in place? | [Architecture: The Reinstall fallback](ARCHITECTURE.md#the-reinstall-fallback) |
+| What does the status line show, and how are durations written? | [Architecture: The status line](ARCHITECTURE.md#the-status-line), [Design language](DESIGN.md#the-status-line) |
 | Which files does the app write? | [Architecture: Where the app writes](ARCHITECTURE.md#where-the-app-writes) |
 | What happens when I quit while a command runs? | [Architecture: Quit rules](ARCHITECTURE.md#quit-rules) |
 | Why was something built this way (text parsing, ad hoc signing, a zip, no Sparkle)? | [Decisions](DECISIONS.md) |
@@ -22,6 +28,7 @@ The map of the docs. It holds no facts of its own: it sends each question to the
 | What does an upgrade need, and why does Gatekeeper block a browser download? | [Releasing: What an upgrade needs](RELEASING.md#what-an-upgrade-needs), [The Gatekeeper limit](RELEASING.md#the-gatekeeper-limit) |
 | What changed in each release? | [Changelog](../CHANGELOG.md) |
 | What is done, what is open, and what comes next? | [Roadmap](../ROADMAP.md) |
+| How is the docs gate run? | [Testing: Run them](TESTING.md#run-them), and [How we keep docs](#how-we-keep-docs) below |
 
 ## By reader
 

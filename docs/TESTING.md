@@ -4,7 +4,7 @@
 
 ## The tests
 
-- 119 tests in 16 files, in `Tests/NanobrewKitTests`.
+- They are in `Tests/NanobrewKitTests`, one file per area (the table below); `swift test` prints the count.
 - They use Swift Testing: `import Testing`, `@Test`, `#expect` and `#require`. Suites that use `AppModel` run on
   the main actor (`@MainActor @Suite`).
 - They link `NanobrewKit` only (`@testable import NanobrewKit`), never the app target. This is why all logic lives
@@ -18,6 +18,7 @@
 swift test                                                       # all tests
 swift test --filter RunnerTests                                  # one suite
 swift test --filter RunnerTests/cancelStopsTheProcessGroupAndTheNextQueuedCommandRuns   # one test
+python3 -I tools/check_docs.py .                                 # the docs gate alone (also part of swift test)
 swift build -c release && swift test && scripts/bundle.sh        # the full check before a release
 ```
 
@@ -41,6 +42,7 @@ swift build -c release && swift test && scripts/bundle.sh        # the full chec
 | `ThemeTests.swift` | Every icon loads as a template image, the logo loads, the Updates count |
 | `VersionTests.swift` | Earlier versions from the history, rollback and switch |
 | `AboutTests.swift` | The nb version and the tested version |
+| `DocsGateTests.swift` | The docs gate: `tools/check_docs.py` passes on the repo, and its selftest passes |
 
 ## The fake nb
 

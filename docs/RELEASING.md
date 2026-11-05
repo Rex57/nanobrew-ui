@@ -114,8 +114,9 @@ nb can upgrade an installed copy in place only when both are true:
 
 The user then upgrades with `nb upgrade --cask Rex57/tap/nanobrew-ui` (nb records a tap cask under its full
 name and does not accept the short name), or with Upgrade on the app's Updates screen. After nb
-exits with success, the app shows "Restart to use the new version". A real upgrade through the tap is not tested
-yet: it needs a second version.
+exits with success, the app shows "Restart to use the new version". The first real upgrade through the tap,
+1.0.0 to 1.0.1, worked on 2026-11-01. 1.0.0 did not show the restart offer for a tap install; 1.0.1 fixed that
+(see the [changelog](../CHANGELOG.md#101-2026-11-01)).
 
 ## The Gatekeeper limit
 
