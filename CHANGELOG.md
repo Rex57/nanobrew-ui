@@ -6,10 +6,23 @@ Each release of Nanobrew UI, newest first. Old entries keep their words. The rel
 [releases page](https://github.com/Rex57/nanobrew-ui/releases); how a release is made is in
 [Releasing](docs/RELEASING.md).
 
-## 1.0.2, not released yet
+## 1.0.2, 2026-11-05
 
-A clean-up release: the same screens and commands, with these fixes. Tested with nb 0.1.215.
+The same screens and commands, quieter and steadier. Tested with nb 0.1.215.
 
+- **New:** the console no longer opens by itself. While a command runs, the status line shows a spinner, the
+  time, the commands that wait, a thin moving bar and Cancel. When a command ends, a note in the bottom-right
+  corner says what happened, with View (it opens the console) and Dismiss, which counts down from 10 and pauses
+  under the pointer. "Keep open" is gone.
+- **New:** Maintenance says its results without the console. A dry run shows how much Clean Up frees ("Can free
+  41.4 MB"), Clean Up shows what it freed, and Doctor says "No problems found" or, in amber, "Found 2 problems"
+  (nb exits 0 in both cases). Each row has one short line and a ? for the full text.
+- **Fixed:** Services could load forever. When a network hang kept one nb command running (and nb's lock), the
+  app queued more nb runs behind it. Now a background nb run stops when you leave its screen, gives up after 60 s
+  with "nb did not answer in 60 s" and Retry (time while your own command runs does not count), and ends when you
+  quit. ⌘R and the app coming to the front share one update check, and Services waits for your own install.
+- **New:** small motions show each change: the console slides, the note rises in, the status text and the
+  sidebar highlight move, and loaded rows fade in. With Reduce Motion on, only fades are left.
 - **Fixed:** leaving Updates during an update check no longer clears the Updates count and the "Update" marks.
 - **Fixed:** a fast change of the selected package no longer shows "nb info failed (exit code 0)".
 - **Fixed:** Restart asks the quit question first while a command runs, and opens the new copy only after a yes,
