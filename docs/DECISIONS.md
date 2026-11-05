@@ -1,5 +1,7 @@
 # Decisions
 
+> Status: current · Owner: Rex57 · Reviewed: 2026-11-01
+
 The main choices behind Nanobrew UI 1.0.0. The owner (Rex57) settled all of them on 2026-11-01. Each record has
 the decision, the reason and the consequence.
 

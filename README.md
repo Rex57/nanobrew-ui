@@ -4,6 +4,8 @@
 
 # Nanobrew UI
 
+> Status: current · Owner: Rex57 · Reviewed: 2026-11-01
+
 A native macOS app for [nanobrew](https://github.com/justrach/nanobrew) (`nb`). It shows what nb has installed,
 what is out of date and which services run, and it runs every nb command from a window, with the live output in a
 console. nb does all the work; the app only shows what nb has and prints.

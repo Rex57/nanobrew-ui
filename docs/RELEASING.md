@@ -1,5 +1,7 @@
 # Releasing
 
+> Status: current · Owner: Rex57 · Reviewed: 2026-11-01
+
 A release is one zip on a GitHub release, plus one cask file in the tap `Rex57/homebrew-tap`. Users install and
 upgrade the app with nb. The steps below use version 1.0.0; put the new version in its place.
 

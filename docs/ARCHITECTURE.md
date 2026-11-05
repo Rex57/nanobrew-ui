@@ -1,5 +1,7 @@
 # Architecture
 
+> Status: current · Owner: Rex57 · Reviewed: 2026-11-01
+
 Nanobrew UI is a thin layer over nanobrew (`nb`). nb does all the work. The app reads what nb has installed, runs
 nb commands, and shows what nb prints.
 

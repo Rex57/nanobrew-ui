@@ -1,5 +1,7 @@
 # Design language
 
+> Status: current · Owner: Rex57 · Reviewed: 2026-11-01
+
 Nanobrew UI uses one style, the framed sheet, in a light and a dark version. The app follows the Mac's light or
 dark setting. All colours live in one place: `Theme` in `Sources/NanobrewUI/Theme.swift`. The approved mockups
 are in [docs/UI/prototype_UI.html](UI/prototype_UI.html) (open the file in a browser). Where this page and the
@@ -20,7 +22,9 @@ to the amber would read as a cream-and-terracotta theme, which the style avoids.
 
 ## Colour tokens
 
-The light and dark values come from the approved mockups. The table shows the values that ship.
+The light and dark values come from the approved mockups. The table shows the values that ship. The code is the
+source: [`Sources/NanobrewUI/Theme.swift`](../Sources/NanobrewUI/Theme.swift); when a value changes there, change
+this table in the same commit.
 
 | Token | Light | Dark | Role |
 |---|---|---|---|

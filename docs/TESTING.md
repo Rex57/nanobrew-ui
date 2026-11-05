@@ -1,5 +1,7 @@
 # Testing
 
+> Status: current · Owner: Rex57 · Reviewed: 2026-11-01
+
 ## The tests
 
 - 119 tests in 16 files, in `Tests/NanobrewKitTests`.

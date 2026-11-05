@@ -1,5 +1,7 @@
 # Nanobrew UI docs
 
+> Status: current · Owner: Rex57 · Reviewed: 2026-11-01
+
 - [Architecture](ARCHITECTURE.md): the two targets, the data flow, how the app runs nb, and the bundle script.
 - [Design language](DESIGN.md): the framed sheet, the colour tokens and what they mean, type and components.
 - [Decisions](DECISIONS.md): the main choices, each with its reason and its consequence.
