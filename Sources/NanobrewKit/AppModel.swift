@@ -253,7 +253,8 @@ public final class AppModel {
     }
 
     /// The one path of every background read (D5): the nb run ends when the caller's task is cancelled, when it
-    /// has not ended after `readLimit` (then it throws the timeout text), and at `endBackgroundReads()`.
+    /// has not ended after `readLimit` (then it throws the timeout text), and at `endBackgroundReads()`. Time while
+    /// the app's own changing command runs does not count.
     private func read(_ command: NBCommand, separateStderr: Bool = false) async throws -> (lines: [String], process: NBProcess) {
         guard let nbPath else { throw CommandFailed(text: "nb is not installed") }
         let process = try NBProcess(path: nbPath, args: command.args, separateStderr: separateStderr)
@@ -261,7 +262,15 @@ public final class AppModel {
         defer { reads.removeAll { $0 === process } }
         let limit = readLimit
         let timer = Task { () -> Bool in
-            guard (try? await Task.sleep(for: limit)) != nil else { return false }
+            // The window starts again while the app's own changing command runs: nb's lock holds the read behind
+            // it (D5). Short sleeps with a tight tolerance: one long sleep fired seconds late (F2).
+            let clock = ContinuousClock()
+            var deadline = clock.now + limit
+            while true {
+                if running != nil { deadline = clock.now + limit } else if clock.now >= deadline { break }
+                guard (try? await Task.sleep(until: min(deadline, clock.now + .milliseconds(100)),
+                                             tolerance: .milliseconds(10), clock: clock)) != nil else { return false }
+            }
             process.cancel()
             return true
         }
@@ -272,10 +281,14 @@ public final class AppModel {
         } onCancel: { process.cancel() }
         timer.cancel()
         if await timer.value {
-            throw CommandFailed(text: "nb did not answer in \(formatDuration(limit)). Another nb command may be running, "
-                                + "or the network does not answer.")
+            throw CommandFailed(text: readTimeoutText)
         }
         return (lines, process)
+    }
+
+    /// The error of a read past the limit, in whole seconds ("60 s").
+    var readTimeoutText: String {
+        "nb did not answer in \(readLimit.components.seconds) s. Another nb command may be running, or the network does not answer."
     }
 
     /// The background reads that run now: `endBackgroundReads()` ends them.

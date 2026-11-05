@@ -152,8 +152,9 @@ polish run). Every background read goes through it, with three rules:
   path ends the nb process group with `NBProcess.cancel()`. A dropped read never holds nb's lock in front of the
   next action.
 - **Read limit.** A read that has not ended after `readLimit` (60 s, set at the model's creation; tests pass a
-  short one) is ended the same way and fails with "nb did not answer in 60.0 s. Another nb command may be
-  running, or the network does not answer." (`capture` returns that text as its one line). Reason: nb's HTTP
+  short one) is ended the same way and fails with "nb did not answer in 60 s. Another nb command may be
+  running, or the network does not answer." Time while the app's own changing command runs does not count: the
+  window starts again when that command ends, because nb's lock holds the read behind it. (`capture` returns that text as its one line). Reason: nb's HTTP
   client has no connect time limit, so a stuck network kept a read, and nb's lock, forever.
 - **Quit.** The model keeps its live reads; `endBackgroundReads()` ends them all, and the app delegate calls it in
   `applicationWillTerminate`.
