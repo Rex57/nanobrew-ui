@@ -3,6 +3,11 @@ import Testing
 @testable import NanobrewKit
 
 @Suite struct IconTests {
+    @Test func eachIconAndTheLogoLoadOnce() {
+        for icon in Icon.allCases { #expect(icon.image === icon.image, "\(icon)") }
+        #expect(nanobrewLogo === nanobrewLogo)
+    }
+
     @Test func everyIconTheAppNamesLoadsAsATemplateImage() {
         for icon in Icon.allCases {
             let image = icon.image

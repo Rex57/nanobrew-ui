@@ -6,18 +6,21 @@ public enum Icon: String, CaseIterable, Sendable {
     case circleArrowUp = "circle-arrow-up", rotateCW = "rotate-cw", externalLink = "external-link", triangleAlert = "triangle-alert", chevronDown = "chevron-down"
 
     /// A template image: it takes the colour of the text around it.
-    public var image: NSImage? {
-        guard let url = resources?.url(forResource: rawValue, withExtension: "svg", subdirectory: "Icons"),
+    public var image: NSImage? { Self.images[self] }
+
+    /// Each SVG is read and parsed once per launch (D6); the views draw it on the main thread only.
+    nonisolated(unsafe) private static let images: [Icon: NSImage] =
+        Dictionary(uniqueKeysWithValues: allCases.compactMap {
+        guard let url = resources?.url(forResource: $0.rawValue, withExtension: "svg", subdirectory: "Icons"),
               let image = NSImage(contentsOf: url) else { return nil }
         image.isTemplate = true
-        return image
-    }
+        return ($0, image)
+    })
 }
 
-/// nanobrew's logo (Copyright 2026 Rach Pradhan, Apache-2.0).
-public var nanobrewLogo: NSImage? {
+/// nanobrew's logo (Copyright 2026 Rach Pradhan, Apache-2.0), read once per launch (D6).
+nonisolated(unsafe) public let nanobrewLogo: NSImage? =
     resources?.url(forResource: "nanobrew-logo", withExtension: "png").flatMap(NSImage.init(contentsOf:))
-}
 
 /// The package resources: inside the app, bundle.sh puts them in Contents/Resources, where codesign accepts them;
 /// SwiftPM's `Bundle.module` looks only next to the .app, so it is the fallback for `swift run` and the tests.
