@@ -46,16 +46,18 @@ import Testing
             await model.run(command).value
         }
         #expect(model.commandsEnded == 4, "the signal changes once per ended read-only command")
-        #expect(!model.outdatedChecked)
         try nb.exit("pin", code: 1)
         await model.run(.pin("a")).value
         await model.run(.unpin("a")).value
         #expect(model.commandsEnded == 6, "and once per ended changing command, failed or not")
-        await eventually { model.outdatedChecked && nb.log.filter { $0.first == "END" && $0[1] == "outdated" }.count == 2 }
-        // Two changing commands: the second check replaces the first, which may not have started nb yet.
+        // The unpin's check replaces the pin's: the pin's nb runs still end by themselves, and their result is
+        // dropped. So exactly two pairs run, and none for the four read-only commands before them.
+        let ends = { nb.log.filter { $0.first == "END" && $0[1] == "outdated" }.count }
+        await eventually { model.outdatedChecked && ends() == 4 }
         let checks = nb.allArgvs.filter { $0.first == "outdated" }
-        #expect(checks.contains(["outdated"]) && checks.contains(["outdated", "--cask"]))
-        #expect(checks.count <= 4)
+        #expect(checks.filter { $0 == ["outdated"] }.count == 2)
+        #expect(checks.filter { $0 == ["outdated", "--cask"] }.count == 2)
+        #expect(ends() == 4)
     }
 
     @Test func aChangingCommandStartsExactlyOneOutdatedCheck() async throws {
