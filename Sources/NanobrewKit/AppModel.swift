@@ -339,7 +339,8 @@ public final class AppModel {
         var output: [String] = []
         for await batch in process.lines {
             console.append(contentsOf: batch)
-            output += batch
+            // Only an upgrade's outcome reads the output: other commands keep no copy beside the capped console.
+            if command.verb == "upgrade" { output += batch }
         }
         checkAgain()
         let exitCode = process.wasCancelled ? nil : process.exitCode
