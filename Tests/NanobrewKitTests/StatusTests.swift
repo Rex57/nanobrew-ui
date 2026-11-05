@@ -144,7 +144,8 @@ import Testing
 
     @Test func aReadOnlyResultDoesNotReplaceARunningChange() async throws {
         let nb = try FakeNB()
-        try nb.wait("install", seconds: 1)
+        // Long enough for doctor to end first while the parallel suites load the machine.
+        try nb.wait("install", seconds: 3)
         let model = nb.model()
         let install = model.run(.install("jq"))
         await eventually { nb.log.contains { $0.first == "CHILD" } }

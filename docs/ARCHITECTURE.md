@@ -270,7 +270,7 @@ There is no file watcher. The app reads again at these moments:
 
 | When | What runs |
 |---|---|
-| The app becomes active (also at launch) | `checkAgain()`: find nb, read `state.json` |
+| The app becomes active (also at launch) | `becameActive()`: `checkAgain()` (find nb, read `state.json`), then `checkOutdated()`, not awaited; a newer one cancels the one before |
 | Launch | `checkOutdated(report: true)` |
 | ⌘R, the top-bar button, Updates > Check Again | `refresh()`: `checkAgain()`, then `checkOutdated(report: true)` |
 | After every command | `checkAgain()` in the run, then `commandsEnded` goes up by one |

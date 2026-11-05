@@ -6,7 +6,7 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let model = AppModel.fromLaunch()
 
-    func applicationDidBecomeActive(_ notification: Notification) { model.checkAgain() }
+    func applicationDidBecomeActive(_ notification: Notification) { model.becameActive() }
 
     /// Test-only `-NBAppearance light|dark`: macOS ignores `-AppleInterfaceStyle Light` on a Mac set to dark.
     func applicationWillFinishLaunching(_ notification: Notification) {

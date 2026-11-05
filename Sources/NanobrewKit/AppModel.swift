@@ -32,8 +32,8 @@ public final class AppModel {
     public private(set) var inProgress: [NBCommand] = []
     /// Changes once each time a command ends, read-only or changing: views with their own fetched data re-load on it.
     public private(set) var commandsEnded = 0
-    /// The outdated check after the last changing command; a newer one replaces it.
-    private var checkAfterChange: Task<Void, Never>?
+    /// The outdated check after the last changing command or activation; a newer one replaces it.
+    private var backgroundCheck: Task<Void, Never>?
     /// A command that waits for the user's yes before it runs.
     public private(set) var pendingConfirmation: NBCommand?
     private var processes: [NBProcess] = []
@@ -98,6 +98,17 @@ public final class AppModel {
     public func checkAgain() {
         if let locate { nbPath = locate() }
         reload()
+    }
+
+    /// D11: the app came to the front: find nb, read state.json and check outdated (not awaited).
+    public func becameActive() {
+        checkAgain()
+        startOutdatedCheck()
+    }
+
+    private func startOutdatedCheck() {
+        backgroundCheck?.cancel()
+        backgroundCheck = Task { await checkOutdated() }
     }
 
     /// The model the app starts with: launch arguments first, then the default places.
@@ -311,10 +322,7 @@ public final class AppModel {
         }
         if outcome.replacedSelf { restartOffered = true }
         // D11: only a changing command can change what is outdated.
-        if command.changes {
-            checkAfterChange?.cancel()
-            checkAfterChange = Task { await checkOutdated() }
-        }
+        if command.changes { startOutdatedCheck() }
         commandsEnded += 1
     }
 }

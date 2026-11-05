@@ -67,6 +67,23 @@ import Testing
         #expect(nb.allArgvs.filter { $0.first == "outdated" }.sorted { $0.count < $1.count } == [["outdated"], ["outdated", "--cask"]])
     }
 
+    @Test func comingToTheFrontReadsStateAndChecksOutdated() async throws {
+        let nb = try FakeNB()
+        let state = nb.dir.appendingPathComponent("state.json").path
+        try FileManager.default.copyItem(atPath: fixture("state-empty.json"), toPath: state)
+        let model = nb.model(statePath: state)
+        model.reload()
+        try FileManager.default.removeItem(atPath: state)
+        try FileManager.default.copyItem(atPath: fixture("state.json"), toPath: state)
+        // Twice in a row: the second check replaces the first.
+        model.becameActive()
+        model.becameActive()
+        #expect(model.snapshot?.formulae.count == 7)
+        await eventually { model.outdatedChecked }
+        #expect(model.updatesCount == 4)
+        #expect(model.commandsEnded == 0, "no command ended")
+    }
+
     @Test func aCancelledOutdatedCheckKeepsThePreviousList() async throws {
         let nb = try FakeNB()
         let model = nb.model()
