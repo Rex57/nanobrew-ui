@@ -117,7 +117,8 @@ import Testing
         let start = ContinuousClock.now
         await #expect(throws: AppModel.CommandFailed.self) { try await model.services() }
         let took = ContinuousClock.now - start
-        #expect(took >= .seconds(2) && took < .milliseconds(2500), "\(took)")
+        // 3 s: the SIGTERM, exit and reap of the fake nb run slow under the parallel suites (facts file trap).
+        #expect(took >= .seconds(2) && took < .seconds(3), "\(took)")
     }
 
     /// F1: time while the app's own changing command runs does not count (nb's lock holds the read behind it).
