@@ -54,6 +54,7 @@ struct MaintenanceView: View {
             }
             .padding(24)
         }
+        .onDisappear { model.forgetCleanupDryRun() }
         .task(id: model.commandsEnded) {
             let status = await model.autoupdateStatus()
             // A newer command end cancelled this load: keep what shows.

@@ -51,9 +51,11 @@ public final class AppModel {
     /// True when the last run of this command (through `run`) exited 0; false after a failure or a cancel.
     public func lastRunSucceeded(_ command: NBCommand) -> Bool { succeeded.contains(command) }
 
-    /// D8: the --prune-kegs setting of the last successful cleanup dry run; nil after a failure, a cancel or a
-    /// Clean Up.
+    /// D8: the --prune-kegs setting of the last successful cleanup dry run; nil after a failure, a cancel, a
+    /// Clean Up or leaving Maintenance.
     private var cleanupDryRunFor: Bool?
+    /// Counts the times Maintenance went away: a dry run that ends after that counts no more.
+    private var cleanupDryRunsForgotten = 0
     /// Clean Up runs only after a successful dry run with the same --prune-kegs setting.
     public func canCleanUp(pruneKegs: Bool) -> Bool { cleanupDryRunFor == pruneKegs }
 
@@ -62,10 +64,18 @@ public final class AppModel {
     public func dryRunCleanup(pruneKegs: Bool) -> Task<Void, Never> {
         let dryRun = NBCommand.cleanupDryRun(pruneKegs: pruneKegs)
         let task = run(dryRun)
+        let forgotten = cleanupDryRunsForgotten
         return Task {
             await task.value
+            guard forgotten == cleanupDryRunsForgotten else { return }
             cleanupDryRunFor = lastRunSucceeded(dryRun) ? pruneKegs : nil
         }
+    }
+
+    /// Maintenance calls it when it goes away: the next visit needs a new dry run, as before C-7.
+    public func forgetCleanupDryRun() {
+        cleanupDryRunFor = nil
+        cleanupDryRunsForgotten += 1
     }
 
     /// Asks before the cleanup; the next Clean Up needs a new dry run.

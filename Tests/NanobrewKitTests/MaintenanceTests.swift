@@ -115,4 +115,27 @@ import Testing
         #expect(!model.canCleanUp(pruneKegs: true))
         #expect(model.canCleanUp(pruneKegs: false))
     }
+
+    @Test func leavingMaintenanceForgetsTheDryRun() async throws {
+        let nb = try FakeNB()
+        let model = nb.model()
+        await model.dryRunCleanup(pruneKegs: true).value
+        #expect(model.canCleanUp(pruneKegs: true))
+        model.forgetCleanupDryRun()
+        #expect(!model.canCleanUp(pruneKegs: true))
+        #expect(!model.canCleanUp(pruneKegs: false))
+    }
+
+    @Test func aDryRunThatEndsAfterLeavingMaintenanceAllowsNoCleanUp() async throws {
+        let nb = try FakeNB()
+        try nb.wait("cleanup", seconds: 1)
+        let model = nb.model()
+        let task = model.dryRunCleanup(pruneKegs: false)
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        model.forgetCleanupDryRun()
+        await task.value
+        #expect(model.lastRunSucceeded(.cleanupDryRun(pruneKegs: false)))
+        #expect(!model.canCleanUp(pruneKegs: false))
+        #expect(!model.canCleanUp(pruneKegs: true))
+    }
 }
