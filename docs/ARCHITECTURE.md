@@ -240,6 +240,7 @@ it. `AppModel.fromLaunch()` makes the app's model from the launch arguments.
 | `status` | The status line: a `CommandStatus` |
 | `outdatedPackages`, `outdatedError`, `outdatedChecked`, `updatesCount` | The last outdated check |
 | `restartOffered` | True after an upgrade replaced the app itself |
+| `canCleanUp(pruneKegs:)` | D8: true only after a successful `dryRunCleanup` with the same `--prune-kegs` setting; `cleanUp` uses it up |
 | `reinstalling` | The casks whose Reinstall has not ended |
 
 ### Requests and confirmations

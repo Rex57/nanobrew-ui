@@ -50,6 +50,29 @@ public final class AppModel {
 
     /// True when the last run of this command (through `run`) exited 0; false after a failure or a cancel.
     public func lastRunSucceeded(_ command: NBCommand) -> Bool { succeeded.contains(command) }
+
+    /// D8: the --prune-kegs setting of the last successful cleanup dry run; nil after a failure, a cancel or a
+    /// Clean Up.
+    private var cleanupDryRunFor: Bool?
+    /// Clean Up runs only after a successful dry run with the same --prune-kegs setting.
+    public func canCleanUp(pruneKegs: Bool) -> Bool { cleanupDryRunFor == pruneKegs }
+
+    /// The dry run keeps the setting it started with, even when the switch moves while it runs.
+    @discardableResult
+    public func dryRunCleanup(pruneKegs: Bool) -> Task<Void, Never> {
+        let dryRun = NBCommand.cleanupDryRun(pruneKegs: pruneKegs)
+        let task = run(dryRun)
+        return Task {
+            await task.value
+            cleanupDryRunFor = lastRunSucceeded(dryRun) ? pruneKegs : nil
+        }
+    }
+
+    /// Asks before the cleanup; the next Clean Up needs a new dry run.
+    public func cleanUp(pruneKegs: Bool) {
+        cleanupDryRunFor = nil
+        request(.cleanup(pruneKegs: pruneKegs))
+    }
     private var lastChange: Task<Void, Never>?
     /// The status line (DD4): the last command's result and how long it took, or the one that runs now.
     public private(set) var status: CommandStatus?

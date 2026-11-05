@@ -5,8 +5,6 @@ import SwiftUI
 struct MaintenanceView: View {
     @Environment(AppModel.self) private var model
     @State private var probePackage = ""
-    /// The --prune-kegs setting of the last successful dry run; Clean Up runs only with that same setting.
-    @State private var dryRunFor: Bool?
     @State private var pruneKegs = false
     @State private var autoupdate: AutoupdateStatus?
     @State private var alsoUpgrade = false
@@ -26,21 +24,11 @@ struct MaintenanceView: View {
                     Button("Probe") { model.request(.doctorProbe(probePackage.isEmpty ? nil : probePackage)) }
                 }
                 SettingsRow(title: "Cleanup", description: "Removes old downloads and unused files. "
-                            + (dryRunFor == pruneKegs ? "Check the dry run in the console first." : "Run a dry run first.")) {
+                            + (model.canCleanUp(pruneKegs: pruneKegs) ? "Check the dry run in the console first." : "Run a dry run first.")) {
                     Toggle(isOn: $pruneKegs) { flagLabel("Remove phantom keg entries", "--prune-kegs") }
-                    Button("Dry Run") {
-                        Task {
-                            let prune = pruneKegs // the setting this dry run shows, even if the switch moves meanwhile
-                            let dryRun = NBCommand.cleanupDryRun(pruneKegs: prune)
-                            await model.run(dryRun).value
-                            dryRunFor = model.lastRunSucceeded(dryRun) ? prune : nil // not after a failure or a cancel
-                        }
-                    }
-                    Button("Clean Up…") {
-                        dryRunFor = nil
-                        model.request(.cleanup(pruneKegs: pruneKegs))
-                    }
-                    .disabled(dryRunFor != pruneKegs)
+                    Button("Dry Run") { model.dryRunCleanup(pruneKegs: pruneKegs) }
+                    Button("Clean Up…") { model.cleanUp(pruneKegs: pruneKegs) }
+                        .disabled(!model.canCleanUp(pruneKegs: pruneKegs))
                 }
                 SettingsRow(title: "Update nb", description: "Updates nanobrew itself to its newest release.") {
                     Button("Update nanobrew") { model.request(.update) }

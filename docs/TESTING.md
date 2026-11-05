@@ -35,7 +35,7 @@ swift build -c release && swift test && scripts/bundle.sh        # the full chec
 | `InfoTests.swift` | `PackageInfo` for formulae and casks, the detail pane with and without a tree, nb's error text (also when nb exits 0), a cancelled fetch |
 | `SearchTests.swift` | Search rows, the installed tag, no results, every install form |
 | `ServicesTests.swift` | Service rows, the service commands, nb's error text for a failed list or search |
-| `MaintenanceTests.swift` | The maintenance commands, the autoupdate parse, `lastRunSucceeded` |
+| `MaintenanceTests.swift` | The maintenance commands, the autoupdate parse, `lastRunSucceeded`, the cleanup rule (`canCleanUp`) |
 | `SettingsTests.swift` | Bundle and Settings commands, telemetry, the saved nb path, bundle dump to a file (stdout only, nothing written on failure), completions |
 | `SetupTests.swift` | Nuke's typed "yes", migrate, the `nb init` admin script, locating nb again after nuke |
 | `TrustTests.swift` | The trust line in plain words |

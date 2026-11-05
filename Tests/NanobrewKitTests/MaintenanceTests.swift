@@ -64,3 +64,50 @@ import Testing
         #expect(!model.lastRunSucceeded(dryRun))
     }
 }
+
+/// D8: Clean Up only after a successful dry run with the same --prune-kegs setting.
+@MainActor @Suite struct CleanupRuleTests {
+    @Test func cleanUpIsAllowedOnlyAfterAGoodDryRunWithTheSameSetting() async throws {
+        let nb = try FakeNB()
+        let model = nb.model()
+        #expect(!model.canCleanUp(pruneKegs: false), "no dry run yet")
+        await model.dryRunCleanup(pruneKegs: false).value
+        #expect(model.canCleanUp(pruneKegs: false))
+        #expect(!model.canCleanUp(pruneKegs: true), "the dry run had the other setting")
+        // Clean Up uses the dry run up: the next one needs a new dry run.
+        model.cleanUp(pruneKegs: false)
+        #expect(model.pendingConfirmation == .cleanup(pruneKegs: false))
+        #expect(!model.canCleanUp(pruneKegs: false))
+    }
+
+    @Test func aFailedDryRunAllowsNoCleanUp() async throws {
+        let nb = try FakeNB()
+        let model = nb.model()
+        await model.dryRunCleanup(pruneKegs: true).value
+        #expect(model.canCleanUp(pruneKegs: true))
+        try nb.exit("cleanup", code: 1)
+        await model.dryRunCleanup(pruneKegs: true).value
+        #expect(!model.canCleanUp(pruneKegs: true), "a failed dry run also ends the earlier good one")
+    }
+
+    @Test func aCancelledDryRunAllowsNoCleanUp() async throws {
+        let nb = try FakeNB()
+        try nb.wait("cleanup", seconds: 30)
+        let model = nb.model()
+        let task = model.dryRunCleanup(pruneKegs: false)
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        model.cancel()
+        await task.value
+        #expect(!model.canCleanUp(pruneKegs: false))
+    }
+
+    @Test func aSwitchChangeDuringTheDryRunAllowsCleanUpOnlyWithTheSettingItRan() async throws {
+        let nb = try FakeNB()
+        try nb.wait("cleanup", seconds: 1)
+        let model = nb.model()
+        // The switch moves to on while the dry run without --prune-kegs runs.
+        await model.dryRunCleanup(pruneKegs: false).value
+        #expect(!model.canCleanUp(pruneKegs: true))
+        #expect(model.canCleanUp(pruneKegs: false))
+    }
+}
