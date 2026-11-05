@@ -17,6 +17,10 @@ upgrades with nanobrew through the tap: `nb install --cask Rex57/tap/nanobrew-ui
   `--json` output on eight commands, a machine-readable form of the "unsupported, skipping" upgrade line, the short
   name for tap casks, and a yes or no on the use of nanobrew's logo. If the answer on the logo is no, the next
   version gets another icon.
+- **nanobrew issue [#503](https://github.com/justrach/nanobrew/issues/503)**, waiting for the maintainer. nb's own
+  HTTP client has no connect time limit, so `nb outdated --cask` can hang on a network that drops IPv6 and hold
+  nb's lock, which blocks every other nb command. 1.0.2 works around it in the app (background reads end after
+  60 s); nb in Terminal can still hang.
 
 ## Next
 
