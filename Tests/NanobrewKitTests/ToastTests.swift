@@ -74,4 +74,34 @@ import Testing
         #expect(model.toast?.kind == .cancelled)
         #expect(model.toast?.text == "Cancelled: nb link a")
     }
+
+    /// F4: the console opened by Cmd-J or the Console button takes the toast away.
+    @Test func openingTheConsoleClearsTheToast() async throws {
+        let nb = try FakeNB()
+        let model = model(nb)
+        await model.run(.install("jq")).value
+        #expect(model.toast != nil)
+        model.toggleConsole()
+        #expect(model.consoleShown)
+        #expect(model.toast == nil)
+        model.toggleConsole()
+        #expect(model.toast == nil)
+    }
+
+    /// T1: a console command that cannot start makes a failure toast; a background read does not.
+    @Test func aCommandThatCannotStartMakesAFailureToast() async throws {
+        let model = AppModel(statePath: fixture("state.json"), nbPath: "/nonexistent/nb")
+        _ = try? await model.services()
+        #expect(model.toast == nil)
+        await model.run(.doctor).value
+        #expect(model.toast?.kind == .failure)
+        #expect(model.toast?.text.hasPrefix("Failed: nb doctor") == true)
+        #expect(model.toast?.detail == "nb doctor")
+        let noNB = AppModel(statePath: fixture("state.json"), nbPath: nil)
+        await noNB.run(.doctor).value
+        #expect(noNB.toast?.text == "Failed: nb is not installed")
+        noNB.toggleConsole()
+        await noNB.run(.doctor).value
+        #expect(noNB.toast == nil, "no toast with the console open")
+    }
 }

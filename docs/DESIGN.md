@@ -175,7 +175,8 @@ Durations read "84 ms", "0.84 s", "12.3 s" and "1 m 05 s". The status line hides
 ### The toast
 
 When a command that the user started (through the run path) ends while the console is closed, a toast says what
-happened (D3, 2026-11-05). Background checks never make one, and a newer end replaces the older toast.
+happened (D3, 2026-11-05), also when the command could not start. Background checks never make one, a newer end
+replaces the older toast, and the console opened by any path (⌘J, the Console toggle, View) takes it away.
 
 - It floats in the bottom-right corner of the sheet, 16 px from the right and 12 px above the status line, over
   the screen: 380 px wide, `sheet` with a 1 px `border` edge, 10 px corners and a soft shadow (only what floats

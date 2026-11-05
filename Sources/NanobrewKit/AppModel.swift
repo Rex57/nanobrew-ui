@@ -98,7 +98,11 @@ public final class AppModel {
     public private(set) var status: CommandStatus?
     /// The console: closed at start; only the user opens and closes it (D1, which changed DD5).
     public private(set) var consoleShown = false
-    public func toggleConsole() { consoleShown.toggle() }
+    /// The console opened by any path takes the toast away (F4).
+    public func toggleConsole() {
+        consoleShown.toggle()
+        if consoleShown { toast = nil }
+    }
 
     /// D3: the result of the last console command that ended while the console was closed; a newer end replaces it.
     public struct Toast: Identifiable, Equatable, Sendable {
@@ -417,16 +421,23 @@ public final class AppModel {
             .trimmingCharacters(in: .whitespacesAndNewlines))
     }
 
+    /// A console command that could not start: a failure in the status line, and the toast when the console is
+    /// closed (D3: failures too).
+    private func failedToStart(_ command: NBCommand, _ text: String) {
+        reportFailure(text)
+        if !consoleShown { toast = Toast(kind: .failure, text: text, detail: command.title) }
+    }
+
     private func execute(_ command: NBCommand) async {
         // A run that cannot start must not leave an earlier success standing (the Reinstall guard reads it).
         succeeded.remove(command)
         console.append("$ \(command.title)")
-        guard let path = command.program ?? nbPath else { reportFailure("Failed: nb is not installed"); return }
+        guard let path = command.program ?? nbPath else { failedToStart(command, "Failed: nb is not installed"); return }
         let process: NBProcess
         do {
             process = try NBProcess(path: path, args: command.args)
         } catch {
-            reportFailure("Failed: \(command.title) (\(error.localizedDescription))")
+            failedToStart(command, "Failed: \(command.title) (\(error.localizedDescription))")
             return
         }
         processes.append(process)
