@@ -27,14 +27,14 @@ public struct CommandStatus: Equatable, Sendable {
         } else if exitCode != 0 {
             self.init(kind: .failure, text: "Failed: \(command.title) (exit code \(exitCode.map(String.init) ?? "signal"))")
         } else {
-            let named = command.args.dropFirst().filter { !$0.hasPrefix("-") }
+            let named = command.names
             let names = named.filter { !skipped.contains($0) }
             let skips = skipped.isEmpty ? "" : "skipped \(skipped.joined(separator: ", ")) (can't upgrade in place)"
             guard names.count > 0 || named.isEmpty || skipped.isEmpty else {
                 self.init(kind: .skipped, text: "Nothing upgraded; " + skips)
                 return
             }
-            let verb = command.program == nil ? command.args.first.flatMap { Self.verbs[$0] } : nil
+            let verb = command.verb.flatMap { Self.verbs[$0] }
             let what = verb.map { names.isEmpty ? nil : "\($0) \(names.joined(separator: " "))" } ?? nil
             self.init(kind: .success, text: "\(what ?? "\(command.title) finished") in \(formatDuration(duration))"
                       + (skips.isEmpty ? "" : "; " + skips))

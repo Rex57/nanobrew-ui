@@ -168,6 +168,9 @@ code marks the missing cap as a known limit.
 - `confirmation`: `.none`, `.ask` (a "Run …?" question) or `.typeYes` (the user must type `yes`).
 - `program`: nil for nb. Only `nb init` sets it (to `/usr/bin/osascript`).
 - `title`: the command as a person would type it, for example `nb remove jq`.
+- `verb` and `names`: nb's subcommand (`install`) and the packages it acts on (`jq`, not `jq@trusted`). The
+  catalogue sets them; the status line, the restart offer and Discover read them instead of the argv. Two commands
+  are equal when their program and argv are equal.
 
 ### Read-only commands
 

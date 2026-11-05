@@ -147,7 +147,7 @@ struct DiscoverView: View {
     /// True while an install of `name` (with any options) runs or waits.
     private func installing(_ name: String) -> Bool {
         (model.inProgress + model.waiting).contains {
-            $0.args.first == "install" && ($0.args.last == name || $0.args.last == name + "@trusted")
+            $0.verb == "install" && $0.names == [name]
         }
     }
 

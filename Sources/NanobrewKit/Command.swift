@@ -9,14 +9,32 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public let changes: Bool
     public let confirmation: Confirmation
     private let label: String?
+    /// nb's subcommand ("install", "upgrade", …); nil for another program.
+    public let verb: String?
+    /// The packages the command acts on ("jq", not "jq@trusted"); empty for a command on no package.
+    public let names: [String]
 
+    /// `names` nil: every argument after the verb that is not a flag (`upgrade --cask a b` names a and b).
     public init(program: String? = nil, args: [String], changes: Bool, confirmation: Confirmation = .none,
-                label: String? = nil) {
+                label: String? = nil, names: [String]? = nil) {
         self.program = program
         self.args = args
         self.changes = changes
         self.confirmation = confirmation
         self.label = label
+        verb = program == nil ? args.first : nil
+        self.names = names ?? (program == nil ? args.dropFirst().filter { !$0.hasPrefix("-") } : [])
+    }
+
+    /// Two commands are the same when they start the same program with the same argv; the verb and the names
+    /// only describe it.
+    public static func == (a: NBCommand, b: NBCommand) -> Bool {
+        (a.program, a.args, a.changes, a.confirmation, a.label) == (b.program, b.args, b.changes, b.confirmation, b.label)
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(program)
+        hasher.combine(args)
     }
 
     /// The command as a person would type it.
@@ -39,12 +57,13 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public static func switchVersion(_ name: String, to version: String) -> NBCommand {
         NBCommand(args: ["switch", "\(name)@\(version)"], changes: true)
     }
-    public static func search(_ query: String) -> NBCommand { NBCommand(args: ["search", query], changes: false) }
+    public static func search(_ query: String) -> NBCommand { NBCommand(args: ["search", query], changes: false, names: []) }
     /// `name` may be a tap path `user/tap/name`.
     public static func install(_ name: String, cask: Bool = false, shims: Bool = false, trustedOnly: Bool = false,
                                trusted: Bool = false) -> NBCommand {
         NBCommand(args: ["install"] + (cask ? ["--cask"] : []) + (shims ? ["--shims"] : [])
-            + (trustedOnly ? ["--trusted-only"] : []) + [trusted ? name + "@trusted" : name], changes: true)
+            + (trustedOnly ? ["--trusted-only"] : []) + [trusted ? name + "@trusted" : name], changes: true,
+                  names: [name])
     }
     public static let outdated = NBCommand(args: ["outdated"], changes: false)
     public static let outdatedCasks = NBCommand(args: ["outdated", "--cask"], changes: false)
@@ -52,9 +71,9 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public static func upgradeCask(_ token: String) -> NBCommand { NBCommand(args: ["upgrade", "--cask", token], changes: true) }
     public static let upgradeAll = NBCommand(args: ["upgrade"], changes: true)
     public enum ServiceAction: String, Sendable { case start, stop, restart }
-    public static let servicesList = NBCommand(args: ["services", "list"], changes: false)
+    public static let servicesList = NBCommand(args: ["services", "list"], changes: false, names: [])
     public static func services(_ action: ServiceAction, _ name: String) -> NBCommand {
-        NBCommand(args: ["services", action.rawValue, name], changes: true)
+        NBCommand(args: ["services", action.rawValue, name], changes: true, names: [name])
     }
     /// Probes write their results to state.json, so they are changing.
     public static func doctorProbe(_ package: String?) -> NBCommand {
@@ -69,23 +88,23 @@ public struct NBCommand: Equatable, Hashable, Sendable {
     public static let update = NBCommand(args: ["update"], changes: true)
     public static let updateRegistry = NBCommand(args: ["update-registry"], changes: true)
     public enum AutoupdateAction: String, Sendable { case enable, disable, run }
-    public static let autoupdateStatus = NBCommand(args: ["autoupdate", "status"], changes: false)
+    public static let autoupdateStatus = NBCommand(args: ["autoupdate", "status"], changes: false, names: [])
     public static func autoupdate(_ action: AutoupdateAction, upgrade: Bool) -> NBCommand {
-        NBCommand(args: ["autoupdate", action.rawValue] + (upgrade ? ["--upgrade"] : []), changes: true)
+        NBCommand(args: ["autoupdate", action.rawValue] + (upgrade ? ["--upgrade"] : []), changes: true, names: [])
     }
-    public static func `where`(_ pattern: String) -> NBCommand { NBCommand(args: ["where", pattern], changes: false) }
+    public static func `where`(_ pattern: String) -> NBCommand { NBCommand(args: ["where", pattern], changes: false, names: []) }
     public static func leaves(tree: Bool) -> NBCommand { NBCommand(args: ["leaves"] + (tree ? ["--tree"] : []), changes: false) }
-    public static let bundleDump = NBCommand(args: ["bundle", "dump"], changes: false)
+    public static let bundleDump = NBCommand(args: ["bundle", "dump"], changes: false, names: [])
     public static func bundleInstall(_ file: String) -> NBCommand {
-        NBCommand(args: ["bundle", "install", file], changes: true, confirmation: .ask)
+        NBCommand(args: ["bundle", "install", file], changes: true, confirmation: .ask, names: [])
     }
-    public static let telemetryStatus = NBCommand(args: ["telemetry", "status"], changes: false)
-    public static func telemetry(on: Bool) -> NBCommand { NBCommand(args: ["telemetry", on ? "on" : "off"], changes: true) }
-    public static func completions(_ shell: String) -> NBCommand { NBCommand(args: ["completions", shell], changes: false) }
+    public static let telemetryStatus = NBCommand(args: ["telemetry", "status"], changes: false, names: [])
+    public static func telemetry(on: Bool) -> NBCommand { NBCommand(args: ["telemetry", on ? "on" : "off"], changes: true, names: []) }
+    public static func completions(_ shell: String) -> NBCommand { NBCommand(args: ["completions", shell], changes: false, names: []) }
     /// Changing: it fetches metadata and may write the output file.
     public static func trustAttest(_ package: String, cask: Bool, output: String?) -> NBCommand {
         NBCommand(args: ["trust", "attest", package] + (cask ? ["--cask"] : []) + (output.map { ["--output", $0] } ?? []),
-                  changes: true)
+                  changes: true, names: [package])
     }
     public static let migrate = NBCommand(args: ["migrate"], changes: true, confirmation: .ask)
     /// `--yes`: without it nb waits for "yes" on stdin. The app asks for the typed "yes" itself.

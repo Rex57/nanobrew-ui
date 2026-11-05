@@ -33,6 +33,33 @@ import Testing
         #expect(model.status?.kind == .success)
     }
 
+    @Test func theCatalogueSetsEachCommandsVerbAndPackageNames() {
+        #expect(NBCommand.install("jq").verb == "install")
+        #expect(NBCommand.install("jq").names == ["jq"])
+        #expect(NBCommand.install("jq", shims: true, trustedOnly: true, trusted: true).names == ["jq"])
+        #expect(NBCommand.install("iterm2", cask: true).verb == "install")
+        #expect(NBCommand.install("iterm2", cask: true).names == ["iterm2"])
+        #expect(NBCommand.upgrade("node").verb == "upgrade")
+        #expect(NBCommand.upgrade("node").names == ["node"])
+        #expect(NBCommand.upgradeCask("nanobrew-ui").names == ["nanobrew-ui"])
+        #expect(NBCommand.upgradeAll.verb == "upgrade")
+        #expect(NBCommand.upgradeAll.names == [])
+        #expect(NBCommand.removeCask("iterm2").verb == "remove")
+        #expect(NBCommand.removeCask("iterm2").names == ["iterm2"])
+        #expect(NBCommand.services(.start, "redis").names == ["redis"])
+        #expect(NBCommand.trustAttest("jq", cask: false, output: "/tmp/a.json").names == ["jq"])
+        #expect(NBCommand.search("jq").names == [])
+        #expect(NBCommand.initNanobrew(nbPath: "/opt/nb").verb == nil)
+        // Upgrade All Casks as the app builds it: the ready casks by name.
+        let model = AppModel(statePath: fixture("state.json"), nbPath: nil,
+                             defaults: UserDefaults(suiteName: "nanobrew-ui-tests-verbs")!)
+        let rows = [OutdatedPackage(name: "puremac", installed: "3.2.0", latest: "3.3.0", isCask: true, pinned: false),
+                    OutdatedPackage(name: "nanobrew-ui", installed: "1.0.0", latest: "1.0.1", isCask: true, pinned: false)]
+        let all = model.upgradeAllCasks(rows)
+        #expect(all?.verb == "upgrade")
+        #expect(all?.names == ["puremac", "nanobrew-ui"])
+    }
+
     @Test func aCommandWithoutItsOwnVerbFinishes() async throws {
         let nb = try FakeNB()
         let model = model(nb, step: .milliseconds(7))

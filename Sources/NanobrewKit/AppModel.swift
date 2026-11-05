@@ -278,7 +278,7 @@ public final class AppModel {
         var output: [String] = []
         for await batch in process.lines {
             console.append(contentsOf: batch)
-            if command.args.first == "upgrade" { output += batch }
+            if command.verb == "upgrade" { output += batch }
         }
         let skips = UnsupportedSkip.parse(output)
         record(skips)
@@ -307,9 +307,8 @@ public final class AppModel {
         let token = "nanobrew-ui"
         // A tap install records the full name, for example Rex57/tap/nanobrew-ui.
         let isSelf = { (name: String) in name == token || name.hasSuffix("/" + token) }
-        guard command.args.first == "upgrade", let appVersion, let casks = snapshot?.casks else { return false }
-        let names = command.args.dropFirst().filter { !$0.hasPrefix("-") }
+        guard command.verb == "upgrade", let appVersion, let casks = snapshot?.casks else { return false }
         // Every matching record counts: a short-name and a tap install can both be in state.json.
-        return casks.contains { isSelf($0.token) && (names.isEmpty || names.contains($0.token)) && $0.version != appVersion }
+        return casks.contains { isSelf($0.token) && (command.names.isEmpty || command.names.contains($0.token)) && $0.version != appVersion }
     }
 }
