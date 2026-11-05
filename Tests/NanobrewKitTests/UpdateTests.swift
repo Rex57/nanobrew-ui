@@ -107,6 +107,38 @@ import Testing
         #expect(pairs(nb) == 2)
     }
 
+    @Test func refreshesAndAnActivationDuringACheckShareIt() async throws {
+        let nb = try FakeNB()
+        try nb.wait("outdated", seconds: 3)
+        let model = nb.model()
+        let first = Task { await model.refresh() }
+        await eventually { pairs(nb) == 1 }
+        let second = Task { await model.refresh() }
+        let third = Task { await model.refresh() }
+        model.becameActive()
+        for task in [first, second, third] {
+            await task.value
+            #expect(model.updatesCount == 4, "every caller sees the one check's result")
+        }
+        #expect(nb.allArgvs.filter { $0.first == "outdated" }.sorted { $0.count < $1.count } == [["outdated"], ["outdated", "--cask"]])
+    }
+
+    @Test func aRefreshThatJoinedACheckReportsIt() async throws {
+        let nb = try FakeNB()
+        let model = nb.model()
+        await model.checkOutdated()
+        try nb.wait("outdated", seconds: 3)
+        model.becameActive()  // not the session's first check: it reports nothing itself
+        await eventually { pairs(nb) == 2 }
+        #expect(model.status == nil)
+        await model.refresh()
+        #expect(pairs(nb) == 2, "the refresh joined the running check")
+        #expect(model.status?.text.hasPrefix("Checked 10 packages in ") == true)
+        // After the joined check ended, the next refresh starts its own.
+        await model.refresh()
+        #expect(pairs(nb) == 3)
+    }
+
     @Test func aChangingCommandDuringAnActivationCheckGetsItsOwnCheck() async throws {
         let nb = try FakeNB()
         try nb.wait("outdated", seconds: 1)

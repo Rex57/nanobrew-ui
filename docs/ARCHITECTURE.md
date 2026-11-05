@@ -293,10 +293,13 @@ There is no file watcher. The app reads again at these moments:
 | When | What runs |
 |---|---|
 | Launch, and the app becomes active | `becameActive()` (the window's first task and the app delegate): `checkAgain()` (find nb, read `state.json`), then `checkOutdated()`, not awaited, unless one of these background checks still runs. So launch starts one check; the session's first check reports in the status line |
-| ⌘R, the top-bar button, Updates > Check Again | `refresh()`: `checkAgain()`, then `checkOutdated(report: true)` |
+| ⌘R, the top-bar button, Updates > Check Again | `refresh()`: `checkAgain()`, then `sharedOutdatedCheck()`, then "Checked N packages in …" in the status line, also when it joined a running check |
 | After every command | `checkAgain()` in the run, then `commandsEnded` goes up by one |
 | After a changing command | `checkOutdated()`, started by the run. A newer check waits for the one before to end, then runs: one check at a time, and the newest result stays. A read-only command (Doctor, Where, Leaves, a dry run) starts no check |
-| Updates opens | `checkOutdated()` |
+| Updates opens | `sharedOutdatedCheck()` |
+
+`sharedOutdatedCheck()` joins the check that runs (activation, after a change, an earlier ⌘R) and waits for its
+result, or starts one when none runs. So repeated presses never stack nb runs behind nb's lock (D5).
 
 The views with their own fetched data key a `.task(id:)` on `commandsEnded`, so they load again after each
 command: the detail pane (`nb info`), Discover's results, the services list, the auto-update status and the

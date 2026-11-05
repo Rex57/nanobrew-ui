@@ -325,17 +325,32 @@ public final class AppModel {
         return try await OutdatedPackage.parse(formulae).filter { !$0.isCask } + OutdatedPackage.parse(casks)
     }
 
-    /// Cmd-R, the top-bar button and Updates' Check Again: find nb, read state.json, check outdated.
+    /// Cmd-R, the top-bar button and Updates' Check Again: find nb, read state.json, check outdated. It joins a
+    /// running check (D5) and still reports it in the status line.
     public func refresh() async {
         checkAgain()
-        await checkOutdated(report: true)
+        let start = now()
+        await sharedOutdatedCheck()
+        reportChecked(since: start)
+    }
+
+    /// Updates opening and `refresh()`: joins the running check, or starts one; never two at once (D5).
+    public func sharedOutdatedCheck() async {
+        if backgroundChecks == 0 { startOutdatedCheck() }
+        await backgroundCheck?.value
+    }
+
+    private func reportChecked(since start: ContinuousClock.Instant) {
+        guard outdatedError == nil, let snapshot else { return }
+        status = CommandStatus(kind: .success, text: "Checked \(snapshot.formulae.count + snapshot.casks.count) packages in "
+                               + formatDuration(now() - start))
     }
 
     /// Sets `updatesCount` (at launch, on activation, on Cmd-R, when Updates opens and after a changing command).
     /// `report` puts the check in the status line (launch and Cmd-R), so it does not replace the result of the command that just ended. A cancelled check
     /// (the user left Updates) changes nothing.
     public func checkOutdated(report: Bool = false) async {
-        let start = now()
+        let start = report ? now() : nil
         do {
             let rows = try await outdated()
             guard !Task.isCancelled else { return }
@@ -348,9 +363,7 @@ public final class AppModel {
         }
         outdatedChecked = true
         updatesCount = outdatedPackages.isEmpty ? nil : outdatedPackages.count
-        guard report, outdatedError == nil, let snapshot else { return }
-        status = CommandStatus(kind: .success, text: "Checked \(snapshot.formulae.count + snapshot.casks.count) packages in "
-                               + formatDuration(now() - start))
+        if let start { reportChecked(since: start) }
     }
 
     /// The detail pane of a package: parsed info (or nb's error text) and, for a formula, the dependency tree.

@@ -59,8 +59,8 @@ struct UpdatesView: View {
         }
         .padding(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        // Each visit checks again, as in the parent run; the model's one list keeps the sidebar count the same.
-        .task { await model.checkOutdated() }
+        // Each visit checks again (or joins the running check, D5); the model's one list keeps the sidebar count the same.
+        .task { await model.sharedOutdatedCheck() }
     }
 
     /// "4 updates: 2 ready, 1 pinned, 1 needs a reinstall"; parts at 0 are left out.
