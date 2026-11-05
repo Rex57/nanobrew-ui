@@ -54,16 +54,8 @@ scripts/bundle.sh           # dist/Nanobrew UI.app, dist/Nanobrew-UI-<version>.z
 A Swift package, no Xcode project and no third-party dependency: the library `NanobrewKit` holds all logic, and
 the `NanobrewUI` target holds the SwiftUI views. `scripts/make-icon.swift` makes the icon from nanobrew's logo.
 
-To try the app without touching your real nanobrew, point it at the test fake and a fixture state file. A given
-`-NBPath` is the only place the app looks for nb, so a wrong path shows "nb not installed" and never reaches your
-real nb:
-
-```sh
-mkdir -p /tmp/nbfake && ln -sf "$PWD/Tests/Fixtures/fake-nb" /tmp/nbfake/nb && cp Tests/Fixtures/state.json /tmp/nbfake/
-open -n "dist/Nanobrew UI.app" --args -NBPath /tmp/nbfake/nb -NBStatePath /tmp/nbfake/state.json -NBAppearance dark
-```
-
-The fake nb logs every command it gets to `/tmp/nbfake/fake-nb.log`. `-NBAppearance light|dark` is for tests only.
+To try the app without touching your real nanobrew, run it against the test fake: see
+[Manual checks with launch arguments](docs/TESTING.md#manual-checks-with-launch-arguments).
 
 ## Docs
 
@@ -76,11 +68,7 @@ The fake nb logs every command it gets to `/tmp/nbfake/fake-nb.log`. `-NBAppeara
 
 ## Future ideas
 
-- **nb's `--json` output.** nb prints text for people, and the app reads that text. When nanobrew adds `--json`
-  output (for `list`, `outdated`, `info`, `search`, `leaves`, `deps`, `services list` and `where`), the app will
-  use it.
-- **"Recently upgraded" on Updates.** A list of the last upgrades (package, from, to, date), built from the
-  history in nanobrew's state.json. It was drawn on the design canvas and left out of 1.0.0.
+What comes next, and what is open, is in the [roadmap](ROADMAP.md).
 
 ## License
 

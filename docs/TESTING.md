@@ -94,7 +94,7 @@ removes the admin clause, or replaces the whole command with error -128, so no p
 
 ## Manual checks with launch arguments
 
-Point a built copy at the fake nb and a fixture, as the [README](../README.md#build) shows:
+Point a built copy (`scripts/bundle.sh`, see the [README](../README.md#build)) at the fake nb and a fixture:
 
 ```sh
 mkdir -p /tmp/nbfake && ln -sf "$PWD/Tests/Fixtures/fake-nb" /tmp/nbfake/nb && cp Tests/Fixtures/state.json /tmp/nbfake/
