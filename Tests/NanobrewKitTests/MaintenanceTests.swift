@@ -105,8 +105,13 @@ import Testing
         let nb = try FakeNB()
         try nb.wait("cleanup", seconds: 1)
         let model = nb.model()
-        // The switch moves to on while the dry run without --prune-kegs runs.
-        await model.dryRunCleanup(pruneKegs: false).value
+        let task = model.dryRunCleanup(pruneKegs: false)
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        // The switch moves to on and back while the dry run without --prune-kegs runs.
+        #expect(!model.canCleanUp(pruneKegs: true), "the dry run still runs")
+        #expect(!model.canCleanUp(pruneKegs: false), "the dry run still runs")
+        // It ends with the switch on: Clean Up stays off until the switch is back at the setting the dry run had.
+        await task.value
         #expect(!model.canCleanUp(pruneKegs: true))
         #expect(model.canCleanUp(pruneKegs: false))
     }
