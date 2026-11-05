@@ -16,7 +16,7 @@ struct MaintenanceView: View {
             VStack(alignment: .leading, spacing: 0) {
                 ScreenTitle(title: "Maintenance") { Text(subline) }.padding(.bottom, 12)
                 SettingsRow(title: "Doctor", description: "Checks the install for problems.", help: Self.help["Doctor"]) {
-                    if let result = model.lastResult(.doctor) { resultText(result.answer ?? result.text, result) }
+                    if let result = model.doctorResult { resultText(result) }
                     Button("Doctor") { model.request(.doctor) }.disabled(model.inProgress.contains(.doctor))
                 }
                 SettingsRow(title: "Probe", description: "Tests that packages still run.", help: Self.help["Probe"]) {
@@ -25,7 +25,7 @@ struct MaintenanceView: View {
                 }
                 SettingsRow(title: "Cleanup", description: "Frees disk space.", help: Self.help["Cleanup"]) {
                     if model.canCleanUp(pruneKegs: pruneKegs), let result = model.cleanupDryRunResult {
-                        resultText(result.answer ?? result.text, result)
+                        resultText(result)
                     } else {
                         Text("Dry run first").font(.system(size: 12)).foregroundStyle(Theme.muted)
                     }
@@ -76,8 +76,8 @@ struct MaintenanceView: View {
     }
 
     /// D4: a result beside its button, "Can free 41.4 MB · 14:32", in the colour of its dot (amber text for attention).
-    private func resultText(_ words: String, _ result: CommandStatus) -> some View {
-        Text(words.prefix(1).uppercased() + words.dropFirst() + " · " + result.time.formatted(date: .omitted, time: .shortened))
+    private func resultText(_ result: CommandStatus) -> some View {
+        Text(result.shortText + " · " + result.time.formatted(date: .omitted, time: .shortened))
             .font(.system(size: 12))
             .foregroundStyle(result.kind == .attention ? Theme.amberText : StatusLine.color(result.kind))
     }

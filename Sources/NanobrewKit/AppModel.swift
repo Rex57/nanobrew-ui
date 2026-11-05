@@ -59,9 +59,10 @@ public final class AppModel {
     private var cleanupDryRunsForgotten = 0
     /// D4: the result of the dry run that allows Clean Up, beside its button; it goes with that permission.
     public private(set) var cleanupDryRunResult: CommandStatus?
-    /// The result of the last run of each command this session (Maintenance shows Doctor's).
-    private var results: [NBCommand: CommandStatus] = [:]
-    public func lastResult(_ command: NBCommand) -> CommandStatus? { results[command] }
+    /// D4: the last Doctor's result (not --probe), beside its button for the session.
+    public private(set) var doctorResult: CommandStatus?
+    /// The last dry run's result; `dryRunCleanup` keeps it as `cleanupDryRunResult` when it still counts.
+    private var lastDryRunResult: CommandStatus?
 
     /// Clean Up runs only after a successful dry run with the same --prune-kegs setting.
     public func canCleanUp(pruneKegs: Bool) -> Bool { cleanupDryRunFor == pruneKegs }
@@ -76,7 +77,7 @@ public final class AppModel {
             await task.value
             guard forgotten == cleanupDryRunsForgotten else { return }
             cleanupDryRunFor = lastRunSucceeded(dryRun) ? pruneKegs : nil
-            cleanupDryRunResult = lastRunSucceeded(dryRun) ? lastResult(dryRun) : nil
+            cleanupDryRunResult = lastRunSucceeded(dryRun) ? lastDryRunResult : nil
         }
     }
 
@@ -466,7 +467,11 @@ public final class AppModel {
                                    duration: duration, skipped: outcome.skips.map(\.token), summary: summary)
         // Decided at the end: a read-only command that started before a change must not hide it either.
         if command.changes || running == nil { status = result }
-        results[command] = result
+        switch CommandStatus.summaryLabel(command) {
+        case "Doctor": doctorResult = result
+        case "Dry run": lastDryRunResult = result
+        default: break
+        }
         if !consoleShown {
             let took = formatDuration(duration)
             toast = Toast(kind: result.kind, text: result.text.replacingOccurrences(of: " in \(took)", with: ""),

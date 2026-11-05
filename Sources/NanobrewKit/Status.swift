@@ -11,6 +11,13 @@ public struct CommandStatus: Equatable, Sendable {
     /// nb's answer read from its summary line ("can free 41.4 MB", "found 2 problems"); nil for other results.
     public let answer: String?
 
+    /// A Maintenance row's words (F6): nb's answer ("Can free 41.4 MB"), else "Done" for a success, else the
+    /// failure or cancel text as it is.
+    public var shortText: String {
+        if let answer { return answer.prefix(1).uppercased() + answer.dropFirst() }
+        return kind == .success ? "Done" : text
+    }
+
     public init(kind: Kind, text: String, time: Date = Date(), answer: String? = nil) {
         self.kind = kind
         self.text = text

@@ -175,14 +175,33 @@ import Testing
         let nb = try FakeNB()
         try nb.output("doctor", recorded: "doctor-issues")
         let model = nb.model()
-        #expect(model.lastResult(.doctor) == nil)
+        #expect(model.doctorResult == nil)
         await model.run(.doctor).value
-        #expect(model.lastResult(.doctor)?.kind == .attention)
-        #expect(model.lastResult(.doctor)?.answer == "found 2 problems")
+        #expect(model.doctorResult?.kind == .attention)
+        #expect(model.doctorResult?.answer == "found 2 problems")
         model.forgetCleanupDryRun()
-        #expect(model.lastResult(.doctor)?.answer == "found 2 problems")
+        #expect(model.doctorResult?.answer == "found 2 problems")
         try nb.exit("doctor", code: 1)
         await model.run(.doctor).value
-        #expect(model.lastResult(.doctor)?.kind == .failure)
+        #expect(model.doctorResult?.kind == .failure)
+    }
+
+    /// F6: the row's words: nb's answer, else "Done" for a success, else the failure or cancel text.
+    @Test func aRowSaysDoneWhenNbPrintsNoKnownAnswer() async throws {
+        let nb = try FakeNB()
+        try nb.output("doctor", recorded: "leaves")
+        let model = nb.model()
+        await model.run(.doctor).value
+        #expect(model.doctorResult?.shortText == "Done")
+        try nb.output("cleanup", recorded: "leaves")
+        await model.dryRunCleanup(pruneKegs: false).value
+        #expect(model.cleanupDryRunResult?.shortText == "Done")
+        try nb.exit("doctor", code: 1)
+        await model.run(.doctor).value
+        #expect(model.doctorResult?.shortText == "Failed: nb doctor (exit code 1)")
+        try FileManager.default.removeItem(at: nb.dir.appendingPathComponent("out-doctor"))
+        try nb.exit("doctor", code: 0)
+        await model.run(.doctor).value
+        #expect(model.doctorResult?.shortText == "No problems found")
     }
 }
