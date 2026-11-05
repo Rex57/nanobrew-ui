@@ -41,13 +41,19 @@ struct FakeNB {
     /// The argv of every run but the outdated checks (the model starts one after each changing command).
     var argvs: [[String]] { allArgvs.filter { $0.first != "outdated" } }
 
+    /// The process group of the first run that slept (the fake nb's pid): no process of that run is alive once
+    /// `kill(-group, 0)` fails.
+    func firstSleeperGroup() -> pid_t? {
+        log.first { $0.first == "CHILD" }.flatMap { Int32($0[1]) }.map { getpgid($0) }
+    }
+
     /// Ends the sleep children of `wait` that no cancel stopped.
     func killChildren() {
         for line in log where line.first == "CHILD" { if let pid = Int32(line[1]) { kill(pid, SIGKILL) } }
     }
 
-    @MainActor func model(statePath: String = fixture("state.json")) -> AppModel {
-        AppModel(statePath: statePath, nbPath: path)
+    @MainActor func model(statePath: String = fixture("state.json"), readLimit: Duration = .seconds(60)) -> AppModel {
+        AppModel(statePath: statePath, nbPath: path, readLimit: readLimit)
     }
 }
 

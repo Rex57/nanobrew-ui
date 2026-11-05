@@ -46,6 +46,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    /// D5: no background nb read of the app outlives it (they hold nb's lock); console commands go on (D34).
+    func applicationWillTerminate(_ notification: Notification) { model.endBackgroundReads() }
+
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 }
 

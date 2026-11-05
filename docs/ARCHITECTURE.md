@@ -145,6 +145,22 @@ only these:
 | `capture(_:)` | no | Read-only data: `info`, `deps --tree`, `version`, `telemetry status`, `autoupdate status`. Returns the lines and the exit code. |
 | `captureStdout(_:)` (private) | no | Read-only data that is parsed: `search`, `outdated`, `services list`, `completions`, `bundle dump`. A non-zero exit throws nb's error text. |
 
+`capture(_:)` and `captureStdout(_:)` share one private read path, `read(_:separateStderr:)` (D5 of the 1.0.2
+polish run). Every background read goes through it, with three rules:
+
+- **Cancel.** When the caller's task is cancelled (the user left the screen, a newer load replaced it), the read
+  path ends the nb process group with `NBProcess.cancel()`. A dropped read never holds nb's lock in front of the
+  next action.
+- **Read limit.** A read that has not ended after `readLimit` (60 s, set at the model's creation; tests pass a
+  short one) is ended the same way and fails with "nb did not answer in 60.0 s. Another nb command may be
+  running, or the network does not answer." (`capture` returns that text as its one line). Reason: nb's HTTP
+  client has no connect time limit, so a stuck network kept a read, and nb's lock, forever.
+- **Quit.** The model keeps its live reads; `endBackgroundReads()` ends them all, and the app delegate calls it in
+  `applicationWillTerminate`.
+
+`run(_:)` commands (changing commands, Doctor, Dry Run, Where, Leaves) never get a limit and the quit call never
+ends them (D34).
+
 ### The queue
 
 - A command with `changes == true` waits its turn. `run(_:)` chains its task onto the task of the last changing
@@ -279,7 +295,7 @@ There is no file watcher. The app reads again at these moments:
 | Launch, and the app becomes active | `becameActive()` (the window's first task and the app delegate): `checkAgain()` (find nb, read `state.json`), then `checkOutdated()`, not awaited, unless one of these background checks still runs. So launch starts one check; the session's first check reports in the status line |
 | ⌘R, the top-bar button, Updates > Check Again | `refresh()`: `checkAgain()`, then `checkOutdated(report: true)` |
 | After every command | `checkAgain()` in the run, then `commandsEnded` goes up by one |
-| After a changing command | `checkOutdated()`, started by the run. A newer check replaces the one before: the older one's result is dropped, while its nb runs end by themselves. A read-only command (Doctor, Where, Leaves, a dry run) starts no check |
+| After a changing command | `checkOutdated()`, started by the run. A newer check waits for the one before to end, then runs: one check at a time, and the newest result stays. A read-only command (Doctor, Where, Leaves, a dry run) starts no check |
 | Updates opens | `checkOutdated()` |
 
 The views with their own fetched data key a `.task(id:)` on `commandsEnded`, so they load again after each
@@ -405,8 +421,9 @@ end run
   else to it. Its `windowShouldClose` calls `NSApp.terminate(nil)` and returns false.
 - The quit then asks first while a changing command runs or waits (`applicationShouldTerminate` calls
   `mayQuit()`).
-- On a quit, the app does not stop nb. nb runs in its own process group, and the app sends it no signal. nb ends
-  its operation in the background, and nobody sees its output. Reason: a finished nb operation, or one that nb
+- On a quit, the app does not stop a console command. nb runs in its own process group, and the app sends it no
+  signal. nb ends its operation in the background, and nobody sees its output. Only the background reads end
+  (`endBackgroundReads()`, see the read path). Reason: a finished nb operation, or one that nb
   rolled back itself, is safer than one cut off halfway.
 
 ## The bundle script and the release zip

@@ -41,7 +41,8 @@ public final class AppModel {
     public private(set) var inProgress: [NBCommand] = []
     /// Changes once each time a command ends, read-only or changing: views with their own fetched data re-load on it.
     public private(set) var commandsEnded = 0
-    /// The outdated check after the last changing command or activation; a newer one replaces it.
+    /// The outdated check after the last changing command or activation; a newer one waits for it to end (a
+    /// cancel would end its nb runs, D5), so one check runs at a time.
     private var backgroundCheck: Task<Void, Never>?
     /// A command that waits for the user's yes before it runs.
     public private(set) var pendingConfirmation: NBCommand?
@@ -123,12 +124,15 @@ public final class AppModel {
     public var canCancel: Bool { !processes.isEmpty }
 
     private let locate: (@MainActor () -> String?)?
+    /// D5: a background read that has not ended after this long is ended and fails with `timeoutText`.
+    public let readLimit: Duration
 
     /// `locate` finds nb again on `checkAgain()`; without it the nb path stays fixed (tests).
     public init(statePath: String, nbPath: String?, appVersion: String? = nil, locate: (@MainActor () -> String?)? = nil,
                 now: @escaping @MainActor () -> ContinuousClock.Instant = { ContinuousClock.now },
-                defaults: UserDefaults = .standard) {
+                defaults: UserDefaults = .standard, readLimit: Duration = .seconds(60)) {
         self.now = now
+        self.readLimit = readLimit
         self.defaults = defaults
         self.statePath = statePath
         self.nbPath = nbPath
@@ -155,9 +159,10 @@ public final class AppModel {
     private var backgroundChecks = 0
 
     private func startOutdatedCheck(report: Bool = false) {
-        backgroundCheck?.cancel()
+        let previous = backgroundCheck
         backgroundChecks += 1
         backgroundCheck = Task {
+            await previous?.value
             await checkOutdated(report: report)
             backgroundChecks -= 1
         }
@@ -222,20 +227,54 @@ public final class AppModel {
         processes.forEach { $0.cancel() }
     }
 
+    /// The one path of every background read (D5): the nb run ends when the caller's task is cancelled, when it
+    /// has not ended after `readLimit` (then it throws the timeout text), and at `endBackgroundReads()`.
+    private func read(_ command: NBCommand, separateStderr: Bool = false) async throws -> (lines: [String], process: NBProcess) {
+        guard let nbPath else { throw CommandFailed(text: "nb is not installed") }
+        let process = try NBProcess(path: nbPath, args: command.args, separateStderr: separateStderr)
+        reads.append(process)
+        defer { reads.removeAll { $0 === process } }
+        let limit = readLimit
+        let timer = Task { () -> Bool in
+            guard (try? await Task.sleep(for: limit)) != nil else { return false }
+            process.cancel()
+            return true
+        }
+        let lines = await withTaskCancellationHandler {
+            var lines: [String] = []
+            for await batch in process.lines { lines += batch }
+            return lines
+        } onCancel: { process.cancel() }
+        timer.cancel()
+        if await timer.value {
+            throw CommandFailed(text: "nb did not answer in \(formatDuration(limit)). Another nb command may be running, "
+                                + "or the network does not answer.")
+        }
+        return (lines, process)
+    }
+
+    /// The background reads that run now: `endBackgroundReads()` ends them.
+    private var reads: [NBProcess] = []
+
+    /// The app quits: its background reads end; console commands go on (D34).
+    public func endBackgroundReads() { reads.forEach { $0.cancel() } }
+
     /// Runs a read-only command without the console and returns its lines and exit code (nil: no nb, or a signal).
+    /// A read past the limit returns the timeout text as its one line.
     public func capture(_ command: NBCommand) async -> (lines: [String], exitCode: Int32?) {
-        guard let nbPath, let process = try? NBProcess(path: nbPath, args: command.args) else { return ([], nil) }
-        var lines: [String] = []
-        for await batch in process.lines { lines += batch }
-        return (lines, process.exitCode)
+        do {
+            let (lines, process) = try await read(command)
+            return (lines, process.exitCode)
+        } catch let failed as CommandFailed where nbPath != nil {
+            return ([failed.text], nil)
+        } catch {
+            return ([], nil)
+        }
     }
 
     /// stdout of a read-only command, stderr apart. A non-zero exit throws nb's error text (never an empty list).
     private func captureStdout(_ command: NBCommand) async throws -> [String] {
-        guard let nbPath else { throw CommandFailed(text: "nb is not installed") }
-        let process = try NBProcess(path: nbPath, args: command.args, separateStderr: true)
-        var lines: [String] = []
-        for await batch in process.lines { lines += batch }
+        let (lines, process) = try await read(command, separateStderr: true)
         guard process.exitCode == 0 else {
             let joined = { (lines: [String]) in lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines) }
             let text = joined(process.stderrLines).isEmpty ? joined(lines) : joined(process.stderrLines)
