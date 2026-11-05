@@ -39,6 +39,22 @@ import Testing
         #expect(Set(nb.argvs) == [["outdated"], ["outdated", "--cask"]])
     }
 
+    @Test func aCancelledOutdatedCheckKeepsThePreviousList() async throws {
+        let nb = try FakeNB()
+        let model = nb.model()
+        await model.checkOutdated()
+        #expect(model.updatesCount == 4)
+        try nb.wait("outdated", seconds: 30)
+        let task = Task { await model.checkOutdated() }
+        await eventually { nb.log.filter { $0.first == "CHILD" }.count == 2 }
+        task.cancel()
+        await task.value
+        nb.killChildren()
+        #expect(model.outdatedPackages.map(\.name) == ["node", "libffi", "puremac", "nanobrew-ui"])
+        #expect(model.updatesCount == 4)
+        #expect(model.outdatedError == nil)
+    }
+
     /// Copies `name` (default: nanobrew-ui 1.0.1) as state.json; the app runs 1.0.0.
     func selfUpgradeModel(_ nb: FakeNB, state name: String = "state-self-upgraded.json") throws -> AppModel {
         let state = nb.dir.appendingPathComponent("state.json").path

@@ -128,7 +128,9 @@ only these:
   `POSIX_SPAWN_CLOEXEC_DEFAULT` keeps the app's other file descriptors out of nb.
 - **Environment.** nb gets the app's environment unchanged.
 - **Lines.** A reader thread splits the output at each newline and hands on the lines in batches. The stream
-  ends after nb exits. `exitCode` is nil when a signal ended nb.
+  ends after nb exits. `exitCode` is nil when a signal ended nb, and nil until the process was reaped (a reader
+  whose task was cancelled stops early and gets no code). A cancelled outdated check or detail fetch changes
+  nothing: the previous list, count, error and detail stay.
 - **Cancel.** `cancel()` sends `SIGTERM` to the whole process group (`kill(-pid, SIGTERM)`), so nb's children
   stop too. There is no `SIGKILL` fallback; the code marks this as a known limit.
 

@@ -311,7 +311,9 @@ struct PackageDetailView: View {
         }
         .task(id: package) {
             detail = nil
-            detail = await model.detail(name: package.name, cask: package.cask)
+            let fetched = await model.detail(name: package.name, cask: package.cask)
+            // A newer selection cancelled this fetch: its result is not this package's.
+            if !Task.isCancelled { detail = fetched }
         }
         // A probe, a link or an upgrade changes what nb info says.
         .onChange(of: model.inProgress.count) { old, new in

@@ -7,7 +7,8 @@ public final class NBProcess: @unchecked Sendable {
     /// The stream ends after the process exits.
     public let lines: AsyncStream<[String]>
     private let lock = NSLock()
-    private var waitStatus: Int32 = 0
+    /// nil until waitpid reaped the process.
+    private var waitStatus: Int32?
     private var cancelled = false
     private var stderrData = Data()
 
@@ -97,9 +98,10 @@ public final class NBProcess: @unchecked Sendable {
         return data.isEmpty ? [] : data.split(separator: 10).map(Self.clean)
     }
 
-    /// The exit code, or nil when a signal ended the process. Valid once `lines` has ended.
+    /// The exit code; nil while the process was not reaped (for example a read that was cancelled) or when a signal
+    /// ended it.
     public var exitCode: Int32? {
-        let status = lock.withLock { waitStatus }
+        guard let status = lock.withLock({ waitStatus }) else { return nil }
         return status & 0x7f == 0 ? (status >> 8) & 0xff : nil
     }
 

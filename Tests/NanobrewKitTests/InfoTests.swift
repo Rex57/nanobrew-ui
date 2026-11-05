@@ -73,6 +73,19 @@ func recorded(_ name: String) throws -> [String] {
         #expect(detail.error == "nb: formula 'nosuch' not found")
     }
 
+    @MainActor @Test func aCancelledDetailFetchIsNoExitZeroFailure() async throws {
+        let nb = try FakeNB()
+        try nb.wait("info", seconds: 30)
+        let model = nb.model()
+        let task = Task { await model.detail(name: "node", cask: false) }
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        task.cancel()
+        let detail = await task.value
+        nb.killChildren()
+        #expect(detail.info == nil)
+        #expect(detail.error != "nb info failed (exit code 0)")
+    }
+
     @MainActor @Test func notFoundWithExitZeroIsStillAnError() async throws {
         // Real nb 0.1.214 prints "not found" to stderr and exits 0.
         let nb = try FakeNB()

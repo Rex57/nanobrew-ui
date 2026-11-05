@@ -226,13 +226,17 @@ public final class AppModel {
     }
 
     /// Sets `updatesCount` (at launch, on Cmd-R and after each command). `report` puts the check in the status
-    /// line (launch and Cmd-R), so it does not replace the result of the command that just ended.
+    /// line (launch and Cmd-R), so it does not replace the result of the command that just ended. A cancelled check
+    /// (the user left Updates) changes nothing.
     public func checkOutdated(report: Bool = false) async {
         let start = now()
         do {
-            outdatedPackages = try await outdated()
+            let rows = try await outdated()
+            guard !Task.isCancelled else { return }
+            outdatedPackages = rows
             outdatedError = nil
         } catch {
+            guard !Task.isCancelled else { return }
             outdatedPackages = []
             outdatedError = error.localizedDescription
         }

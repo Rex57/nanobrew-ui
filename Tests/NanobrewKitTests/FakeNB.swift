@@ -34,6 +34,11 @@ struct FakeNB {
     /// The argv of every run, in start order.
     var argvs: [[String]] { log.filter { $0.first == "START" }.map { Array($0.dropFirst()) } }
 
+    /// Ends the sleep children of `wait` that no cancel stopped.
+    func killChildren() {
+        for line in log where line.first == "CHILD" { if let pid = Int32(line[1]) { kill(pid, SIGKILL) } }
+    }
+
     @MainActor func model(statePath: String = fixture("state.json")) -> AppModel {
         AppModel(statePath: statePath, nbPath: path)
     }

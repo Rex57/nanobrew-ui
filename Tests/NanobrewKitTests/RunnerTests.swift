@@ -50,6 +50,20 @@ import Testing
         #expect(!nb.log.contains(["END", "link", "a"]))
     }
 
+    @Test func aProcessReportsNoExitCodeUntilItWasReaped() async throws {
+        let nb = try FakeNB()
+        try nb.wait("doctor", seconds: 30)
+        let running = try NBProcess(path: nb.path, args: ["doctor"])
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        #expect(running.exitCode == nil)
+        running.cancel()
+        for await _ in running.lines {}
+        try nb.exit("leaves", code: 3)
+        let ended = try NBProcess(path: nb.path, args: ["leaves"])
+        for await _ in ended.lines {}
+        #expect(ended.exitCode == 3)
+    }
+
     @Test func consoleLinesHaveNoAnsiCodes() async throws {
         let nb = try FakeNB()
         let model = nb.model()
