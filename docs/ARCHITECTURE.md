@@ -278,7 +278,7 @@ There is no file watcher. The app reads again at these moments:
 | Launch | `checkOutdated(report: true)` |
 | ⌘R, the top-bar button, Updates > Check Again | `refresh()`: `checkAgain()`, then `checkOutdated(report: true)` |
 | After every command | `checkAgain()` in the run, then `commandsEnded` goes up by one |
-| After a changing command | `checkOutdated()`, started by the run; a newer one cancels the one before. A read-only command (Doctor, Where, Leaves, a dry run) starts no check |
+| After a changing command | `checkOutdated()`, started by the run. A newer check replaces the one before: the older one's result is dropped, while its nb runs end by themselves. A read-only command (Doctor, Where, Leaves, a dry run) starts no check |
 | Updates opens | `checkOutdated()` |
 
 The views with their own fetched data key a `.task(id:)` on `commandsEnded`, so they load again after each
