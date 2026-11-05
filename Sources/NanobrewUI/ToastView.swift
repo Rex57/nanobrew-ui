@@ -15,17 +15,22 @@ struct ToastView: View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             Circle().fill(StatusLine.color(toast.kind)).frame(width: 8, height: 8).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
+                // F5: a long result (a failure) wraps to two lines; the detail stays one.
                 Text(toast.text).font(.system(size: 13, weight: .medium)).foregroundStyle(Theme.text)
+                    .lineLimit(2).fixedSize(horizontal: false, vertical: true)
                 Text(toast.detail).font(.system(size: 12)).foregroundStyle(Theme.muted).monospacedDigit()
+                    .lineLimit(1).truncationMode(.middle)
             }
-            .lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 12)
             Button("View") { model.viewToast() }
                 .buttonStyle(OutlinedButtonStyle(height: 26)).font(.system(size: 12, weight: .medium))
                 .accessibilityLabel("View in the console")
             Button { model.dismissToast() } label: {
                 // D6(2): the countdown number rolls.
-                Text("Dismiss (\(left))").contentTransition(reduceMotion ? .opacity : .numericText(countsDown: true))
+                // F7: as wide as "Dismiss (10)" at every n, so View never moves (D6: nothing pops).
+                Text("Dismiss (10)").hidden().overlay(alignment: .leading) {
+                    Text("Dismiss (\(left))").contentTransition(reduceMotion ? .opacity : .numericText(countsDown: true))
+                }
             }
                 .buttonStyle(TextButtonStyle(color: Theme.muted)).font(.system(size: 12)).monospacedDigit()
                 .accessibilityLabel("Dismiss")
