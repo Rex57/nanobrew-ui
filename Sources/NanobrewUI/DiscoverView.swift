@@ -14,7 +14,8 @@ struct DiscoverView: View {
     @State private var searched: (query: String, time: Duration)?
     /// The detail pane's width: the mockup's at start, then where the user drags it.
     @State private var detailWidth: CGFloat = 420
-    @State private var selection: SearchResult?
+    /// The selected result by name and kind, so it stays selected when a re-load marks it installed.
+    @State private var selection: PackageRef?
     @State private var tapName = ""
     @State private var tapCask = false
     @State private var shims = false
@@ -31,9 +32,9 @@ struct DiscoverView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     } else {
                         ScrollView {
-                            LazyVStack(spacing: 0) { ForEach(results ?? [], id: \.self) { row($0).id($0) } }
+                            LazyVStack(spacing: 0) { ForEach(results ?? [], id: \.ref) { row($0) } }
                         }
-                        .modifier(ArrowSelection(selection: $selection, items: results ?? []))
+                        .modifier(ArrowSelection(selection: $selection, items: (results ?? []).map(\.ref)))
                     }
                 }
                 .padding(.top, 16)
@@ -43,8 +44,7 @@ struct DiscoverView: View {
             ResizeEdge(axis: .horizontal, size: $detailWidth, range: 300...640)
             Group {
                 if let selection {
-                    PackageDetailView(package: PackageRef(name: selection.name, cask: selection.isCask),
-                                      footer: AnyView(installSection(selection)))
+                    PackageDetailView(package: selection, footer: AnyView(installSection(selection)))
                 } else {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 12) {
@@ -70,7 +70,7 @@ struct DiscoverView: View {
     }
 
     private func row(_ r: SearchResult) -> some View {
-        Button { selection = r } label: {
+        Button { selection = r.ref } label: {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text(r.name).font(.system(size: 14, weight: .medium)).foregroundStyle(Theme.text)
@@ -83,16 +83,16 @@ struct DiscoverView: View {
             }
             .padding(.horizontal, 12)
             .frame(height: 52)
-            .background(selection == r ? Theme.active : .clear, in: RoundedRectangle(cornerRadius: 6))
+            .background(selection == r.ref ? Theme.active : .clear, in: RoundedRectangle(cornerRadius: 6))
             .overlay(alignment: .bottom) { Theme.rule.frame(height: 1) }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityAddTraits(selection == r ? .isSelected : [])
+        .accessibilityAddTraits(selection == r.ref ? .isSelected : [])
     }
 
     /// Install options, the primary for the selected result, and Install from a tap.
-    private func installSection(_ selected: SearchResult?) -> some View {
+    private func installSection(_ selected: PackageRef?) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Install options").font(.system(size: 14, weight: .semibold)).padding(.bottom, 6)
@@ -104,7 +104,7 @@ struct DiscoverView: View {
             if let selected {
                 let busy = installing(selected.name)
                 Button(busy ? "Installing \(selected.name)…" : "Install \(selected.name)") {
-                    install(selected.name, cask: selected.isCask)
+                    install(selected.name, cask: selected.cask)
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(busy)
@@ -129,13 +129,7 @@ struct DiscoverView: View {
     }
 
     private func option(_ words: String, flag: String, isOn: Binding<Bool>) -> some View {
-        Toggle(isOn: isOn) {
-            HStack(spacing: 6) {
-                Text(words)
-                Text(flag).font(.system(size: 12, design: .monospaced)).foregroundStyle(Theme.muted)
-            }
-            .font(.system(size: 13))
-        }
+        Toggle(isOn: isOn) { flagLabel(words, flag) }
         .toggleStyle(.checkbox)
         .tint(Theme.primary)
         .frame(minHeight: 26)
@@ -185,4 +179,9 @@ private struct TapButtonStyle: ButtonStyle {
             .overlay(UnevenRoundedRectangle(bottomTrailingRadius: 6, topTrailingRadius: 6).strokeBorder(Theme.control))
             .opacity(enabled ? (configuration.isPressed ? 0.7 : 1) : 0.4)
     }
+}
+
+extension SearchResult {
+    /// A result by name and kind: the row's identity and the selection, the same before and after an install.
+    var ref: PackageRef { PackageRef(name: name, cask: isCask) }
 }
