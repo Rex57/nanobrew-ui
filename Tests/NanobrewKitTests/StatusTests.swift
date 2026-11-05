@@ -101,23 +101,28 @@ import Testing
 }
 
 @MainActor @Suite struct ConsoleStateTests {
-    @Test func closedAtStartOpenWhileACommandRunsClosedAfter() async throws {
+    /// D1: the console never opens or closes by itself.
+    @Test func aCommandLeavesTheConsoleClosed() async throws {
         let nb = try FakeNB()
         try nb.wait("install", seconds: 1)
         let model = nb.model()
         #expect(!model.consoleShown)
         let task = model.run(.install("jq"))
         await eventually { nb.log.contains { $0.first == "CHILD" } }
-        #expect(model.consoleShown)
+        #expect(!model.consoleShown)
         await task.value
+        #expect(!model.consoleShown)
+        await model.run(.doctor).value
         #expect(!model.consoleShown)
     }
 
-    @Test func staysOpenWhenPinned() async throws {
+    @Test func aCommandLeavesTheOpenConsoleOpen() async throws {
         let nb = try FakeNB()
         let model = nb.model()
-        model.consolePinned = true
+        model.toggleConsole()
         await model.run(.install("jq")).value
+        #expect(model.consoleShown)
+        await model.run(.doctor).value
         #expect(model.consoleShown)
     }
 

@@ -87,9 +87,8 @@ public final class AppModel {
     private var lastChange: Task<Void, Never>?
     /// The status line (DD4): the last command's result and how long it took, or the one that runs now.
     public private(set) var status: CommandStatus?
-    /// The console (DD5): closed at start, open while a command runs, closed when it ends unless pinned.
+    /// The console: closed at start; only the user opens and closes it (D1, which changed DD5).
     public private(set) var consoleShown = false
-    public var consolePinned = false
     public func toggleConsole() { consoleShown.toggle() }
     /// A monotonic clock for the durations; tests inject their own.
     private let now: @MainActor () -> ContinuousClock.Instant
@@ -393,7 +392,6 @@ public final class AppModel {
         }
         processes.append(process)
         inProgress.append(command)
-        consoleShown = true
         // While a changing command runs, the status line keeps showing it; a parallel read-only one stays out.
         let quiet = !command.changes && running != nil
         if !quiet { status = CommandStatus(kind: .running, text: "Running: \(command.title)") }
@@ -420,7 +418,6 @@ public final class AppModel {
         }
         processes.removeAll { $0 === process }
         inProgress.remove(at: inProgress.firstIndex(of: command)!)
-        if inProgress.isEmpty, !consolePinned { consoleShown = false }
         if !process.wasCancelled, process.exitCode == 0 { succeeded.insert(command) } else { succeeded.remove(command) }
         if process.wasCancelled {
             console.append("Cancelled: \(command.title)")

@@ -250,7 +250,7 @@ it. `AppModel.fromLaunch()` makes the app's model from the launch arguments.
 |---|---|
 | `snapshot`, `notSetUp`, `stateError` | The last good `state.json`, whether nanobrew is set up, and the read error |
 | `nbPath`, `notInstalled` | The nb that the locator found, or none |
-| `console`, `consoleDropped`, `consoleShown`, `consolePinned` | The last 20,000 console lines (`consoleLimit`), how many lines dropped off the top, and whether the console shows |
+| `console`, `consoleDropped`, `consoleShown` | The last 20,000 console lines (`consoleLimit`), how many lines dropped off the top, and whether the console shows |
 | `running`, `waiting`, `inProgress` | The queue |
 | `commandsEnded` | Goes up by one each time a command ends |
 | `pendingConfirmation` | A command that waits for the user's yes |
@@ -290,8 +290,8 @@ then minutes and seconds (`1 m 05 s`). It picks the unit after it rounds.
 
 ### The console state
 
-The console is closed at launch. It opens when a command starts. It closes when the last command ends, unless
-the user pinned it ("Keep open"). ⌘J opens and closes it.
+The console is closed at launch. Only the user opens and closes it (the Console toggle, ⌘J, the toast's View): a
+command's start and end leave it as it was (D1 of the 1.0.2 polish run).
 
 ### Refresh
 

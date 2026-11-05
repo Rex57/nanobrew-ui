@@ -31,7 +31,7 @@ this table in the same commit.
 | `frame` | `#f9fbfc` | `#000000` | The sidebar and the top bar |
 | `sheet` | `#ffffff` | `#111111` | The content sheet, the console, dialogs, and the inside of fields and outlined buttons |
 | `raised` | `#f4f6f8` | `#1a1a1a` | Code blocks: the install command, the dependency tree, the shell completions |
-| `active` | `#ebedee` | `#262626` | The selected sidebar row and table row, the console toggle when open, "Keep open" when on, a disabled primary button |
+| `active` | `#ebedee` | `#262626` | The selected sidebar row and table row, the console toggle when open, a disabled primary button |
 | `border` | `#e8eaec` | `#2e2e2e` | The sheet edge, dialog edges, the tab rule, the console edge, the logo tile edge |
 | `rule` | `#f0f1f2` | `#1e1e1e` | The line under each table row and each settings row |
 | `control` | `#cdced1` | `#444444` | The edge of fields, outlined buttons and the Check again button |
@@ -146,24 +146,30 @@ Each screen has 24 px padding and the same parts, top to bottom:
 The status line is 36 px high, at the bottom of the sheet, with a 1 px `border` line on top. It is 12 px grey
 text with tabular figures:
 
-- an 8 px dot: amber while a command runs or when a result needs attention (a Doctor that found problems), green
-  after a success, red after a failure, grey after a cancel or a skip;
+- an 8 px dot: amber when a result needs attention (a Doctor that found problems), green after a success, red
+  after a failure, grey after a cancel or a skip;
 - the text, for example "Installed jq in 0.84 s" (selectable; long text is cut in the middle);
 - "· <time of day>";
 - at the right, the Console toggle with the terminal icon and "⌘J". It is grey, on `active` when the console is
   open.
 
+While a command runs (D2, 2026-11-05), the line shows a small spinner in place of the dot, "Running: <commands>"
+in `text`, the time since the start (it counts up), "<n> waiting" when commands wait and Cancel (outlined, 24 px).
+A thin indeterminate amber bar (2 px) runs along its top edge in place of the `border` line. After the end it shows
+the result as before.
+
 Durations read "84 ms", "0.84 s", "12.3 s" and "1 m 05 s". The status line hides while the console shows.
 
 ### The console
 
-- It opens by itself when a command starts, and closes when the last command ends, unless "Keep open" is on. ⌘J
-  opens and closes it.
+- It never opens or closes by itself: only the Console toggle, ⌘J and the toast's View open it (D1, 2026-11-05,
+  which changed DD5). Reason: a console that popped open and shut with each command pulled the eye away from the
+  screen the user works in; the status line now shows the running command. "Keep open" went with it.
 - It starts at 212 px high. A drag on its top edge sets 120 to 600 px, and never so much that the content gets
   less than 200 px.
 - The 40 px header holds: the dot; "Running: <commands>" or the last result (13 semibold); the time since the
-  start (it counts up) or the time of day; "<n> waiting" when commands wait; Cancel (outlined, 26 px); "Keep open"
-  (a text toggle, on `active` when on); and a chevron that hides the console.
+  start (it counts up) or the time of day; "<n> waiting" when commands wait; Cancel (outlined, 26 px); and a
+  chevron that hides the console.
 - The output is 12 px SF Mono on the sheet, 24 px from the edge. A drag selects across lines.
 
 ### Pills and badges

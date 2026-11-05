@@ -6,8 +6,8 @@ struct ConsoleView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        // mockups/Discover.dc.html: a 40px header (dot, what runs, its time, Cancel, Keep open, hide), the output in
-        // 12px SF Mono on the sheet. The status line hides while the console shows.
+        // mockups/Discover.dc.html: a 40px header (dot, what runs, its time, Cancel, hide), the output in 12px SF Mono
+        // on the sheet. The status line hides while the console shows. "Keep open" went with D1.
         VStack(spacing: 0) {
             HStack(spacing: 8) {
                 if let status = model.status {
@@ -34,13 +34,6 @@ struct ConsoleView: View {
                 Button("Cancel") { model.cancel() }
                     .buttonStyle(OutlinedButtonStyle(height: 26)).font(.system(size: 12, weight: .medium))
                     .disabled(!model.canCancel)
-                Button("Keep open") { model.consolePinned.toggle() }
-                    .buttonStyle(TextButtonStyle(color: model.consolePinned ? Theme.text : Theme.muted))
-                    .font(.system(size: 12, weight: model.consolePinned ? .semibold : .regular))
-                    .padding(.horizontal, 8).frame(height: 26)
-                    .background(model.consolePinned ? Theme.active : .clear, in: RoundedRectangle(cornerRadius: 6))
-                    .help("Keep the console open after a command")
-                    .accessibilityAddTraits(model.consolePinned ? .isSelected : [])
                 Button { model.toggleConsole() } label: {
                     IconView(icon: .chevronDown).foregroundStyle(Theme.muted).frame(width: 26, height: 26)
                         .contentShape(Rectangle())
@@ -109,14 +102,28 @@ struct ConsoleText: NSViewRepresentable {
     }
 }
 
-/// DD4: the dot (green success, red failure, amber while running or when a result needs attention), the last result, its time of day and the
-/// console toggle.
+/// DD4: the dot (green success, red failure, amber when a result needs attention), the last result, its time of day and
+/// the console toggle. D2: while a command runs, a spinner, "Running: <titles>", the time, "<n> waiting", Cancel and
+/// a thin amber bar on the top edge.
 struct StatusLine: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         HStack(spacing: 8) {
-            if let status = model.status {
+            if !model.inProgress.isEmpty {
+                ProgressView().controlSize(.mini).frame(width: 8, height: 8).accessibilityHidden(true)
+                Text("Running: " + model.inProgress.map(\.title).joined(separator: ", "))
+                    .foregroundStyle(Theme.text).lineLimit(1).truncationMode(.middle)
+                if let status = model.status, status.kind == .running {
+                    TimelineView(.periodic(from: .now, by: 0.1)) { context in
+                        Text(formatDuration(.seconds(context.date.timeIntervalSince(status.time))))
+                    }
+                }
+                if !model.waiting.isEmpty { Text("\(model.waiting.count) waiting") }
+                Button("Cancel") { model.cancel() }
+                    .buttonStyle(OutlinedButtonStyle(height: 24)).font(.system(size: 12, weight: .medium))
+                    .disabled(!model.canCancel)
+            } else if let status = model.status {
                 Circle().fill(Self.color(status.kind)).frame(width: 8, height: 8).accessibilityHidden(true)
                 Text(status.text).foregroundStyle(Theme.text).lineLimit(1).truncationMode(.middle)
                     .textSelection(.enabled)
@@ -140,7 +147,9 @@ struct StatusLine: View {
         .foregroundStyle(Theme.muted)
         .padding(.leading, 24).padding(.trailing, 12)
         .frame(height: 36)
-        .overlay(alignment: .top) { Theme.border.frame(height: 1) }
+        .overlay(alignment: .top) {
+            if model.inProgress.isEmpty { Theme.border.frame(height: 1) } else { RunningBar() }
+        }
     }
 
     static func color(_ kind: CommandStatus.Kind) -> Color {
@@ -150,5 +159,20 @@ struct StatusLine: View {
         case .failure: Theme.negative
         case .cancelled, .skipped: Theme.muted
         }
+    }
+}
+
+/// D2: a thin indeterminate amber bar: a segment that runs along the status line's top edge while a command runs.
+struct RunningBar: View {
+    var body: some View {
+        TimelineView(.animation) { context in
+            GeometryReader { bar in
+                let phase = context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.4) / 1.4
+                let width = bar.size.width * 0.3
+                Theme.amber.frame(width: width, height: 2).offset(x: -width + (bar.size.width + width) * phase)
+            }
+        }
+        .frame(height: 2).clipped().background(Theme.border.frame(height: 1), alignment: .top)
+        .accessibilityHidden(true)
     }
 }
