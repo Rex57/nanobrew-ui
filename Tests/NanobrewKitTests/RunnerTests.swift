@@ -50,6 +50,49 @@ import Testing
         #expect(!nb.log.contains(["END", "link", "a"]))
     }
 
+    @Test func cancelKillsARunThatIgnoresSigtermAfterFiveSecondsAndTheNextQueuedCommandRuns() async throws {
+        let nb = try FakeNB()
+        try nb.wait("link", seconds: 30)
+        try nb.ignoreTerm("link")
+        let model = nb.model()
+        let first = model.run(.link("a"))
+        let second = model.run(.unlink("a"))
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        let child = try #require(nb.log.first { $0.first == "CHILD" }.flatMap { Int32($0[1]) })
+        let start = ContinuousClock.now
+        model.cancel()
+        try await Task.sleep(for: .seconds(4))
+        #expect(kill(child, 0) == 0, "SIGTERM alone does not stop it")
+        await first.value
+        let took = ContinuousClock.now - start
+        #expect(took >= .seconds(5) && took < .seconds(7), "gone within about 6 s: \(took)")
+        #expect(kill(child, 0) != 0)
+        await second.value
+        #expect(model.console.contains("Cancelled: nb link a"))
+        #expect(nb.argvs == [["link", "a"], ["unlink", "a"]])
+    }
+
+    @Test func aRunThatObeysSigtermGetsNoSigkill() async throws {
+        let nb = try FakeNB()
+        try nb.wait("doctor", seconds: 30)
+        let process = try NBProcess(path: nb.path, args: ["doctor"])
+        await eventually { nb.log.contains { $0.first == "CHILD" } }
+        process.cancel(killAfter: .milliseconds(300))
+        for await _ in process.lines {}
+        try await Task.sleep(for: .milliseconds(600))
+        #expect(!process.killed)
+    }
+
+    @Test func aRunThatEndedByItselfIsNeverSignalledAgain() async throws {
+        let nb = try FakeNB()
+        let process = try NBProcess(path: nb.path, args: ["doctor"])
+        for await _ in process.lines {}
+        process.cancel(killAfter: .milliseconds(300))
+        try await Task.sleep(for: .milliseconds(600))
+        #expect(!process.killed)
+        #expect(process.exitCode == 0)
+    }
+
     @Test func aProcessReportsNoExitCodeUntilItWasReaped() async throws {
         let nb = try FakeNB()
         try nb.wait("doctor", seconds: 30)

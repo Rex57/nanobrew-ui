@@ -132,7 +132,9 @@ only these:
   whose task was cancelled stops early and gets no code). A cancelled outdated check or detail fetch changes
   nothing: the previous list, count, error and detail stay.
 - **Cancel.** `cancel()` sends `SIGTERM` to the whole process group (`kill(-pid, SIGTERM)`), so nb's children
-  stop too. There is no `SIGKILL` fallback; the code marks this as a known limit.
+  stop too. When nb was not reaped 5 s later, it sends `SIGKILL` to the group (D4). The reader waits for the exit
+  with `WNOWAIT` and reaps under a lock that the `SIGKILL` check also takes, so a run that ended is never
+  signalled again (its pid may be reused).
 
 ### Three ways to run a command
 

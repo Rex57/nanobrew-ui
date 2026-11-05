@@ -17,6 +17,11 @@ struct FakeNB {
         try "\(seconds)".write(to: dir.appendingPathComponent("wait-\(command)"), atomically: true, encoding: .utf8)
     }
 
+    /// The fake nb and its sleep child ignore SIGTERM when the first argument is `command`.
+    func ignoreTerm(_ command: String) throws {
+        try "".write(to: dir.appendingPathComponent("ignore-term-\(command)"), atomically: true, encoding: .utf8)
+    }
+
     func exit(_ command: String, code: Int) throws {
         try "\(code)".write(to: dir.appendingPathComponent("exit-\(command)"), atomically: true, encoding: .utf8)
     }

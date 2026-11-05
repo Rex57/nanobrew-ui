@@ -27,7 +27,7 @@ swift build -c release && swift test && scripts/bundle.sh        # the full chec
 | File | Covers |
 |---|---|
 | `StateTests.swift` | `StateReader` (full, empty, missing and broken files, missing folder) and `NBLocator` (order, non-executables, the exclusive `-NBPath`, nothing found). Also holds the helpers `fixture(_:)` and `scratchDir()`. |
-| `RunnerTests.swift` | argv kept whole, the serial queue, read-only commands in parallel, Cancel of the process group, ANSI removal, stderr in the console, a non-zero exit, `askBeforeQuit`, the reload after a command, no exit code before the reap |
+| `RunnerTests.swift` | argv kept whole, the serial queue, read-only commands in parallel, Cancel of the process group, the `SIGKILL` 5 s after a `SIGTERM` that nb ignored (and none for a run that ended), ANSI removal, stderr in the console, a non-zero exit, `askBeforeQuit`, the reload after a command, no exit code before the reap |
 | `StatusTests.swift` | The status texts and durations, the launch check, the console's open, closed and pinned states, read-only results that must not replace a running change, `refresh()` |
 | `ReinstallTests.swift` | The skip-line parse, the plain words, the verdict per installed version, the status after skips, the upgrade outcome from the recorded output, the ready rows, the Reinstall sequence (good, failed remove, failed install, quit during it), runs that cannot start |
 | `UpdateTests.swift` | The outdated parse, formulae and casks from their two commands, the restart offer after a self-upgrade (and when there must be none), a cancelled check that keeps the list, the check after a changing command only, the `commandsEnded` signal |
@@ -57,6 +57,7 @@ that could change anything. Link it as `nb` in a scratch folder (call it D); the
 | `D/wait-<arg1>` | Sleep that many seconds before printing. The sleep runs as a child process, so a Cancel test can prove that the whole process group stops. |
 | `D/exit-<arg1>` | Exit with that code. |
 | `D/stderr-<arg1>` | Print that file to stderr. |
+| `D/ignore-term-<arg1>` | Ignore `SIGTERM`, the sleep child too; only the `SIGKILL` that follows a Cancel 5 s later stops the run. |
 
 **Log.** Each run appends to `D/fake-nb.log`, with tabs between the fields:
 
@@ -67,7 +68,7 @@ that could change anything. Link it as `nb` in a scratch folder (call it D); the
 **Output.** The fake prints `nb-output/<all args joined by _>.txt` next to the real script, else
 `nb-output/<arg1>.txt`, else nothing. For example, `nb info --cask iterm2` prints `info_--cask_iterm2.txt`.
 
-**The helper.** `FakeNB` gives `wait(_:seconds:)`, `exit(_:code:)` and `stderr(_:text:)` to write the control
+**The helper.** `FakeNB` gives `wait(_:seconds:)`, `ignoreTerm(_:)`, `exit(_:code:)` and `stderr(_:text:)` to write the control
 files, `log`, `argvs` (without the outdated checks) and `allArgvs` to read the log, `killChildren()` to end
 leftover sleeps, and `model(statePath:)` to make an `AppModel` that uses the fake.
 `eventually(_:)` waits up to 10 seconds for a condition.

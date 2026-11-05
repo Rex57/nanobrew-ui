@@ -10,6 +10,9 @@ public final class NBProcess: @unchecked Sendable {
     /// nil until waitpid reaped the process.
     private var waitStatus: Int32?
     private var cancelled = false
+    /// True once Cancel had to send SIGKILL.
+    var killed: Bool { lock.withLock { killedFlag } }
+    private var killedFlag = false
     private var stderrData = Data()
 
     public init(path: String, args: [String], separateStderr: Bool = false) throws {
@@ -76,18 +79,30 @@ public final class NBProcess: @unchecked Sendable {
             if !pending.isEmpty { continuation.yield([Self.clean(pending)]) }
             close(readFD)
             stderrDone.wait()
-            var status: Int32 = 0
-            while waitpid(self.pid, &status, 0) == -1 && errno == EINTR {}
-            lock.withLock { waitStatus = status }
+            // Wait for the exit without reaping, then reap under the lock: Cancel's SIGKILL checks `waitStatus`
+            // under the same lock, so it never reaches a pid that was reaped and maybe reused.
+            var info = siginfo_t()
+            while waitid(P_PID, id_t(self.pid), &info, WEXITED | WNOWAIT) == -1 && errno == EINTR {}
+            lock.withLock {
+                var status: Int32 = 0
+                while waitpid(self.pid, &status, 0) == -1 && errno == EINTR {}
+                waitStatus = status
+            }
             continuation.finish()
         }
     }
 
-    /// Stops the whole process group.
-    public func cancel() {
+    /// Stops the whole process group: SIGTERM now, SIGKILL when the process was not reaped `killAfter` later (D4).
+    public func cancel(killAfter grace: Duration = .seconds(5)) {
         lock.withLock { cancelled = true }
-        // shortcut: SIGTERM only, no SIGKILL fallback; add one if nb ever ignores SIGTERM.
         kill(-pid, SIGTERM)
+        DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(grace / .milliseconds(1)))) { [self] in
+            lock.withLock {
+                guard waitStatus == nil else { return }
+                kill(-pid, SIGKILL)
+                killedFlag = true
+            }
+        }
     }
 
     public var wasCancelled: Bool { lock.withLock { cancelled } }

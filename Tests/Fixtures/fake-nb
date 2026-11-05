@@ -4,12 +4,14 @@
 #   D/wait-<arg1>      if present: sleep that many seconds (in a child process) before printing
 #   D/exit-<arg1>      if present: exit with that code
 #   D/stderr-<arg1>    if present: print that file to stderr
+#   D/ignore-term-<arg1> if present: ignore SIGTERM (the sleep child inherits it); only SIGKILL stops the run
 # Output: nb-output/<args joined by _>.txt next to the real script, else nb-output/<arg1>.txt, else nothing.
 DIR="$(dirname "$0")"
 OUT="$(dirname "$(realpath "$0")")/nb-output"
 LOG="$DIR/fake-nb.log"
 IFS=$'\t'
 printf 'START\t%s\n' "$*" >> "$LOG"
+[ -f "$DIR/ignore-term-$1" ] && trap '' TERM
 if [ -f "$DIR/wait-$1" ]; then
   sleep "$(cat "$DIR/wait-$1")" &
   printf 'CHILD\t%s\n' "$!" >> "$LOG"
