@@ -1,0 +1,6 @@
+==> Checking nanobrew installation...
+  ✓ /opt/nanobrew is writable
+  ✗ Orphaned store entry: 99c2620dc9fe4058ba790fd445adf4160f5201ef2ad2abae5b9d90b707684f26
+  ✗ Orphaned store entry: 3f1d0c2b7a5e4f6a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a
+
+==> Found 2 issue(s). Run `nb cleanup` to fix some of them.

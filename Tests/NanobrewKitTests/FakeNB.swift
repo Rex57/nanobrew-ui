@@ -22,6 +22,11 @@ struct FakeNB {
         try "".write(to: dir.appendingPathComponent("ignore-term-\(command)"), atomically: true, encoding: .utf8)
     }
 
+    /// The fake nb prints the recorded output `name` (Tests/Fixtures/nb-output/<name>.txt) for `command`.
+    func output(_ command: String, recorded name: String) throws {
+        try FileManager.default.copyItem(atPath: fixture("nb-output/\(name).txt"), toPath: dir.appendingPathComponent("out-\(command)").path)
+    }
+
     func exit(_ command: String, code: Int) throws {
         try "\(code)".write(to: dir.appendingPathComponent("exit-\(command)"), atomically: true, encoding: .utf8)
     }

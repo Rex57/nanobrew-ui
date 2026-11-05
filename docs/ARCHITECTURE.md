@@ -268,11 +268,18 @@ the question. `confirm(typed:)` runs it; a `.typeYes` command runs only when the
 
 ### The status line
 
-`CommandStatus` has a kind (`running`, `success`, `failure`, `cancelled`, `skipped`), a text and a time.
+`CommandStatus` has a kind (`running`, `success`, `failure`, `cancelled`, `skipped`, `attention`), a text and a
+time. It is built in one place (`CommandStatus.init(command:exitCode:cancelled:duration:skipped:summary:)`).
 
 - While a command runs: `Running: nb install jq`.
 - A success names what happened and how long it took: `Installed jq in 0.84 s`. Commands without their own verb
-  say `nb doctor finished in <duration>`.
+  say `nb leaves finished in <duration>`.
+- A cleanup or a Doctor (not `--probe`) that exits 0 says nb's answer, read from nb's summary line (D4, F5):
+  `Dry run: can free 41.4 MB in <d>`, `Dry run: nothing to clean up in <d>`, `Cleanup: freed 0.2 MB in <d>`,
+  `Cleanup: nothing to clean up in <d>`, `Doctor: no problems found in <d>`, or `Doctor: found 2 problems in <d>`
+  with the `attention` kind (amber): nb exits 0 also when it finds problems. A line nb does not print in a known
+  form leaves the plain text. The run keeps only that one line, never a copy of the output; only an upgrade keeps
+  its output, for its outcome.
 - A failure: `Failed: nb upgrade node (exit code 1)`. A cancel: `Cancelled: nb link a`.
 - A launch check or ⌘R: `Checked <n> packages in <duration>`.
 - A read-only command that runs while a change runs does not replace the change's status.

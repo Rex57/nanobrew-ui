@@ -58,6 +58,7 @@ that could change anything. Link it as `nb` in a scratch folder (call it D); the
 | `D/exit-<arg1>` | Exit with that code. |
 | `D/stderr-<arg1>` | Print that file to stderr. |
 | `D/ignore-term-<arg1>` | Ignore `SIGTERM`, the sleep child too; only the `SIGKILL` that follows a Cancel 5 s later stops the run. |
+| `D/out-<arg1>` | Print that file as the output instead of the recorded one (for example `doctor-issues.txt`, a Doctor that finds 2 problems). |
 
 **Log.** Each run appends to `D/fake-nb.log`, with tabs between the fields:
 
@@ -68,7 +69,7 @@ that could change anything. Link it as `nb` in a scratch folder (call it D); the
 **Output.** The fake prints `nb-output/<all args joined by _>.txt` next to the real script, else
 `nb-output/<arg1>.txt`, else nothing. For example, `nb info --cask iterm2` prints `info_--cask_iterm2.txt`.
 
-**The helper.** `FakeNB` gives `wait(_:seconds:)`, `ignoreTerm(_:)`, `exit(_:code:)` and `stderr(_:text:)` to write the control
+**The helper.** `FakeNB` gives `wait(_:seconds:)`, `ignoreTerm(_:)`, `output(_:recorded:)`, `exit(_:code:)` and `stderr(_:text:)` to write the control
 files, `log`, `argvs` (without the outdated checks) and `allArgvs` to read the log, `killChildren()` to end
 leftover sleeps, and `model(statePath:)` to make an `AppModel` that uses the fake.
 `eventually(_:)` waits up to 10 seconds for a condition.

@@ -109,7 +109,7 @@ struct ConsoleText: NSViewRepresentable {
     }
 }
 
-/// DD4: the dot (green success, red failure, amber while running), the last result, its time of day and the
+/// DD4: the dot (green success, red failure, amber while running or when a result needs attention), the last result, its time of day and the
 /// console toggle.
 struct StatusLine: View {
     @Environment(AppModel.self) private var model
@@ -145,7 +145,7 @@ struct StatusLine: View {
 
     static func color(_ kind: CommandStatus.Kind) -> Color {
         switch kind {
-        case .running: Theme.amber
+        case .running, .attention: Theme.amber
         case .success: Theme.positive
         case .failure: Theme.negative
         case .cancelled, .skipped: Theme.muted

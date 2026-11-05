@@ -37,7 +37,7 @@ this table in the same commit.
 | `control` | `#cdced1` | `#444444` | The edge of fields, outlined buttons and the Check again button |
 | `text` | `#131416` | `#ffffff` | Main text |
 | `muted` | `#5d5f60` | `#b4b4b4` | Secondary text, table headers, flags, icons at rest |
-| `amber` | `#ba8122` | `#f8ac2d` | Amber marks: the selected tab's underline, the running dot, the icon in the Reinstall dialog |
+| `amber` | `#ba8122` | `#f8ac2d` | Amber marks: the selected tab's underline, the running dot, the "needs attention" dot, the icon in the Reinstall dialog |
 | `amberText` | `#8b6019` | `#f8ac2d` | Amber text: new versions, the Updates count, "updates waiting", the "Can't upgrade in place" badge, the restart bar |
 | `amberBg` | `#fbf4e6` | `#2a2112` | Behind the Updates count, the badge and the restart bar |
 | `positive` | `#1e7b4f` | `#3fc07a` | The success dot; the text of a "Running" service pill |
@@ -146,8 +146,8 @@ Each screen has 24 px padding and the same parts, top to bottom:
 The status line is 36 px high, at the bottom of the sheet, with a 1 px `border` line on top. It is 12 px grey
 text with tabular figures:
 
-- an 8 px dot: amber while a command runs, green after a success, red after a failure, grey after a cancel or a
-  skip;
+- an 8 px dot: amber while a command runs or when a result needs attention (a Doctor that found problems), green
+  after a success, red after a failure, grey after a cancel or a skip;
 - the text, for example "Installed jq in 0.84 s" (selectable; long text is cut in the middle);
 - "· <time of day>";
 - at the right, the Console toggle with the terminal icon and "⌘J". It is grey, on `active` when the console is

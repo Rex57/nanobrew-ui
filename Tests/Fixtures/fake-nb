@@ -5,6 +5,7 @@
 #   D/exit-<arg1>      if present: exit with that code
 #   D/stderr-<arg1>    if present: print that file to stderr
 #   D/ignore-term-<arg1> if present: ignore SIGTERM (the sleep child inherits it); only SIGKILL stops the run
+#   D/out-<arg1>       if present: print it as the output instead of the recorded one
 # Output: nb-output/<args joined by _>.txt next to the real script, else nb-output/<arg1>.txt, else nothing.
 DIR="$(dirname "$0")"
 OUT="$(dirname "$(realpath "$0")")/nb-output"
@@ -19,7 +20,7 @@ if [ -f "$DIR/wait-$1" ]; then
 fi
 [ -f "$DIR/stderr-$1" ] && cat "$DIR/stderr-$1" >&2
 IFS='_'
-if [ -f "$OUT/$*.txt" ]; then cat "$OUT/$*.txt"; elif [ -f "$OUT/$1.txt" ]; then cat "$OUT/$1.txt"; fi
+if [ -f "$DIR/out-$1" ]; then cat "$DIR/out-$1"; elif [ -f "$OUT/$*.txt" ]; then cat "$OUT/$*.txt"; elif [ -f "$OUT/$1.txt" ]; then cat "$OUT/$1.txt"; fi
 IFS=$'\t'
 printf 'END\t%s\n' "$*" >> "$LOG"
 [ -f "$DIR/exit-$1" ] && exit "$(cat "$DIR/exit-$1")"

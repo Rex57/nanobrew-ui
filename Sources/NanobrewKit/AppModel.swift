@@ -399,10 +399,14 @@ public final class AppModel {
         if !quiet { status = CommandStatus(kind: .running, text: "Running: \(command.title)") }
         let start = now()
         var output: [String] = []
+        var summary: String?
+        let summarizes = CommandStatus.summaryLabel(command) != nil
         for await batch in process.lines {
             console.append(contentsOf: batch)
-            // Only an upgrade's outcome reads the output: other commands keep no copy beside the capped console.
+            // Only an upgrade's outcome reads the output: other commands keep no copy beside the capped console,
+            // at most their summary line (D4).
             if command.verb == "upgrade" { output += batch }
+            if summarizes, let line = batch.last(where: { CommandStatus.summary(of: command, line: $0) != nil }) { summary = line }
         }
         checkAgain()
         let exitCode = process.wasCancelled ? nil : process.exitCode
@@ -412,7 +416,7 @@ public final class AppModel {
         // Decided at the end: a read-only command that started before a change must not hide it either.
         if command.changes || running == nil {
             status = CommandStatus(command: command, exitCode: exitCode, cancelled: process.wasCancelled,
-                                   duration: now() - start, skipped: outcome.skips.map(\.token))
+                                   duration: now() - start, skipped: outcome.skips.map(\.token), summary: summary)
         }
         processes.removeAll { $0 === process }
         inProgress.remove(at: inProgress.firstIndex(of: command)!)

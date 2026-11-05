@@ -63,8 +63,9 @@ import Testing
     @Test func aCommandWithoutItsOwnVerbFinishes() async throws {
         let nb = try FakeNB()
         let model = model(nb, step: .milliseconds(7))
-        await model.run(.doctor).value
-        #expect(model.status?.text == "nb doctor finished in 7 ms")
+        // Doctor reads its summary line since P-5 (SummaryStatusTests); Leaves has no verb and no summary.
+        await model.run(.leaves(tree: false)).value
+        #expect(model.status?.text == "nb leaves finished in 7 ms")
     }
 
     @Test func aFailureNamesTheCommandAndItsExitCode() async throws {
