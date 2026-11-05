@@ -4,7 +4,7 @@
 # dist/nanobrew-ui.rb, the cask text for the Rex57/homebrew-tap repo.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-VERSION="1.0.1"
+VERSION="1.0.2"
 DIST="$ROOT/dist"
 APP="$DIST/Nanobrew UI.app"
 ZIP="$DIST/Nanobrew-UI-$VERSION.zip"

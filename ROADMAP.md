@@ -9,6 +9,9 @@ What is done, what is open, and what comes next. Releases and their changes are 
 Nanobrew UI 1.0.1 is released. It installs and upgrades with nanobrew through the tap:
 `nb install --cask Rex57/tap/nanobrew-ui` (see the [README](README.md#install)).
 
+In progress: 1.0.2, a clean-up release (fixes, faster update checks, one home for each rule; see the
+[changelog](CHANGELOG.md)). It is not tagged or released yet.
+
 ## Open
 
 - **nanobrew issue [#495](https://github.com/justrach/nanobrew/issues/495)**, waiting for the maintainer. It asks for
