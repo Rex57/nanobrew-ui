@@ -68,10 +68,14 @@ struct ServicesView: View {
     }
 
     private func load() async {
+        // A newer command end cancelled this load: keep what shows until the newer one ends.
         do {
-            rows = try await model.services()
+            let fresh = try await model.services()
+            guard !Task.isCancelled else { return }
+            rows = fresh
             error = nil
         } catch {
+            guard !Task.isCancelled else { return }
             rows = nil
             self.error = error.localizedDescription
         }

@@ -66,7 +66,11 @@ struct MaintenanceView: View {
             }
             .padding(24)
         }
-        .task(id: model.commandsEnded) { autoupdate = await model.autoupdateStatus() }
+        .task(id: model.commandsEnded) {
+            let status = await model.autoupdateStatus()
+            // A newer command end cancelled this load: keep what shows.
+            if !Task.isCancelled { autoupdate = status }
+        }
     }
 
     private var subline: String {

@@ -129,7 +129,11 @@ struct SettingsView: View {
             }
             .padding(24)
         }
-        .task(id: model.commandsEnded) { telemetry = await model.telemetryEnabled() }
+        .task(id: model.commandsEnded) {
+            let enabled = await model.telemetryEnabled()
+            // A newer command end cancelled this load: keep what shows.
+            if !Task.isCancelled { telemetry = enabled }
+        }
         .task(id: shell) { completions = await model.completions(shell) ?? "" }
     }
 
